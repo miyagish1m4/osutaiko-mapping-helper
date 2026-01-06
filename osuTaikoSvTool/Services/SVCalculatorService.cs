@@ -305,7 +305,7 @@ namespace osuTaikoSvTool.Services
                                              userInputData.calculationCode,
                                              userInputData.relativeCode,
                                              userInputData.relativeBaseSv) *
-                                             (baseBpm / (applyTimingPoint != null ? applyTimingPoint.bpm : 120));
+                                             (userInputData.relativeCode == Constants.RELATIVE_DISABLE ? (baseBpm / (applyTimingPoint != null ? applyTimingPoint.bpm : 120)) : 1);
                         }
                         else
                         {
@@ -474,7 +474,7 @@ namespace osuTaikoSvTool.Services
                                          userInputData.calculationCode,
                                          userInputData.relativeCode,
                                          userInputData.relativeBaseSv) *
-                                         (baseBpm / (applyTimingPoint != null ? applyTimingPoint.bpm : 120));
+                                         (userInputData.relativeCode == Constants.RELATIVE_DISABLE ? (baseBpm / (applyTimingPoint != null ? applyTimingPoint.bpm : 120)) : 1);
                     }
                     else
                     {
@@ -637,7 +637,7 @@ namespace osuTaikoSvTool.Services
                                                  userInputData.calculationCode,
                                                  userInputData.relativeCode,
                                                  userInputData.relativeBaseSv) *
-                                                 (baseBpm / (applyTimingPoint != null ? applyTimingPoint.bpm : 120));
+                                                 (userInputData.relativeCode == Constants.RELATIVE_DISABLE ? (baseBpm / (applyTimingPoint != null ? applyTimingPoint.bpm : 120)) : 1);
                             }
                             else
                             {
@@ -857,7 +857,7 @@ namespace osuTaikoSvTool.Services
                                              userInputData.calculationCode,
                                              userInputData.relativeCode,
                                              userInputData.relativeBaseSv) *
-                                             (baseBpm / redLineList[i].bpm);
+                                             (userInputData.relativeCode == Constants.RELATIVE_DISABLE ? (baseBpm / redLineList[i].bpm) : 1);
                         }
                         else
                         {

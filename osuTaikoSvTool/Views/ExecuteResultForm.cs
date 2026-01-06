@@ -16,6 +16,9 @@ namespace osuTaikoSvTool.Views
         public ExecuteResultForm(string messageCode)
         {
             InitializeComponent();
+            this.ShowInTaskbar = false;
+            this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            this.ControlBox = false;
             SetMessage(messageCode);
             InitializeControls();
         }
