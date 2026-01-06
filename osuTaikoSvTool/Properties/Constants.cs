@@ -7,7 +7,7 @@ namespace osuTaikoSvTool.Properties
     {
         #region ファイル名
         internal const string APP_NAME = "osuTaikoSvTool";
-        internal const string APP_VERSION = "0.5.2";
+        internal const string APP_VERSION = "0.5.3";
         #endregion
         #region 言語設定
         internal static readonly string[] LANGUAGES = ["日本語", 
