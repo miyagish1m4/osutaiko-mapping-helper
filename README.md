@@ -1,4 +1,4 @@
-# osuTaikoSvTool
+# osu!Taiko Mapping Helper
 
 ## 開発者用導入ライブラリ
 
