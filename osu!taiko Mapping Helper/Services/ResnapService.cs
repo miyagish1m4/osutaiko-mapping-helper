@@ -136,7 +136,7 @@ namespace osu_taiko_Mapping_Helper.Services
                                                              .Select(x => x.Index)
                                                              .ToList();
                 // 始点のBPMを取得
-                baseBpm = baseTimingPoint != null ? (double)baseTimingPoint.bpm : 120;
+                baseBpm = baseTimingPoint != null ? baseTimingPoint.bpm : 120;
                 if (baseTimingPoint == null) throw new Exception("No valid base timing point found for the specified resnap timing.");
                 double currentTime = -1;
                 double baseTime = baseTimingPoint.time;
@@ -155,7 +155,7 @@ namespace osu_taiko_Mapping_Helper.Services
                 // 始点の直前のタイミングポイントより前にノーツがある場合は、最初のタイミングポイントを基準にリスナップする
                 if (timingPointIndexes[currentIndex] == 0 && beatmap.hitObjects[0].time < beatmap.timingPoints[timingPointIndexes[currentIndex]].time)
                 {
-                    beatSnapLength = (double)beatmap.timingPoints[timingPointIndexes[currentIndex]].barLength / userInputUtilityData.beatSnap / 4;
+                    beatSnapLength = beatmap.timingPoints[timingPointIndexes[currentIndex]].barLength / userInputUtilityData.beatSnap / 4;
                     var diffTime = beatmap.timingPoints[timingPointIndexes[currentIndex]].time - beatmap.hitObjects[0].time;
                     var snapCount = (int)Math.Floor(diffTime / beatSnapLength);
                     currentTime = beatmap.timingPoints[timingPointIndexes[currentIndex]].time - beatSnapLength * snapCount;
@@ -188,7 +188,7 @@ namespace osu_taiko_Mapping_Helper.Services
                 for (int i = currentIndex; i < timingPointIndexes.Count; i++)
                 {
                     var nextTiming = i == timingPointIndexes.Count - 1 ? beatmap.hitObjects[^1].time + 1 : beatmap.timingPoints[timingPointIndexes[i + 1]].time;
-                    beatSnapLength = (double)beatmap.timingPoints[timingPointIndexes[i]].barLength / userInputUtilityData.beatSnap / 4;
+                    beatSnapLength = beatmap.timingPoints[timingPointIndexes[i]].barLength / userInputUtilityData.beatSnap / 4;
                     baseTime = beatmap.timingPoints[timingPointIndexes[i]].time;
                     currentTime = beatmap.timingPoints[timingPointIndexes[i]].time;
                     for (int j = 0; ; j++)

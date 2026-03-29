@@ -8,9 +8,9 @@ namespace osu_taiko_Mapping_Helper.Models
     internal class HitObject
     {
         // BPM
-        public decimal bpm { set; get; }
+        public double bpm { set; get; }
         // SV
-        public decimal sv { set; get; }
+        public double sv { set; get; }
         // SVが掛かるタイミング
         public int svApplyTime { set; get; }
         // ヒットオブジェクトの種類
@@ -24,10 +24,11 @@ namespace osu_taiko_Mapping_Helper.Models
         // 0b0000 0000 0000 0000 0000 0000 0001 0000 スライダー
         // 0b0000 0000 0000 0000 0000 0000 0010 0000 スライダー(大音符)
         // 0b0000 0000 0000 0000 0000 0000 0100 0000 スピナー
-        // 0b0000 0000 0000 0000 0000 0000 1000 0000 小節線以外
-        // 0b0000 0000 0000 0000 0000 0001 0000 0000 小節線
-        // 0b0000 0000 0000 0000 0000 0010 0000 0000 Bookmark以外
-        // 0b0000 0000 0000 0000 0000 0100 0000 0000 Bookmark
+        // 0b0000 0000 0000 0000 0000 0000 1000 0000 スピナーの終点
+        // 0b0000 0000 0000 0000 0000 0001 0000 0000 小節線以外
+        // 0b0000 0000 0000 0000 0000 0010 0000 0000 小節線
+        // 0b0000 0000 0000 0000 0000 0100 0000 0000 Bookmark以外
+        // 0b0000 0000 0000 0000 0000 1000 0000 0000 Bookmark
         public int hitObjectCode { set; get; }
         // NewComboの判定
         public bool isNewCombo { set; get; }
@@ -51,9 +52,9 @@ namespace osu_taiko_Mapping_Helper.Models
         // sliderのカーブ設定を表す文字列
         public string? curveSetting { set; get; } = null;
         // sliderの折り返し回数
-        public decimal slides { set; get; }
+        public double slides { set; get; }
         // sliderの長さ
-        public decimal sliderLength { set; get; }
+        public double sliderLength { set; get; }
         // sliderの折り返し時のヒットサウンドの種類
         public string? edgeSounds { set; get; } = null;
         // sliderの折り返し時のヒットサンプルの種類
@@ -88,8 +89,8 @@ namespace osu_taiko_Mapping_Helper.Models
                 // スライダーの場合
                 noteType = Constants.NoteType.SLIDER;
                 curveSetting = buff[5];
-                slides = decimal.Parse(buff[6]);
-                sliderLength = decimal.Parse(buff[7]);
+                slides = double.Parse(buff[6]);
+                sliderLength = double.Parse(buff[7]);
                 if (buff.Length > 8)
                 {
                     edgeSounds = buff[8];
@@ -117,8 +118,9 @@ namespace osu_taiko_Mapping_Helper.Models
         /// </summary>
         /// <param name="time">timing</param>
         /// <param name="code">ノーツ種別
-        /// 　　　　　　　　　 0:小節線
-        /// 　　　　　　　　　 1:Bookmark</param>
+        /// 　　　　　　　　　 0:スピナーの終点
+        /// 　　　　　　　　　 1:小節線
+        /// 　　　　　　　　　 2:Bookmark</param>
         internal HitObject(int time, int code)
         {
             // 小節線の場合
@@ -129,16 +131,20 @@ namespace osu_taiko_Mapping_Helper.Models
             hitSound = "0";  // 未使用
             type = "0";      // 未使用
             isNewCombo = false;
-            isOnBarline = true;
             switch (code)
             {
                 case 0:
-                    noteType = Constants.NoteType.BARLINE;
-                    hitObjectCode = 0x00000100;
+                    noteType = Constants.NoteType.SPINNER_END;
+                    hitObjectCode = 0x00000080;
                     break;
                 case 1:
+                    isOnBarline = true;
+                    noteType = Constants.NoteType.BARLINE;
+                    hitObjectCode = 0x00000200;
+                    break;
+                case 2:
                     noteType = Constants.NoteType.BOOKMARK;
-                    hitObjectCode = 0x00000400;
+                    hitObjectCode = 0x00000800;
                     break;
             }
         }

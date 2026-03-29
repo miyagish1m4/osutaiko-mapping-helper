@@ -237,45 +237,5 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 return false;
             }
         }
-        /// <summary>
-        /// 入力履歴ファイルの最大保持数分新しい入力履歴ファイルを残す
-        /// </summary>
-        /// <param name="config">コンフィグクラス</param>
-        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool ResetHistoryFile(Config config)
-        {
-            try
-            {
-                string historyPath = Directory.GetCurrentDirectory() + Constants.HISTORY_DIRECTORY + "\\";
-                // 入力履歴フォルダ内にあるosuファイルを取得
-                string[] backupFiles = Directory.GetFiles(historyPath, "*.xml");
-                List<long> fileDate = [];
-                // ファイル名の日付のみを取得し、数値にする
-                foreach (var file in backupFiles)
-                {
-                    string date = file.Replace(historyPath, "")
-                                      .Replace(".xml", "")
-                                      .Replace("history_", "");
-                    fileDate.Add(Convert.ToInt64(date));
-                }
-                // 数値を降順にソートする
-                fileDate.Sort();
-                fileDate.Reverse();
-                // 入力履歴ファイルの最大保持数分新しいファイルのみ残す
-                for (global::System.Int32 j = (fileDate.Count) - (1); j >= config.maxHistoryCount; j--)
-                {
-                    string targetFileName = fileDate[j].ToString("history_00000000000000000");
-                    targetFileName = Path.Combine(historyPath, targetFileName + ".xml");
-                    File.Delete(targetFileName);
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.WriteErrorMessage("LOG_E-EXCEPTION");
-                Common.WriteExceptionMessage(ex);
-                return false;
-            }
-}
     }
 }

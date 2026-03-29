@@ -98,7 +98,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// </summary>
         /// <param name="path">beatmapのパス</param>
         /// <returns>取得したデータ</returns>
-        internal static Beatmap GetBeatmapData(string path)
+        internal static Beatmap GetBeatmapData(string path, bool isThread = false)
         {
             var version = string.Empty;
             var generalList = new List<string>();
@@ -130,10 +130,10 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     throw new Exception();
                 }
                 // 赤線と小節線を取得する
-                if (!GetRedLineAndBarlineAndBookmark(ref timingPointList,
-                                                     ref hitObjectList,
-                                                     ref uninheritedTimingPointList,
-                                                     ref bookmarkList))
+                if (!GetOtherObject(ref timingPointList,
+                                    ref hitObjectList,
+                                    ref uninheritedTimingPointList,
+                                    ref bookmarkList))
                 {
                     throw new Exception();
                 }
@@ -157,8 +157,12 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
             catch (Exception ex)
             {
-                Common.WriteErrorMessage("LOG_E-GET-BEATMAP");
-                Common.WriteExceptionMessage(ex);
+                if (!isThread)
+                {
+                    Common.WriteErrorMessage("LOG_E-GET-BEATMAP");
+                    Common.WriteExceptionMessage(ex);
+                }
+                Console.WriteLine(ex);
                 return new Beatmap("",
                                    generalList,
                                    editorList,
@@ -216,7 +220,12 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                             List<string> stringBookmarks = [.. bookmarkParts[1].Replace(" ", "").Split(",")];
                             foreach (var timing in stringBookmarks)
                             {
-                                bookmarks.Add(new Bookmark(int.Parse(timing)));
+                                int outTiming;
+                                if (!int.TryParse(timing, out outTiming))
+                                {
+                                    break;
+                                }
+                                bookmarks.Add(new Bookmark(outTiming));
                             }
                         }
                     }
@@ -294,20 +303,66 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
         }
         /// <summary>
-        /// 赤線と小節線とブックマークを取得する
+        /// その他のオブジェクト(スピナー終点,赤線,小節線,ブックマーク)を取得する
         /// </summary>
         /// <param name="timingPointList">赤線のリスト</param>
-        /// <param name="hitObjectList">小節線の格納先(小節線はHitObjectとしてカウントする)</param>
+        /// <param name="hitObjectList">スピナーの終点,小節線の格納先(小節線はHitObjectとしてカウントする)</param>
         /// <param name="uninheritedTimingPointList">赤線の格納先</param>
         /// <param name="bookmarkList">ブックマークの格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool GetRedLineAndBarlineAndBookmark(ref List<TimingPoint> timingPointList,
-                                                            ref List<HitObject> hitObjectList,
-                                                            ref List<TimingPoint> uninheritedTimingPointList,
-                                                            ref List<Bookmark> bookmarkList)
+        private static bool GetOtherObject(ref List<TimingPoint> timingPointList,
+                                           ref List<HitObject> hitObjectList,
+                                           ref List<TimingPoint> uninheritedTimingPointList,
+                                           ref List<Bookmark> bookmarkList)
         {
             try
             {
+                List<HitObject> tempHitObjects = [];
+
+                hitObjectList = [.. hitObjectList.OrderBy(a => a.time)];
+                foreach (var hitObject in hitObjectList)
+                {
+                    if (hitObject.noteType == Constants.NoteType.SPINNER)
+                    {
+                        tempHitObjects.Add(new HitObject(hitObject.endTime, 0));
+                    }
+                }
+                // bookmarksをhitObjectに含める
+                for (int i = 0; i < bookmarkList.Count; i++)
+                {
+                    int currentTime = bookmarkList[i].time;
+                    // すでに同じ time の HitObject が存在するかをチェック
+                    var hitObjectOnBookmark = hitObjectList.FirstOrDefault(h => h.time == currentTime);
+                    if (hitObjectOnBookmark == null)
+                    {
+                        // ない場合はBookmarkをHitObjectとして追加
+                        hitObjectList.Add(new HitObject(currentTime, 2));
+                    }
+                    else
+                    {
+                        // ある場合はオブジェクトコードにBookmarkを追加
+                        hitObjectOnBookmark.hitObjectCode += 0x00000800;
+                    }
+                }
+                foreach (var hitObject in hitObjectList)
+                {
+
+                    if ((hitObject.hitObjectCode & 0x00000800) == 0)
+                    {
+                        // オブジェクトコードにbookmarkがない場合は
+                        // オブジェクトコードにbookmark以外を追加
+                        hitObject.hitObjectCode += unchecked((int)0x00000400);
+                    }
+                    if ((hitObject.hitObjectCode & 0x00000200) == 0)
+                    {
+                        // オブジェクトコードに小節線がない場合は
+                        // オブジェクトコードに小節線以外を追加
+                        hitObject.hitObjectCode += 0x00000100;
+                    }
+                }
+                hitObjectList.AddRange(tempHitObjects);
+                hitObjectList = [.. hitObjectList.OrderBy(a => a.time)];
+
                 // 最終ノーツを取る(これ以上は見ない)
                 hitObjectList.Sort((a, b) => a.time.CompareTo(b.time));
                 HitObject lastHitObject = hitObjectList.Last();
@@ -323,88 +378,33 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 for (int i = 0; i < uninheritedTimingPointList.Count; i++)
                 {
-                    decimal time = uninheritedTimingPointList[i].time;
+                    double startTime = uninheritedTimingPointList[i].time;
+                    double currentTime = startTime;
                     int timeEnd = lastHitObject.time;
 
                     if (i + 1 < uninheritedTimingPointList.Count) timeEnd = uninheritedTimingPointList[i + 1].time;
-                    decimal timeBar = uninheritedTimingPointList[i].barLength;
-                    for (; time < timeEnd; time += timeBar)
+                    double timeBar = uninheritedTimingPointList[i].barLength;
+                    for (int j = 0; currentTime < timeEnd; j++)
                     {
-                        int timeBarline = (int)Math.Floor(time);
+                        int timeBarline = (int)Math.Floor(currentTime);
 
                         // すでに同じ time の HitObject が存在するかをチェック
                         var hitObjectOnBarLine = hitObjectList.FirstOrDefault(h => h.time == timeBarline);
                         if (hitObjectOnBarLine == null)
                         {
                             // 赤線を HitObject として追加
-                            hitObjectList.Add(new HitObject(timeBarline, 0));
+                            hitObjectList.Add(new HitObject(timeBarline, 1));
                         }
                         else
                         {
                             // オブジェクトコードに小節線を追加
-                            hitObjectOnBarLine.hitObjectCode += unchecked((int)0x00000100);
+                            hitObjectOnBarLine.hitObjectCode += unchecked((int)0x00000200);
                         }
+                        currentTime = startTime + timeBar * (j + 1);
                     }
                 }
                 // ソートする
                 timingPointList = [.. timingPointList.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0)];
-                hitObjectList = [.. hitObjectList.OrderBy(a => a.time)];
-
-                // bookmarksをhitObjectに含める
-                for (int i = 0; i < bookmarkList.Count; i++)
-                {
-                    //for (global::System.Int32 j = (timingPointList.Count) - (1); j >= 0; j--)
-                    //{
-                    //    // 対象となるbookmarkにtime以外設定されていない場合は
-                    //    // bookmarkの直前の赤線、または緑線からTimingPointsとしての情報を受け取る
-                    //    if ((timingPointList[j].time <= bookmarkList[i].time) && bookmarkList[i].sv == -1)
-                    //    {
-                    //        bookmarkList[i].sv = timingPointList[j].isRedLine ? 1 : timingPointList[j].sv;
-                    //        bookmarkList[i].meter = timingPointList[j].meter;
-                    //        bookmarkList[i].sampleSet = timingPointList[j].sampleSet;
-                    //        bookmarkList[i].sampleIndex = timingPointList[j].sampleIndex;
-                    //        bookmarkList[i].volume = timingPointList[j].volume;
-                    //        bookmarkList[i].isRedLine = false;
-                    //        bookmarkList[i].effect = timingPointList[j].effect;
-                    //    }
-                    //    // 対象となるbookmarkにBPM情報などが設定されていない場合は
-                    //    // bookmarkの直前の赤線からBPM情報などを受け取る
-                    //    if (timingPointList[j].time <= bookmarkList[i].time && timingPointList[j].isRedLine)
-                    //    {
-                    //        bookmarkList[i].bpm = timingPointList[j].bpm;
-                    //        bookmarkList[i].barLength = timingPointList[j].barLength;
-                    //        break;
-                    //    }
-                    //}
-                    int currentTime = bookmarkList[i].time;
-                    // すでに同じ time の HitObject が存在するかをチェック
-                    var hitObjectOnBookmark = hitObjectList.FirstOrDefault(h => h.time == currentTime);
-                    if (hitObjectOnBookmark == null)
-                    {
-                        // ない場合はBookmarkをHitObjectとして追加
-                        hitObjectList.Add(new HitObject(currentTime, 1));
-                    }
-                    else
-                    {
-                        // ある場合はオブジェクトコードにBookmarkを追加
-                        hitObjectOnBookmark.hitObjectCode += 0x00000400;
-                    }
-                }
-                foreach (var hitObject in hitObjectList)
-                {
-                    if ((hitObject.hitObjectCode & 0x00000400) == 0)
-                    {
-                        // オブジェクトコードにbookmarkがない場合は
-                        // オブジェクトコードにbookmark以外を追加
-                        hitObject.hitObjectCode += unchecked((int)0x00000200);
-                    }
-                    if ((hitObject.hitObjectCode & 0x00000100) == 0)
-                    {
-                        // オブジェクトコードに小節線がない場合は
-                        // オブジェクトコードに小節線以外を追加
-                        hitObject.hitObjectCode += 0b10000000;
-                    }
-                }
                 hitObjectList = [.. hitObjectList.OrderBy(a => a.time)];
                 return true;
             }
@@ -426,8 +426,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                                                     ref List<HitObject> hitObjectList)
         {
             int timingIndex = 0;
-            decimal currentBpm = 0;
-            decimal currentSv = 1.0m;
+            double currentBpm = 0;
+            double currentSv = 1.0;
             int svApplyTime = 0;
             try
             {
@@ -461,7 +461,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     else if (red != null)
                     {
                         // 赤線のみある場合、SVは1.0
-                        currentSv = 1.0m;
+                        currentSv = 1.0;
                         svApplyTime = red.time;
                     }
 
@@ -529,7 +529,26 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 file.WriteLine(beatmap.version);
                 file.WriteLine("");
                 file.WriteLine(Constants.GENERAL);
-                beatmap.general.ForEach(line => file.WriteLine(line));
+                foreach (var line in beatmap.general)
+                {
+                    if (line.Contains(Constants.PREVIEW) && userInputUtilityData != null)
+                    {
+                        if (userInputUtilityData?.utilityCode == Constants.UTILITY_METADATA_SETTING &&
+                            (userInputUtilityData?.metadataSettingCode == Constants.METADATA_SETTING_ALL ||
+                             userInputUtilityData?.metadataSettingCode == Constants.METADATA_SETTING_PREVIEW))
+                        {
+                            file.WriteLine(Constants.PREVIEW + beatmapInfo?.previewTime);
+                        }
+                        else
+                        {
+                            file.WriteLine(line);
+                        }
+                    }
+                    else
+                    {
+                        file.WriteLine(line);
+                    }
+                }
                 file.WriteLine("");
                 file.WriteLine(Constants.EDITOR);
                 beatmap.editor.ForEach(line => file.WriteLine(line));
@@ -597,12 +616,12 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         beatmap.events[i].Contains(Constants.BG_AND_VIDEO) &&
                         beatmapInfo?.background != string.Empty)
                     {
+                        file.WriteLine(beatmapInfo?.background);
                         if (beatmap.events[i + 1].Contains(Constants.JPG_EXTENSION) ||
                             beatmap.events[i + 1].Contains(Constants.JPEG_EXTENSION) ||
                             beatmap.events[i + 1].Contains(Constants.PNG_EXTENSION) ||
                             beatmap.events[i + 1].Contains(Constants.WEBP_EXTENSION))
                         {
-                            file.WriteLine(beatmapInfo?.background);
                             i++;
                         }
                     }
@@ -639,13 +658,28 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 file.WriteLine("");
                 file.WriteLine(Constants.HIT_OBJECTS);
-                foreach (var hitObject in beatmap.hitObjects)
+                for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
                 {
-                    // HitObjectsの1行のデータを作成する
-                    if (hitObject.noteType != Constants.NoteType.BARLINE &&
-                        hitObject.noteType != Constants.NoteType.BOOKMARK)
+                    int endTime = int.MinValue;
+                    if (beatmap.hitObjects[i].noteType == Constants.NoteType.SPINNER)
                     {
-                        string hitObjectLine = CreateHitObjectLine(hitObject, userInputUtilityData);
+                        for (int j = i; j < beatmap.hitObjects.Count; j++)
+                        {
+                            if (beatmap.hitObjects[j].noteType == Constants.NoteType.SPINNER_END)
+                            {
+                                endTime = beatmap.hitObjects[j].time;
+                                break;
+                            }
+                        }
+                    }
+                    // HitObjectsの1行のデータを作成する
+                    if (beatmap.hitObjects[i].noteType != Constants.NoteType.BARLINE &&
+                        beatmap.hitObjects[i].noteType != Constants.NoteType.BOOKMARK &&
+                        beatmap.hitObjects[i].noteType != Constants.NoteType.SPINNER_END)
+                    {
+                        string hitObjectLine = CreateHitObjectLine(beatmap.hitObjects[i],
+                                                                   userInputUtilityData,
+                                                                   endTime);
                         file.WriteLine(hitObjectLine);
                     }
                 }
@@ -747,7 +781,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <param name="hitObject">ヒットオブジェクトデータ</param>
         /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
         /// <returns>ヒットオブジェクトの行</returns>
-        private static string CreateHitObjectLine(HitObject hitObject, UserInputUtilityData? userInputUtilityData)
+        private static string CreateHitObjectLine(HitObject hitObject, UserInputUtilityData? userInputUtilityData, int endTime)
         {
             int positionX = hitObject.positionX;
             int positionY = hitObject.positionY;
@@ -867,7 +901,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             else if (hitObject.noteType == Constants.NoteType.SPINNER)
             {
                 // スピナーの場合はendTimeとhitSampleを設定する
-                sb.Append(hitObject.endTime + ",");
+                sb.Append(endTime + ",");
                 sb.Append(hitObject.hitSample);
             }
             else
@@ -988,15 +1022,15 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <returns>
         /// 指定されたタイミングがosuの動作対象内の場合 : 算出された正確なタイミング<br/>
         /// 指定されたタイミングがosuの動作対象外の場合 : 引数で指定されたタイミング<br/>
-        /// 処理が異常終了した場合 : decimal型の最小値</returns>
-        internal static decimal GetRawTiming(List<TimingPoint> timingPoints, int timing)
+        /// 処理が異常終了した場合 : double型の最小値</returns>
+        internal static double GetRawTiming(List<TimingPoint> timingPoints, int timing)
         {
             // snapPerMs[0] 1/16のノーツ間隔(ms) -> 1/1,1/2,1/4,1/8,1/16 に対応可
             // snapPerMs[1] 1/12のノーツ間隔(ms) ->         1/3,1/6,1/12 に対応可
             // snapPerMs[2] 1/9のノーツ間隔(ms)  ->                  1/9 に対応可
             // snapPerMs[3] 1/7のノーツ間隔(ms)  ->                  1/7 に対応可
             // snapPerMs[4] 1/5のノーツ間隔(ms)  ->                  1/5 に対応可
-            decimal[] snapPerMs = new decimal[5];
+            double[] snapPerMs = new double[5];
             try
             {
                 // 手前のTimingPointを算出する
@@ -1011,7 +1045,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 // 細かいスナップ間隔から指定されたタイミングの正確なタイミングを算出する
                 foreach (var snap in snapPerMs)
                 {
-                    decimal currentTime = applyTimingPoint.time;
+                    double currentTime = applyTimingPoint.time;
                     while (true)
                     {
                         // もし現時点を丸めた値が指定されたタイミングと一致した場合
@@ -1029,13 +1063,13 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     }
                 }
                 // 指定されたTimingの位置が動作対象外
-                return (decimal)timing;
+                return (double)timing;
             }
             catch (Exception ex)
             {
                 Common.WriteErrorMessage("LOG_E-EXCEPTION");
                 Common.WriteExceptionMessage(ex);
-                return Decimal.MinValue;
+                return double.MinValue;
             }
         }
     }

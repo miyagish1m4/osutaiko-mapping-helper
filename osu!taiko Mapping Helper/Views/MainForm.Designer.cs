@@ -50,7 +50,6 @@ namespace osu_taiko_Mapping_Helper
             chkEnableOffset = new CheckBox();
             txtOffset = new TextBox();
             lblMiliSecond = new Label();
-            btnBackup = new Button();
             btnSwapTiming = new Button();
             btnSwapSv = new Button();
             btnSwapVolume = new Button();
@@ -67,7 +66,6 @@ namespace osu_taiko_Mapping_Helper
             lblSpecificNormal = new Label();
             picSpecificNormalSlider = new PictureBox();
             picSpecificFinisherSlider = new PictureBox();
-            btnViewHistory = new Button();
             lblSpecificGridLine2 = new Label();
             picSpecificNormalSpinner = new PictureBox();
             tabExecuteType = new TabControl();
@@ -108,6 +106,7 @@ namespace osu_taiko_Mapping_Helper
             menuStrip1 = new MenuStrip();
             sVEditorToolStripMenuItem = new ToolStripMenuItem();
             utilityToolStripMenuItem = new ToolStripMenuItem();
+            timingPropertyToolStripMenuItem = new ToolStripMenuItem();
             pnlGroupSvEditor = new Panel();
             pnlGroupUtility = new Panel();
             btnApplyResnap = new Button();
@@ -132,6 +131,7 @@ namespace osu_taiko_Mapping_Helper
             lblResnapTiming = new Label();
             txtResnapTimingFrom = new TextBox();
             txtResnapTimingTo = new TextBox();
+            btnBackup = new Button();
             pnlBeatmapInfoGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picDisplayBg).BeginInit();
             pnlCalcurationTypeGroup.SuspendLayout();
@@ -393,23 +393,6 @@ namespace osu_taiko_Mapping_Helper
             lblMiliSecond.TabIndex = 5;
             lblMiliSecond.Text = "ms";
             // 
-            // btnBackup
-            // 
-            btnBackup.BackColor = Color.DarkCyan;
-            btnBackup.FlatAppearance.BorderColor = Color.Cyan;
-            btnBackup.FlatAppearance.BorderSize = 2;
-            btnBackup.FlatStyle = FlatStyle.Flat;
-            btnBackup.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnBackup.ForeColor = SystemColors.ControlLightLight;
-            btnBackup.Location = new Point(18, 909);
-            btnBackup.Name = "btnBackup";
-            btnBackup.Size = new Size(181, 39);
-            btnBackup.TabIndex = 8;
-            btnBackup.TabStop = false;
-            btnBackup.Text = "バックアップフォルダ";
-            btnBackup.UseVisualStyleBackColor = false;
-            btnBackup.Click += btnBackup_Click;
-            // 
             // btnSwapTiming
             // 
             btnSwapTiming.FlatAppearance.BorderColor = Color.Cyan;
@@ -589,25 +572,6 @@ namespace osu_taiko_Mapping_Helper
             picSpecificFinisherSlider.Size = new Size(42, 42);
             picSpecificFinisherSlider.TabIndex = 13;
             picSpecificFinisherSlider.TabStop = false;
-            // 
-            // btnViewHistory
-            // 
-            btnViewHistory.BackColor = Color.DarkCyan;
-            btnViewHistory.Enabled = false;
-            btnViewHistory.FlatAppearance.BorderColor = Color.Cyan;
-            btnViewHistory.FlatAppearance.BorderSize = 2;
-            btnViewHistory.FlatStyle = FlatStyle.Flat;
-            btnViewHistory.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnViewHistory.ForeColor = SystemColors.ControlLightLight;
-            btnViewHistory.Location = new Point(18, 909);
-            btnViewHistory.Name = "btnViewHistory";
-            btnViewHistory.Size = new Size(181, 39);
-            btnViewHistory.TabIndex = 4;
-            btnViewHistory.TabStop = false;
-            btnViewHistory.Text = "履歴";
-            btnViewHistory.UseVisualStyleBackColor = false;
-            btnViewHistory.Visible = false;
-            btnViewHistory.Click += btnViewHistory_Click;
             // 
             // lblSpecificGridLine2
             // 
@@ -1151,7 +1115,7 @@ namespace osu_taiko_Mapping_Helper
             // menuStrip1
             // 
             menuStrip1.BackColor = Color.FromArgb(0, 64, 64);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { sVEditorToolStripMenuItem, utilityToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { sVEditorToolStripMenuItem, utilityToolStripMenuItem, timingPropertyToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(408, 24);
@@ -1175,6 +1139,15 @@ namespace osu_taiko_Mapping_Helper
             utilityToolStripMenuItem.Size = new Size(50, 20);
             utilityToolStripMenuItem.Text = "Utility";
             utilityToolStripMenuItem.Click += utilityToolStripMenuItem_Click;
+            // 
+            // timingPropertyToolStripMenuItem
+            // 
+            timingPropertyToolStripMenuItem.BackColor = Color.FromArgb(0, 96, 96);
+            timingPropertyToolStripMenuItem.ForeColor = Color.White;
+            timingPropertyToolStripMenuItem.Name = "timingPropertyToolStripMenuItem";
+            timingPropertyToolStripMenuItem.Size = new Size(103, 20);
+            timingPropertyToolStripMenuItem.Text = "Timing Property";
+            timingPropertyToolStripMenuItem.Click += timingPropertyToolStripMenuItem_Click;
             // 
             // pnlGroupSvEditor
             // 
@@ -1263,7 +1236,7 @@ namespace osu_taiko_Mapping_Helper
             cmbResnapBeatSnap.Font = new Font("Yu Gothic UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 128);
             cmbResnapBeatSnap.FormattingEnabled = true;
             cmbResnapBeatSnap.IntegralHeight = false;
-            cmbResnapBeatSnap.Items.AddRange(new object[] { "1/24", "1/36", "1/48", "1/60" });
+            cmbResnapBeatSnap.Items.AddRange(new object[] { "1/24 (1/8, 1/12)", "1/36 (1/4, 1/6, 1/9)", "1/48 (1/12, 1/16)", "1/60 (1/4, 1/5, 1/12)" });
             cmbResnapBeatSnap.Location = new Point(102, 579);
             cmbResnapBeatSnap.Name = "cmbResnapBeatSnap";
             cmbResnapBeatSnap.Size = new Size(179, 29);
@@ -1327,7 +1300,7 @@ namespace osu_taiko_Mapping_Helper
             cmbMetadataSetting.Font = new Font("Yu Gothic UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 128);
             cmbMetadataSetting.FormattingEnabled = true;
             cmbMetadataSetting.IntegralHeight = false;
-            cmbMetadataSetting.Items.AddRange(new object[] { "All", "Metadata", "BG Position" });
+            cmbMetadataSetting.Items.AddRange(new object[] { "All", "Metadata", "BG Position", "Preview" });
             cmbMetadataSetting.Location = new Point(12, 444);
             cmbMetadataSetting.Name = "cmbMetadataSetting";
             cmbMetadataSetting.Size = new Size(253, 29);
@@ -1543,16 +1516,32 @@ namespace osu_taiko_Mapping_Helper
             txtResnapTimingTo.TextAlign = HorizontalAlignment.Center;
             txtResnapTimingTo.TextChanged += txtResnapTimingTo_TextChanged;
             // 
+            // btnBackup
+            // 
+            btnBackup.BackColor = Color.DarkCyan;
+            btnBackup.FlatAppearance.BorderColor = Color.Cyan;
+            btnBackup.FlatAppearance.BorderSize = 2;
+            btnBackup.FlatStyle = FlatStyle.Flat;
+            btnBackup.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            btnBackup.ForeColor = SystemColors.ControlLightLight;
+            btnBackup.Location = new Point(18, 909);
+            btnBackup.Name = "btnBackup";
+            btnBackup.Size = new Size(181, 39);
+            btnBackup.TabIndex = 23;
+            btnBackup.TabStop = false;
+            btnBackup.Text = "バックアップ";
+            btnBackup.UseVisualStyleBackColor = false;
+            btnBackup.Click += btnBackup_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(0, 64, 64);
             ClientSize = new Size(408, 963);
+            Controls.Add(btnBackup);
             Controls.Add(pnlGroupSvEditor);
             Controls.Add(btnViewSetting);
-            Controls.Add(btnViewHistory);
-            Controls.Add(btnBackup);
             Controls.Add(pnlBeatmapInfoGroup);
             Controls.Add(menuStrip1);
             Controls.Add(pnlGroupUtility);
@@ -1618,7 +1607,6 @@ namespace osu_taiko_Mapping_Helper
         private CheckBox chkEnableOffset;
         private TextBox txtOffset;
         private Label lblMiliSecond;
-        private Button btnBackup;
         private Button btnSwapTiming;
         private Button btnSwapSv;
         private Button btnSwapVolume;
@@ -1636,7 +1624,6 @@ namespace osu_taiko_Mapping_Helper
         private PictureBox picDisplayBg;
         private PictureBox picSpecificNormalSlider;
         private PictureBox picSpecificFinisherSlider;
-        private Button btnViewHistory;
         private Label lblSpecificGridLine2;
         private PictureBox picSpecificNormalSpinner;
         private TabControl tabExecuteType;
@@ -1701,5 +1688,7 @@ namespace osu_taiko_Mapping_Helper
         private Button btnApplyResnap;
         private ComboBox cmbResnapBeatSnap;
         private Label label1;
+        private Button btnBackup;
+        private ToolStripMenuItem timingPropertyToolStripMenuItem;
     }
 }

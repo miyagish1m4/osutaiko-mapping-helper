@@ -80,9 +80,8 @@ namespace osu_taiko_Mapping_Helper.Views
                                         config))
             {
                 Common.LoadConfig(config);
-                // 設定値に応じてバックアップと入力履歴ファイルの保持数を変更する
-                if (SettingHelper.ResetBackupFile(config) &&
-                    SettingHelper.ResetHistoryFile(config))
+                // 設定値に応じてバックアップの保持数を変更する
+                if (SettingHelper.ResetBackupFile(config))
                 {
                     // 成功した場合はメッセージダイアログを表示する
                     Common.ShowMessageDialog("I_A-P-003");

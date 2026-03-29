@@ -23,8 +23,12 @@
         internal string background { set; get; }
         // 譜面のパス
         internal string beatmapPath { set; get; }
+        // PreviewTime
+        internal int previewTime { set; get; }
         // タグ
         internal string[] tags { set; get; }
+        // 最終更新日
+        internal string lastUpdate { set; get; }
         /// <summary>
         /// コンストラクタ
         /// クラス変数に空文字を格納する
@@ -40,8 +44,10 @@
             this.source = string.Empty;
             this.backgroundPath = string.Empty;
             this.beatmapPath = string.Empty;
+            this.previewTime = -1;
             this.background = string.Empty;
-            this.tags = Array.Empty<string>();
+            this.tags = [];
+            this.lastUpdate = string.Empty;
         }
     }
 }
