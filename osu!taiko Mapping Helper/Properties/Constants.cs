@@ -7,7 +7,7 @@ namespace osu_taiko_Mapping_Helper.Properties
     {
         #region ファイル名
         internal const string APP_NAME = "osu!Taiko Mapping Helper";
-        internal const string APP_VERSION = "0.6.5-alpha";
+        internal const string APP_VERSION = "0.6.4-alpha";
         #endregion
         #region 言語設定
         internal static readonly string[] LANGUAGES = ["日本語",
