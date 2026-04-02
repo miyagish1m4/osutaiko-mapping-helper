@@ -32,7 +32,6 @@ namespace osu_taiko_Mapping_Helper.Models
 
             // config読み込み
             maxBackupCount = Convert.ToInt32(config.AppSettings.Settings["maxBackupCount"].Value);
-            maxHistoryCount = Convert.ToInt32(config.AppSettings.Settings["maxHistoryCount"].Value);
             language = config.AppSettings.Settings["language"].Value;
             advanceMode = Convert.ToInt32(config.AppSettings.Settings["advanceMode"].Value);
             donX = Convert.ToInt32(config.AppSettings.Settings["donX"].Value);
@@ -53,7 +52,6 @@ namespace osu_taiko_Mapping_Helper.Models
 
             // config書き込み
             config.AppSettings.Settings["maxBackupCount"].Value = maxBackupCount.ToString();
-            config.AppSettings.Settings["maxHistoryCount"].Value = maxHistoryCount.ToString();
             config.AppSettings.Settings["language"].Value = language;
             config.AppSettings.Settings["advanceMode"].Value = advanceMode.ToString();
             config.AppSettings.Settings["donX"].Value = donX.ToString();

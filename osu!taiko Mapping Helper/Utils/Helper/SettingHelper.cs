@@ -17,7 +17,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
         internal static bool SetConfig(string language,
                                        string maxBackupCount,
-                                       string maxHistoryCount,
                                        bool isAdvanceMode,
                                        NotesPosition notesPosition,
                                        Config config)
@@ -25,7 +24,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             try
             {
                 int retMaxBackupCount = 0;
-                int retMaxHistoryCount = 0;
                 int retDonX = 0;
                 int retDonY = 0;
                 int retKatX = 0;
@@ -37,7 +35,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 int advanceMode = isAdvanceMode ? 1 : 0;
                 // 入力された値のバリデーションチェックをする
                 if (!ValidateMaxBackupCount(maxBackupCount, ref retMaxBackupCount) ||
-                    !ValidateMaxHistoryCount(maxHistoryCount, ref retMaxHistoryCount) ||
                     !ValidatePosition(notesPosition.donX, ref retDonX, 0) ||
                     !ValidatePosition(notesPosition.donY, ref retDonY, 1) ||
                     !ValidatePosition(notesPosition.katX, ref retKatX, 0) ||
@@ -52,7 +49,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 config.language = language;
                 config.maxBackupCount = retMaxBackupCount;
-                config.maxHistoryCount = retMaxHistoryCount;
                 config.advanceMode = advanceMode;
                 config.donX = retDonX;
                 config.donY = retDonY;
@@ -109,44 +105,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 return false;
             }
         }
-        /// <summary>
-        /// 入力履歴ファイルの最大保持数のバリデーションチェックをする関数
-        /// </summary>
-        /// <param name="maxHistoryCount">入力履歴ファイルの最大保持数</param>
-        /// <param name="retMaxHistoryCount">チェック後の入力履歴ファイルの最大保持数</param>
-        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool ValidateMaxHistoryCount(string maxHistoryCount, ref int retMaxHistoryCount)
-        {
-            try
-            {
-                if (maxHistoryCount == string.Empty)
-                {
-                    //入力履歴ファイルの最大保持数の入力がない
-                    Common.ShowMessageDialog("E_V-EM-006");
-                    return false;
-                }
-                if (!int.TryParse(maxHistoryCount, out retMaxHistoryCount))
-                {
-                    //入力履歴ファイルの最大保持数のフォーマットが間違えている
-                    Common.ShowMessageDialog("E_V-T-005");
-                    return false;
-                }
-                if ((retMaxHistoryCount < 1) || (retMaxHistoryCount > 1000))
-                {
-                    //入力履歴ファイルの最大保持数が1～1000以内ではない
-                    Common.ShowMessageDialog("E_V-C-008");
-                    return false;
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.WriteErrorMessage("LOG_E-EXCEPTION");
-                Common.WriteExceptionMessage(ex);
-                return false;
-            }
-        }
-
         /// <summary>
         /// ノーツ座標のバリデーションチェックをする関数
         /// </summary>

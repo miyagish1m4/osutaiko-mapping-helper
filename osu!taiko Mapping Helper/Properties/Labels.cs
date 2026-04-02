@@ -44,7 +44,6 @@
             // settingForm
             { "LBL_SETTINGS_LANGUAGE", "言語設定" },
             { "LBL_SETTINGS_BACKUP_MAX_COUNT", "バックアップ最大保持数" },
-            { "LBL_SETTINGS_INPUT_HISTORY_MAX_COUNT", "入力履歴ファイル最大保持数" },
             { "LBL_SETTINGS_SEPARETE_SETTING", "ノーツ配置設定" },
             { "LBL_SETTINGS_SAVE", "保存" },
             // dialogForm
@@ -92,8 +91,7 @@
             { "LBL_BACKUP_DATE", "Last Update" },
             // settingForm
             { "LBL_SETTINGS_LANGUAGE", "Language" },
-            { "LBL_SETTINGS_BACKUP_MAX_COUNT", "バックアップ最大保持数" },
-            { "LBL_SETTINGS_INPUT_HISTORY_MAX_COUNT", "入力履歴ファイル最大保持数" },
+            { "LBL_SETTINGS_BACKUP_MAX_COUNT", "Backup Max Count" },
             { "LBL_SETTINGS_SEPARETE_SETTING", "Notes Position Setting" },
             { "LBL_SETTINGS_SAVE", "Save" },
             // dialogForm

@@ -17,7 +17,6 @@ namespace osu_taiko_Mapping_Helper.Views
         private Beatmap? beatmapData;
         private int currentTime;
         delegate void DelegateProcess();//delegateを宣言
-        private bool isLoad = false;
         private int updateInterval = 15;
         #endregion
         #region メソッド

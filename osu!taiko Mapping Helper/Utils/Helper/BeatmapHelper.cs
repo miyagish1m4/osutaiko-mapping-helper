@@ -519,7 +519,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         internal static bool ExportToOsuFile(Beatmap beatmap,
                                              string beatmapPath,
                                              UserInputUtilityData? userInputUtilityData = null,
-                                             BeatmapMetadata? beatmapInfo = null)
+                                             BeatmapMetadata? beatmapInfo = null,
+                                             List<TimingPoint>? timingPoints = null)
         {
             StreamWriter? file = null;
             try
@@ -533,9 +534,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 {
                     if (line.Contains(Constants.PREVIEW) && userInputUtilityData != null)
                     {
-                        if (userInputUtilityData?.utilityCode == Constants.UTILITY_METADATA_SETTING &&
-                            (userInputUtilityData?.metadataSettingCode == Constants.METADATA_SETTING_ALL ||
-                             userInputUtilityData?.metadataSettingCode == Constants.METADATA_SETTING_PREVIEW))
+                        if (userInputUtilityData?.utilityCode == Constants.UTILITY_SETTING_COPIER &&
+                            userInputUtilityData?.settingCopierCode == Constants.SETTING_COPIER_PREVIEW)
                         {
                             file.WriteLine(Constants.PREVIEW + beatmapInfo?.previewTime);
                         }
@@ -562,9 +562,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         file.WriteLine(Constants.TAGS + userInputUtilityData?.tags);
                     }
                     // メタデータ設定ユーティリティが選択されている場合は選択している譜面のメタデータをコピーする
-                    else if (userInputUtilityData?.utilityCode == Constants.UTILITY_METADATA_SETTING &&
-                             (userInputUtilityData?.metadataSettingCode == Constants.METADATA_SETTING_ALL ||
-                              userInputUtilityData?.metadataSettingCode == Constants.METADATA_SETTING_METADATA))
+                    else if (userInputUtilityData?.utilityCode == Constants.UTILITY_SETTING_COPIER &&
+                             userInputUtilityData?.settingCopierCode == Constants.SETTING_COPIER_METADATA)
                     {
                         if (beatmap.metadata[i].Contains(Constants.TITLE))
                         {
@@ -610,9 +609,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 {
                     file.WriteLine(beatmap.events[i]);
                     // メタデータ設定ユーティリティが選択されている場合は選択している譜面のBGをコピーする
-                    if (userInputUtilityData?.utilityCode == Constants.UTILITY_METADATA_SETTING &&
-                        (userInputUtilityData?.metadataSettingCode == Constants.METADATA_SETTING_ALL ||
-                        userInputUtilityData?.metadataSettingCode == Constants.METADATA_SETTING_BG) &&
+                    if (userInputUtilityData?.utilityCode == Constants.UTILITY_SETTING_COPIER &&
+                        userInputUtilityData?.settingCopierCode == Constants.SETTING_COPIER_BG &&
                         beatmap.events[i].Contains(Constants.BG_AND_VIDEO) &&
                         beatmapInfo?.background != string.Empty)
                     {
@@ -628,7 +626,25 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 file.WriteLine("");
                 file.WriteLine(Constants.TIMING_POINTS);
-                foreach (var timingPoint in beatmap.timingPoints)
+                var inheritedPoints = beatmap.timingPoints.Where(tp => !tp.isRedLine).ToList();
+                List<TimingPoint> tempTimingPoints = new List<TimingPoint>();
+                if (userInputUtilityData?.utilityCode == Constants.UTILITY_SETTING_COPIER &&
+                    userInputUtilityData?.settingCopierCode == Constants.SETTING_COPIER_TIMING_POINTS &&
+                    timingPoints != null)
+                {
+                    tempTimingPoints.AddRange(timingPoints);
+                } else
+                {
+                    tempTimingPoints = beatmap.timingPoints.Where(tp => tp.isRedLine).ToList();
+                }
+                if (tempTimingPoints == null)
+                {
+                    return false;
+                }
+                tempTimingPoints.AddRange(inheritedPoints);
+                // ソートする
+                tempTimingPoints = [.. tempTimingPoints.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0)];
+                foreach (var timingPoint in tempTimingPoints)
                 {
                     // beatLengthは桁数を指定して求める
                     string beatLength = (timingPoint.isRedLine ?
@@ -640,7 +656,9 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         beatLength = beatLength.TrimEnd('0');
                         beatLength = beatLength.TrimEnd('.');
                     }
-                    string timingPointLine = timingPoint.time + "," +
+                    int time = userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET ?
+                               (timingPoint.time + userInputUtilityData.offset) : timingPoint.time;
+                    string timingPointLine = time + "," +
                                              beatLength + "," +
                                              timingPoint.meter + "," +
                                              timingPoint.sampleSet + "," +
@@ -785,6 +803,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         {
             int positionX = hitObject.positionX;
             int positionY = hitObject.positionY;
+            int time = userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET ?
+                       (hitObject.time + userInputUtilityData.offset) : hitObject.time;
             string hitSound = hitObject.hitSound;
             if (hitObject.noteType != Constants.NoteType.SPINNER)
             {
@@ -866,7 +886,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             StringBuilder sb = new();
             sb.Append(positionX + ",");
             sb.Append(positionY + ",");
-            sb.Append(hitObject.time + ",");
+            sb.Append(time + ",");
             sb.Append(hitObject.type + ",");
             sb.Append(hitSound + ",");
             if (hitObject.noteType == Constants.NoteType.SLIDER)

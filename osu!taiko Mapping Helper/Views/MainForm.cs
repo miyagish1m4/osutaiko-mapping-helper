@@ -1,13 +1,13 @@
 using System.Diagnostics;
-using OsuMemoryDataProvider;
-using OsuMemoryDataProvider.OsuMemoryModels;
-using OsuParsers.Decoders;
 using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Services;
 using osu_taiko_Mapping_Helper.Utils;
 using osu_taiko_Mapping_Helper.Utils.Helper;
 using osu_taiko_Mapping_Helper.Views;
+using OsuMemoryDataProvider;
+using OsuMemoryDataProvider.OsuMemoryModels;
+using OsuParsers.Decoders;
 
 namespace osu_taiko_Mapping_Helper
 {
@@ -220,7 +220,7 @@ namespace osu_taiko_Mapping_Helper
         {
             cmbHitsoundTool.SelectedIndex = 0;
             cmbNotesPosition.SelectedIndex = 0;
-            cmbMetadataSetting.SelectedIndex = 0;
+            cmbSettingCopier.SelectedIndex = 0;
             cmbResnapBeatSnap.SelectedIndex = 0;
             picSpecificNormalDong.Image = Properties.Resources.d;
             picSpecificNormalKa.Image = Properties.Resources.k;
@@ -364,18 +364,20 @@ namespace osu_taiko_Mapping_Helper
             {
                 return;
             }
+            string beatmapDirectory = Path.GetDirectoryName(this.beatmapInfo.beatmapPath) ?? string.Empty;
+            string[] beatmapsPath = Directory.GetFiles(beatmapDirectory, "*" + Constants.OSU_EXTENSION, SearchOption.TopDirectoryOnly);
             switch (userInputUtilityData.utilityCode)
             {
-                case Constants.UTILITY_TAG_EDIT:
-                case Constants.UTILITY_METADATA_SETTING:
-                    var tags = txtTags.Text;
-                    var metadataSettingIndex = cmbMetadataSetting.SelectedIndex;
-                    string beatmapDirectory = Path.GetDirectoryName(this.beatmapInfo.beatmapPath) ?? string.Empty;
+                case Constants.UTILITY_OFFSET:
+                    if (!UserInputUtilityDataHelper.SetOffsetData(userInputUtilityData,
+                                                                  txtTimingOffset.Text))
+                    {
+                        return;
+                    }
                     if (string.IsNullOrEmpty(beatmapDirectory))
                     {
                         return;
                     }
-                    string[] beatmapsPath = Directory.GetFiles(beatmapDirectory, "*" + Constants.OSU_EXTENSION, SearchOption.TopDirectoryOnly);
                     foreach (var beatmapPath in beatmapsPath)
                     {
                         // マップセットの内容を取得する
@@ -383,6 +385,28 @@ namespace osu_taiko_Mapping_Helper
 
                         // 出力
                         if (!BeatmapHelper.ExportToOsuFile(tempBeatmap, beatmapPath, userInputUtilityData, beatmapInfo))
+                        {
+                            // 失敗した場合はエラーダイアログを表示する
+                            Common.ShowMessageDialog("E_A-P-001");
+                            return;
+                        }
+                    }
+                    break;
+                case Constants.UTILITY_TAG_EDIT:
+                case Constants.UTILITY_SETTING_COPIER:
+                    var tags = txtTags.Text.Replace("\n", "");
+                    if (string.IsNullOrEmpty(beatmapDirectory) || beatmapData == null)
+                    {
+                        return;
+                    }
+                    var timingPoints = beatmapData.timingPoints.Where(tp => tp.isRedLine).ToList();
+                    foreach (var beatmapPath in beatmapsPath)
+                    {
+                        // マップセットの内容を取得する
+                        var tempBeatmap = BeatmapHelper.GetBeatmapData(beatmapPath);
+
+                        // 出力
+                        if (!BeatmapHelper.ExportToOsuFile(tempBeatmap, beatmapPath, userInputUtilityData, beatmapInfo, timingPoints))
                         {
                             // 失敗した場合はエラーダイアログを表示する
                             Common.ShowMessageDialog("E_A-P-001");
@@ -1679,6 +1703,17 @@ namespace osu_taiko_Mapping_Helper
         {
             userInputUtilityData.hitSoundCode = cmbHitsoundTool.SelectedIndex;
         }
+        private void btnApplyOffset_Click(object sender, EventArgs e)
+        {
+            // 譜面情報の取得
+            if (!GetBeatmap())
+            {
+                Common.ShowMessageDialog("E_A-D-001");
+                return;
+            }
+            userInputUtilityData.utilityCode = Constants.UTILITY_OFFSET;
+            ExecuteUtilityProcess();
+        }
         private void btnApplyHitsound_Click(object sender, EventArgs e)
         {
             // 譜面情報の取得
@@ -1710,6 +1745,15 @@ namespace osu_taiko_Mapping_Helper
         {
             userInputUtilityData.tags = txtTags.Text;
         }
+        private void txtTags_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Enterキーが押された場合
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // 入力を無効化する
+                e.Handled = true;
+            }
+        }
         private void btnApplyTags_Click(object sender, EventArgs e)
         {
             userInputUtilityData.utilityCode = Constants.UTILITY_TAG_EDIT;
@@ -1717,11 +1761,17 @@ namespace osu_taiko_Mapping_Helper
         }
         private void cmbMetadataSetting_SelectedIndexChanged(object sender, EventArgs e)
         {
-            userInputUtilityData.metadataSettingCode = cmbMetadataSetting.SelectedIndex;
+            userInputUtilityData.settingCopierCode = cmbSettingCopier.SelectedIndex;
         }
-        private void btnApplyMetadata_Click(object sender, EventArgs e)
+        private void btnApplySettingCopier_Click(object sender, EventArgs e)
         {
-            userInputUtilityData.utilityCode = Constants.UTILITY_METADATA_SETTING;
+            // 譜面情報の取得
+            if (!GetBeatmap())
+            {
+                Common.ShowMessageDialog("E_A-D-001");
+                return;
+            }
+            userInputUtilityData.utilityCode = Constants.UTILITY_SETTING_COPIER;
             ExecuteUtilityProcess();
         }
         private void txtResnapTimingFrom_TextChanged(object sender, EventArgs e)

@@ -84,10 +84,7 @@ namespace osu_taiko_Mapping_Helper.Properties
         // ログメッセージ
         internal static readonly Dictionary<string, string> LogMessages = new()
         {
-            { "LOG_E-SERIALIZE-XML", "xmlファイルのシリアライズに失敗しました。" },
-            { "LOG_E-DESERIALIZE-XML", "xmlファイルのデシリアライズに失敗しました。" },
             { "LOG_E-EXPORT-OSU", "osuへエクスポートに失敗しました。" },
-            { "LOG_E-DIRECTORY-SONGS", "Songsフォルダの設定に失敗しました。" },
             { "LOG_E-GET-BEATMAP", "譜面情報の取得に失敗しました。" },
             { "LOG_E-GET-INPUT", "入力情報の取得に失敗しました。" },
             { "LOG_E-GET-HISTORY", "編集履歴の取得に失敗しました。" },
@@ -98,8 +95,6 @@ namespace osu_taiko_Mapping_Helper.Properties
             { "LOG_E-CREATE-BACKUP", "バックアップの作成に失敗しました。" },
             { "LOG_E-EXCEPTION", "例外エラーが発生しました。" },
             { "LOG_W-GET-BG", "BGの取得に失敗しました。" },
-            { "LOG_I-METHOD-START", "{0}.{1}を開始します。" },
-            { "LOG_I-METHOD-END", "{0}.{1}を終了します。" },
             { "LOG_I-START", "アプリケーションを開始します。" },
             { "LOG_I-END", "アプリケーションを終了します。" },
         };

@@ -31,9 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingForm));
             lblLanguage = new Label();
             lblMaxBackupCount = new Label();
-            lblMaxHistoryCount = new Label();
             txtMaxBackupCount = new TextBox();
-            txtHistoryCount = new TextBox();
             cmbLanguage = new ComboBox();
             btnSave = new Button();
             label1 = new Label();
@@ -75,17 +73,6 @@
             lblMaxBackupCount.Text = "バックアップの最大保持数";
             lblMaxBackupCount.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // lblMaxHistoryCount
-            // 
-            lblMaxHistoryCount.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            lblMaxHistoryCount.ForeColor = Color.White;
-            lblMaxHistoryCount.Location = new Point(12, 161);
-            lblMaxHistoryCount.Name = "lblMaxHistoryCount";
-            lblMaxHistoryCount.Size = new Size(256, 25);
-            lblMaxHistoryCount.TabIndex = 2;
-            lblMaxHistoryCount.Text = "入力履歴ファイルの最大保持数";
-            lblMaxHistoryCount.TextAlign = ContentAlignment.MiddleLeft;
-            // 
             // txtMaxBackupCount
             // 
             txtMaxBackupCount.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
@@ -94,15 +81,6 @@
             txtMaxBackupCount.Size = new Size(180, 27);
             txtMaxBackupCount.TabIndex = 3;
             txtMaxBackupCount.TextAlign = HorizontalAlignment.Right;
-            // 
-            // txtHistoryCount
-            // 
-            txtHistoryCount.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            txtHistoryCount.Location = new Point(274, 160);
-            txtHistoryCount.Name = "txtHistoryCount";
-            txtHistoryCount.Size = new Size(180, 27);
-            txtHistoryCount.TabIndex = 4;
-            txtHistoryCount.TextAlign = HorizontalAlignment.Right;
             // 
             // cmbLanguage
             // 
@@ -125,7 +103,7 @@
             btnSave.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             btnSave.ForeColor = SystemColors.ControlLightLight;
             btnSave.ImageAlign = ContentAlignment.MiddleLeft;
-            btnSave.Location = new Point(146, 400);
+            btnSave.Location = new Point(146, 338);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(189, 39);
             btnSave.TabIndex = 15;
@@ -139,7 +117,7 @@
             label1.Anchor = AnchorStyles.Bottom;
             label1.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             label1.ForeColor = Color.White;
-            label1.Location = new Point(12, 344);
+            label1.Location = new Point(12, 282);
             label1.Name = "label1";
             label1.Size = new Size(256, 25);
             label1.TabIndex = 16;
@@ -153,7 +131,7 @@
             chkAdvanceMode.BackColor = Color.White;
             chkAdvanceMode.Font = new Font("MS UI Gothic", 15F, FontStyle.Regular, GraphicsUnit.Point, 128);
             chkAdvanceMode.ForeColor = Color.Green;
-            chkAdvanceMode.Location = new Point(273, 344);
+            chkAdvanceMode.Location = new Point(273, 282);
             chkAdvanceMode.Name = "chkAdvanceMode";
             chkAdvanceMode.Size = new Size(25, 25);
             chkAdvanceMode.TabIndex = 17;
@@ -232,7 +210,7 @@
             // 
             lblSeparateSetting.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblSeparateSetting.ForeColor = Color.White;
-            lblSeparateSetting.Location = new Point(12, 222);
+            lblSeparateSetting.Location = new Point(12, 160);
             lblSeparateSetting.Name = "lblSeparateSetting";
             lblSeparateSetting.Size = new Size(203, 25);
             lblSeparateSetting.TabIndex = 19;
@@ -246,7 +224,7 @@
             grpSeparateSetting.Controls.Add(txtPositionY);
             grpSeparateSetting.Controls.Add(lblPisitionX);
             grpSeparateSetting.Controls.Add(txtPisitionX);
-            grpSeparateSetting.Location = new Point(215, 212);
+            grpSeparateSetting.Location = new Point(215, 150);
             grpSeparateSetting.Name = "grpSeparateSetting";
             grpSeparateSetting.Size = new Size(239, 117);
             grpSeparateSetting.TabIndex = 20;
@@ -304,15 +282,13 @@
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.FromArgb(0, 64, 64);
-            ClientSize = new Size(466, 468);
+            ClientSize = new Size(466, 408);
             Controls.Add(lblSeparateSetting);
             Controls.Add(chkAdvanceMode);
             Controls.Add(label1);
             Controls.Add(btnSave);
             Controls.Add(cmbLanguage);
-            Controls.Add(txtHistoryCount);
             Controls.Add(txtMaxBackupCount);
-            Controls.Add(lblMaxHistoryCount);
             Controls.Add(lblMaxBackupCount);
             Controls.Add(lblLanguage);
             Controls.Add(grpSeparateSetting);
@@ -333,9 +309,7 @@
 
         private Label lblLanguage;
         private Label lblMaxBackupCount;
-        private Label lblMaxHistoryCount;
         private TextBox txtMaxBackupCount;
-        private TextBox txtHistoryCount;
         private ComboBox cmbLanguage;
         private Button btnSave;
         private Label label1;

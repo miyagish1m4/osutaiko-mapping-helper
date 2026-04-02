@@ -31,7 +31,6 @@ namespace osu_taiko_Mapping_Helper.Views
         {
             Common.SetLabelText(lblLanguage, "LBL_SETTINGS_LANGUAGE");
             Common.SetLabelText(lblMaxBackupCount, "LBL_SETTINGS_BACKUP_MAX_COUNT");
-            Common.SetLabelText(lblMaxHistoryCount, "LBL_SETTINGS_INPUT_HISTORY_MAX_COUNT");
             Common.SetLabelText(lblSeparateSetting, "LBL_SETTINGS_SEPARETE_SETTING");
             Common.SetLabelText(btnSave, "LBL_SETTINGS_SAVE");
         }
@@ -43,7 +42,6 @@ namespace osu_taiko_Mapping_Helper.Views
             cmbLanguage.Items.AddRange(Constants.LANGUAGES);
             cmbLanguage.Text = config.language;
             txtMaxBackupCount.Text = config.maxBackupCount.ToString();
-            txtHistoryCount.Text = config.maxHistoryCount.ToString();
             rdoDon.Checked = true;
             this.MinimizeBox = false;
             this.MaximizeBox = false;
@@ -74,7 +72,6 @@ namespace osu_taiko_Mapping_Helper.Views
             // app.configに設定値をセットする
             if (SettingHelper.SetConfig(cmbLanguage.Text,
                                         txtMaxBackupCount.Text,
-                                        txtHistoryCount.Text,
                                         chkAdvanceMode.Checked,
                                         notesPosition,
                                         config))

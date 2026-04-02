@@ -7,7 +7,7 @@ namespace osu_taiko_Mapping_Helper.Properties
     {
         #region ファイル名
         internal const string APP_NAME = "osu!Taiko Mapping Helper";
-        internal const string APP_VERSION = "0.6.4-alpha";
+        internal const string APP_VERSION = "0.6.5-alpha";
         #endregion
         #region 言語設定
         internal static readonly string[] LANGUAGES = ["日本語",
@@ -101,11 +101,12 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const int RELATIVE_MULTIPLY = 2;   // 乗算
         #endregion
         #region ユーティリティ機能コード
-        internal const int UTILITY_HITSOUND = 0;
-        internal const int UTILITY_NOTES_POSITION = 1;
-        internal const int UTILITY_TAG_EDIT = 2;
-        internal const int UTILITY_METADATA_SETTING = 3;
-        internal const int UTILITY_RESNAP = 4;
+        internal const int UTILITY_OFFSET = 0;
+        internal const int UTILITY_HITSOUND = 1;
+        internal const int UTILITY_NOTES_POSITION = 2;
+        internal const int UTILITY_TAG_EDIT = 3;
+        internal const int UTILITY_SETTING_COPIER = 4;
+        internal const int UTILITY_RESNAP = 5;
         #endregion
         #region ヒットサウンドコード
         internal const int HITSOUND_CLAP = 0;
@@ -119,10 +120,10 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal static readonly Point CENTER_NOTES = new(256, 192);
         #endregion
         #region メタデータ設定コード
-        internal const int METADATA_SETTING_ALL = 0;
-        internal const int METADATA_SETTING_METADATA = 1;
-        internal const int METADATA_SETTING_BG = 2;
-        internal const int METADATA_SETTING_PREVIEW = 3;
+        internal const int SETTING_COPIER_METADATA = 0;
+        internal const int SETTING_COPIER_BG = 1;
+        internal const int SETTING_COPIER_PREVIEW = 2;
+        internal const int SETTING_COPIER_TIMING_POINTS = 3;
         #endregion
         #region ビートスナップ間隔
         internal static readonly int[] BEAT_SNAP_INTERVALS = [24, 36, 48, 60];
