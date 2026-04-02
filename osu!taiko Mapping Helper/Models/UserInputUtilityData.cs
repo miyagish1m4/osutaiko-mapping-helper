@@ -3,10 +3,11 @@
     internal class UserInputUtilityData
     {
         internal int utilityCode { set; get; }
+        internal int offset { set; get; }
         internal int hitSoundCode { set; get; }
         internal int notesPositionCode { set; get; }
         internal string tags { set; get; }
-        internal int metadataSettingCode { set; get; }
+        internal int settingCopierCode { set; get; }
         internal int resnapTimingFrom { set; get; }
         internal int resnapTimingTo { set; get; }
         internal int beatSnap { set; get; }
@@ -25,7 +26,7 @@
             hitSoundCode = 0;
             notesPositionCode = 0;
             tags = string.Empty;
-            metadataSettingCode = 0;
+            settingCopierCode = 0;
             resnapTimingFrom = 0;
             resnapTimingTo = 0;
             beatSnap = -1;

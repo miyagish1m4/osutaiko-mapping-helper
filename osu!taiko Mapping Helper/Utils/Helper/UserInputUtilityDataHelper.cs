@@ -5,6 +5,34 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
 {
     internal class UserInputUtilityDataHelper
     {
+
+        internal static bool SetOffsetData(UserInputUtilityData userInputUtilityData, string offset)
+        {
+            try
+            {
+                int retOffset = 0;
+                if (offset == string.Empty)
+                {
+                    //オフセットの入力がない
+                    offset = "0";
+                }
+                if (!int.TryParse(offset, out retOffset))
+                {
+                    //オフセットのフォーマットが間違えている
+                    Common.ShowMessageDialog("E_V-T-003");
+                    return false;
+                }
+                // ユーザー入力データにオフセット情報をセットする
+                userInputUtilityData.offset = retOffset;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
         /// <summary>
         /// リスナップタイミングの入力値をユーザー入力データにセットする処理<br/>
         /// </summary>

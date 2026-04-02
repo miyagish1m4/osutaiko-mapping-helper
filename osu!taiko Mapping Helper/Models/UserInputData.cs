@@ -19,9 +19,9 @@ namespace osu_taiko_Mapping_Helper.Models
         // SV有効化設定
         internal bool isSv { set; get; }
         // SV(開始)
-        internal decimal svFrom { set; get; }
+        internal double svFrom { set; get; }
         // SV(終了)
-        internal decimal svTo { set; get; }
+        internal double svTo { set; get; }
         // 音量有効化設定
         internal bool isVolume { set; get; }
         // 音量(開始)
@@ -40,7 +40,7 @@ namespace osu_taiko_Mapping_Helper.Models
         // 1  : 加算
         internal int relativeCode { set; get; }
         // 相対速度オプションで"乗算"選択時の基準SV
-        internal decimal relativeBaseSv { set; get; }
+        internal double relativeBaseSv { set; get; }
         internal SetOption setOption = new();
         internal SetObjectOption setObjectOption = new();
         internal SetBeatSnapOption setBeatSnapOption = new();
@@ -68,10 +68,11 @@ namespace osu_taiko_Mapping_Helper.Models
             // 0b0000 0000 0000 0000 0000 0000 0001 0000 スライダー
             // 0b0000 0000 0000 0000 0000 0000 0010 0000 スライダー(大音符)
             // 0b0000 0000 0000 0000 0000 0000 0100 0000 スピナー
-            // 0b0000 0000 0000 0000 0000 0000 1000 0000 小節線以外
-            // 0b0000 0000 0000 0000 0000 0001 0000 0000 小節線
-            // 0b0000 0000 0000 0000 0000 0010 0000 0000 Bookmark以外
-            // 0b0000 0000 0000 0000 0000 0100 0000 0000 Bookmark
+            // 0b0000 0000 0000 0000 0000 0000 1000 0000 スピナー終点
+            // 0b0000 0000 0000 0000 0000 0001 0000 0000 小節線以外
+            // 0b0000 0000 0000 0000 0000 0010 0000 0000 小節線
+            // 0b0000 0000 0000 0000 0000 0100 0000 0000 Bookmark以外
+            // 0b0000 0000 0000 0000 0000 1000 0000 0000 Bookmark
             internal int setObjectsCode { set; get; }
             // 始点緑線有効化設定
             internal bool isTimingStart { set; get; }

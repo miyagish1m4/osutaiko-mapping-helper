@@ -8,11 +8,11 @@
         // タイミングポイント
         internal int time { set; get; }
         // BPM
-        internal decimal bpm { set; get; }
+        internal double bpm { set; get; }
         // SV
-        internal decimal sv { set; get; }
+        internal double sv { set; get; }
         // 1小節の長さ(ms)
-        internal decimal barLength { set; get; }
+        internal double barLength { set; get; }
         // 拍子
         internal int meter { set; get; }
         // サンプルセット(Normal,Soft,Drum 等)
@@ -39,9 +39,9 @@
         /// <param name="isRedLine">赤線判定フラグ</param>
         /// <param name="effect">エフェクト(kiai有無,omit有無など)</param>
         internal TimingPoint(int time,
-                             decimal bpm,
-                             decimal sv,
-                             decimal barLength,
+                             double bpm,
+                             double sv,
+                             double barLength,
                              int meter,
                              int sampleSet,
                              int sampleIndex,
@@ -83,14 +83,14 @@
             if (int.Parse(buff[6]) == 1)
             {
                 isRedLine = true;
-                barLength = decimal.Parse(buff[1]) * meter;
-                bpm = 60000 / decimal.Parse(buff[1]);
+                barLength = double.Parse(buff[1]) * meter;
+                bpm = 60000 / double.Parse(buff[1]);
                 sv = 1;
             }
             else
             {
                 isRedLine = false;
-                sv = -100 / decimal.Parse(buff[1]);
+                sv = -100 / double.Parse(buff[1]);
             }
 
         }

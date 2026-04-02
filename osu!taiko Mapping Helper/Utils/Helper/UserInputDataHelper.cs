@@ -10,80 +10,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
     class UserInputDataHelper
     {
         /// <summary>
-        /// ユーザーが入力したデータをXML形式でシリアライズする関数
-        /// </summary>
-        /// <param name="userInputData">入力データ</param>
-        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool SerializeUserInputData(UserInputData userInputData)
-        {
-            try
-            {
-                DateTime date = DateTime.Now;
-                // シリアライザーの作成
-                XmlSerializer serializer = new(userInputData.GetType());
-                using (var sw = new StreamWriter(Directory.GetCurrentDirectory() + "\\" +
-                                                 Properties.Constants.HISTORY_DIRECTORY + "\\" +
-                                                 "\\history_" +
-                                                 userInputData.createDate.ToString("yyyyMMddHHmmssfff") +
-                                                 Properties.Constants.XML_EXTENSION,
-                                                 false,
-                                                 new System.Text.UTF8Encoding(false))) // BOMなしUTF-8
-                {
-                    // historyディレクトリにシリアライズしたファイルを作成する
-                    serializer.Serialize(sw, userInputData);
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.WriteErrorMessage("LOG_E-SERIALIZE-XML");
-                Common.WriteExceptionMessage(ex);
-                return false;
-            }
-        }
-        /// <summary>
-        /// ユーザーが入力したデータをXML形式からデシリアライズする関数
-        /// </summary>
-        /// <param name="userInputData">格納先のデータ</param>
-        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool DeserializeUserInputData(ref List<UserInputData> userInputData)
-        {
-            try
-            {
-                // 履歴ファイルを探す
-                string[] files = Directory.GetFiles(Directory.GetCurrentDirectory() + "\\" +
-                                                    Properties.Constants.HISTORY_DIRECTORY, "history_*.xml");
-                DateTime date = DateTime.Now;
-                // シリアライザーの作成
-                XmlSerializer serializer = new(typeof(UserInputData));
-                // 履歴ファイルが見つからない場合は
-                if (files.Length == 0)
-                {
-                    return false;
-                }
-                foreach (var file in files)
-                {
-                    // 履歴をデシリアライズし、入力値リストに格納する
-                    using (var sw = new StreamReader(file,
-                                                     new System.Text.UTF8Encoding(false)))
-                    {
-                        UserInputData? tempUserInputData = (UserInputData?)serializer?.Deserialize(sw);
-                        if (tempUserInputData != null)
-                        {
-                            userInputData?.Add(tempUserInputData);
-                        }
-                    }
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.WriteErrorMessage("LOG_E-DESERIALIZE-XML");
-                Common.WriteExceptionMessage(ex);
-                return false;
-            }
-        }
-        /// <summary>
         /// 相対速度変化コードを設定する関数
         /// </summary>
         /// <param name="userInputTempData">入力値(一時保存用)</param>
@@ -94,20 +20,20 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         {
             try
             {
-                decimal retBaseSv = -1m;
+                double retBaseSv = -1;
                 if (userInputTempData.isRelative)
                 {
                     if (userInputTempData.isRelativeMultiply)
                     {
                         userInputData.relativeCode = Constants.RELATIVE_MULTIPLY;
-                        userInputData.relativeBaseSv = decimal.Parse(userInputTempData.relativeMultiplyBaseSv);
+                        userInputData.relativeBaseSv = double.Parse(userInputTempData.relativeMultiplyBaseSv);
                         if (userInputTempData.relativeMultiplyBaseSv == string.Empty)
                         {
                             //基準SVの入力がない
                             Common.ShowMessageDialog("E_V-EM-002");
                             return false;
                         }
-                        if (!decimal.TryParse(userInputTempData.relativeMultiplyBaseSv, out retBaseSv))
+                        if (!double.TryParse(userInputTempData.relativeMultiplyBaseSv, out retBaseSv))
                         {
                             //SVのフォーマットが間違えている
                             Common.ShowMessageDialog("E_V-T-001");
@@ -239,17 +165,17 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             {
                 if (userInputTempData.setObjectOption.isAllHitObjects)
                 {
-                    userInputData.setObjectOption.setObjectsCode = 0x0000017f;
+                    userInputData.setObjectOption.setObjectsCode = 0x0000037f;
                 }
                 else if (userInputTempData.setObjectOption.isOnlyBarlines)
                 {
                     if (userInputTempData.setObjectOption.isOnBarlines)
                     {
-                        userInputData.setObjectOption.setObjectsCode = 0x00000100;
+                        userInputData.setObjectOption.setObjectsCode = 0x00000200;
                     }
                     else if (userInputTempData.setObjectOption.isOffBarlines)
                     {
-                        userInputData.setObjectOption.setObjectsCode = 0x00000080;
+                        userInputData.setObjectOption.setObjectsCode = 0x00000100;
                     }
                     else
                     {
@@ -260,11 +186,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 {
                     if (userInputTempData.setObjectOption.isOnBarlines)
                     {
-                        userInputData.setObjectOption.setObjectsCode = 0x00000400;
+                        userInputData.setObjectOption.setObjectsCode = 0x00000800;
                     }
                     else if (userInputTempData.setObjectOption.isOffBarlines)
                     {
-                        userInputData.setObjectOption.setObjectsCode = 0x00000200;
+                        userInputData.setObjectOption.setObjectsCode = 0x00000400;
                     }
                     else
                     {
@@ -303,7 +229,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     }
                     if (userInputData.setObjectOption.setObjectsCode == 0x00000000)
                     {
-                        userInputData.setObjectOption.setObjectsCode += 0x0000007f;
+                        userInputData.setObjectOption.setObjectsCode += 0x0000037f;
                     }
                     return true;
                 }
@@ -375,8 +301,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             {
                 string tempSvFrom = string.Empty;
                 string tempSvTo = string.Empty;
-                decimal retSvFrom = -1m;
-                decimal retSvTo = -1m;
+                double retSvFrom = -1;
+                double retSvTo = -1;
                 userInputData.isSv = userInputTempData.isSv;
                 if (!userInputData.isSv)
                 {
@@ -417,8 +343,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     Common.ShowMessageDialog("E_V-EM-002");
                     return false;
                 }
-                if (!decimal.TryParse(tempSvFrom, out retSvFrom) ||
-                    !decimal.TryParse(tempSvTo, out retSvTo))
+                if (!double.TryParse(tempSvFrom, out retSvFrom) ||
+                    !double.TryParse(tempSvTo, out retSvTo))
                 {
                     //SVのフォーマットが間違えている
                     Common.ShowMessageDialog("E_V-T-001");
@@ -429,10 +355,10 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     case Constants.RELATIVE_DISABLE:
                         // 相対速度変化オプションが無効の場合は
                         // SVがosu側で指定できる範囲内かチェックする
-                        if (((retSvFrom < 0.01m) || (retSvFrom > 10m) || (retSvTo < 0.01m) || (retSvTo > 10m)))
+                        if (((retSvFrom < 0.01) || (retSvFrom > 10) || (retSvTo < 0.01) || (retSvTo > 10)))
                         {
-                            retSvFrom = -1m;
-                            retSvTo = -1m;
+                            retSvFrom = -1;
+                            retSvTo = -1;
                             // SVがosu側で指定できる範囲外の値
                             Common.ShowMessageDialog("E_V-C-003");
                             return false;
@@ -441,10 +367,10 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     case Constants.RELATIVE_SUM:
                         // 相対速度変化オプションが加算の場合は
                         // SVがosu側で指定できる範囲内かチェックする
-                        if (((retSvFrom <= -10m) || (retSvFrom >= 10m) || (retSvTo <= -10m) || (retSvTo >= 10m)))
+                        if (((retSvFrom <= -10) || (retSvFrom >= 10) || (retSvTo <= -10) || (retSvTo >= 10)))
                         {
-                            retSvFrom = -1m;
-                            retSvTo = -1m;
+                            retSvFrom = -1;
+                            retSvTo = -1;
                             // SVがosu側で指定できる範囲外の値
                             Common.ShowMessageDialog("E_V-C-003");
                             return false;
@@ -453,11 +379,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     case Constants.RELATIVE_MULTIPLY:
                         // 相対速度変化オプションが乗算の場合は
                         // 基準SVが0かつ倍率が0かチェックする
-                        if (((retSvFrom == 0m) || (retSvTo == 0m)) &&
-                            userInputData.relativeBaseSv == 0m)
+                        if (((retSvFrom == 0) || (retSvTo == 0)) &&
+                            userInputData.relativeBaseSv == 0)
                         {
-                            retSvFrom = -1m;
-                            retSvTo = -1m;
+                            retSvFrom = -1;
+                            retSvTo = -1;
                             // SVがosu側で指定できる範囲外の値
                             Common.ShowMessageDialog("E_V-C-003");
                             return false;
@@ -700,10 +626,10 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <param name="beatmap">譜面情報</param>
         /// <param name="currentTime">タイミング</param>
         /// <returns>SVの値</returns>
-        internal static string SetCurrentSv(Beatmap? beatmap, int currentTime)
+        internal static string SetCurrentSv(Beatmap? beatmap, int currentTime, bool isDebug = false)
         {
             TimingPoint timingPointBuff = new();
-            decimal retSv = 0;
+            double retSv = 0;
             string retSvStr = string.Empty;
             try
             {
@@ -712,7 +638,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     throw new Exception();
                 }
                 // 現在のタイミングのSVを取得する (小数点第15位まで)
-                retSv = Math.Round(beatmap.timingPoints.LastOrDefault(tp => tp.time <= currentTime)?.sv ?? -1, 15, MidpointRounding.AwayFromZero);
+                retSv = Math.Round(beatmap.timingPoints.LastOrDefault(tp => tp.time <= currentTime)?.sv ?? -1, isDebug ? 8 : 12, MidpointRounding.AwayFromZero);
                 if (retSv == -1)
                 {
                     throw new Exception();

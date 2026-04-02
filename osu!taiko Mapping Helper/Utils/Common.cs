@@ -2,6 +2,7 @@ using System.Text;
 using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Views;
+using System.Globalization;
 
 namespace osu_taiko_Mapping_Helper.Utils
 {
@@ -71,11 +72,13 @@ namespace osu_taiko_Mapping_Helper.Utils
             {
                 File.Create(errorLogPath).Close();
             }
-            // 履歴ディレクトリの作成
-            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.HISTORY_DIRECTORY))
+#if DEBUG
+            // デバッグディレクトリの作成
+            if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.DEBUG_DIRECTORY))
             {
-                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.HISTORY_DIRECTORY);
+                Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.DEBUG_DIRECTORY);
             }
+# endif
             // バックアップディレクトリの作成
             if (!Directory.Exists(Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY))
             {
@@ -117,7 +120,7 @@ namespace osu_taiko_Mapping_Helper.Utils
         /// </summary>
         /// <param name="labelCode">ラベルコード、またはラベルテキスト</param>
         /// <returns>ラベルテキスト</returns>
-        internal static void SetLabelText(Control control,string labelCode)
+        internal static void SetLabelText(Control control, string labelCode)
         {
             string label;
             switch (config?.language)
@@ -169,6 +172,7 @@ namespace osu_taiko_Mapping_Helper.Utils
             if (isModeless)
             {
                 executeResultForm?.Close();
+                executeResultForm?.Dispose();
                 executeResultForm = new DialogForm(messageCode, messageBoxButton);
                 executeResultForm.Show();
             }
@@ -376,6 +380,5 @@ namespace osu_taiko_Mapping_Helper.Utils
                    second.ToString("00") + ":" +
                    milliSecond.ToString("000");
         }
-
     }
 }

@@ -7,7 +7,7 @@ namespace osu_taiko_Mapping_Helper.Views
     {
         #region クラス変数
         private int newLineCount = 1;
-        const decimal CHAR_SIZE = 8.5m;
+        const double CHAR_SIZE = 8.5;
         const int BUTTON_GAP = 11;
         #endregion
         #region メソッド

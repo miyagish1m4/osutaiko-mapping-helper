@@ -7,7 +7,7 @@ namespace osu_taiko_Mapping_Helper.Properties
     {
         #region ファイル名
         internal const string APP_NAME = "osu!Taiko Mapping Helper";
-        internal const string APP_VERSION = "0.6.1-alpha";
+        internal const string APP_VERSION = "0.6.4-alpha";
         #endregion
         #region 言語設定
         internal static readonly string[] LANGUAGES = ["日本語",
@@ -16,8 +16,6 @@ namespace osu_taiko_Mapping_Helper.Properties
         #region ディレクトリ
         // バックアップディレクトリ
         internal const string BACKUP_DIRECTORY = "\\BackUp";
-        // 作業ディレクトリ
-        internal const string WORK_DIRECTORY = "\\Work";
         // Infoログディレクトリ
         internal const string LOG_DIRECTORY = "\\Log";
         // Infoログディレクトリ
@@ -27,7 +25,7 @@ namespace osu_taiko_Mapping_Helper.Properties
         // Errorログディレクトリ
         internal const string ERROR_LOG_DIRECTORY = "\\Log\\Error";
         // 履歴ディレクトリ
-        internal const string HISTORY_DIRECTORY = "\\History";
+        internal const string DEBUG_DIRECTORY = "\\Debug";
         // エスケープ文字
         internal const string ESCAPE_CHARACTER = @"[\\,/,:,*,?,"",<,>,|]";
         #endregion
@@ -56,6 +54,7 @@ namespace osu_taiko_Mapping_Helper.Properties
         #endregion
         #region osuファイルのセクション
         internal const string GENERAL = "[General]";
+        internal const string PREVIEW = "PreviewTime: ";
         internal const string EDITOR = "[Editor]";
         internal const string METADATA = "[Metadata]";
         internal const string DIFFICULTY = "[Difficulty]";
@@ -84,8 +83,9 @@ namespace osu_taiko_Mapping_Helper.Properties
         #endregion
         #region セットコード
         internal const int SET_TIMING = 0;
-        internal const int SET_SV = 1;
-        internal const int SET_VOLUME = 2;
+        internal const int SET_BPM = 1;
+        internal const int SET_SV = 2;
+        internal const int SET_VOLUME = 3;
         #endregion
         #region 実行コード
         internal const int EXECUTE_APPLY = 0;
@@ -101,11 +101,12 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const int RELATIVE_MULTIPLY = 2;   // 乗算
         #endregion
         #region ユーティリティ機能コード
-        internal const int UTILITY_HITSOUND = 0;
-        internal const int UTILITY_NOTES_POSITION = 1;
-        internal const int UTILITY_TAG_EDIT = 2;
-        internal const int UTILITY_METADATA_SETTING = 3;
-        internal const int UTILITY_RESNAP = 4;
+        internal const int UTILITY_OFFSET = 0;
+        internal const int UTILITY_HITSOUND = 1;
+        internal const int UTILITY_NOTES_POSITION = 2;
+        internal const int UTILITY_TAG_EDIT = 3;
+        internal const int UTILITY_SETTING_COPIER = 4;
+        internal const int UTILITY_RESNAP = 5;
         #endregion
         #region ヒットサウンドコード
         internal const int HITSOUND_CLAP = 0;
@@ -119,9 +120,10 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal static readonly Point CENTER_NOTES = new(256, 192);
         #endregion
         #region メタデータ設定コード
-        internal const int METADATA_SETTING_ALL = 0;
-        internal const int METADATA_SETTING_METADATA = 1;
-        internal const int METADATA_SETTING_BG = 2;
+        internal const int SETTING_COPIER_METADATA = 0;
+        internal const int SETTING_COPIER_BG = 1;
+        internal const int SETTING_COPIER_PREVIEW = 2;
+        internal const int SETTING_COPIER_TIMING_POINTS = 3;
         #endregion
         #region ビートスナップ間隔
         internal static readonly int[] BEAT_SNAP_INTERVALS = [24, 36, 48, 60];
@@ -138,6 +140,26 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const int DIALOG_OPTION_OKCANCEL = 0x00000002;
         #endregion
 
+        internal static string ConvertNoteType(NoteType noteType)
+        {
+            switch (noteType)
+            {
+                case NoteType.BARLINE:
+                    return "Barline";
+                case NoteType.BOOKMARK:
+                    return "Bookmark";
+                case NoteType.CIRCLE:
+                    return "Circle";
+                case NoteType.SLIDER:
+                    return "Slider";
+                case NoteType.SPINNER:
+                    return "Spinner";
+                case NoteType.SPINNER_END:
+                    return "SpinnerEnd";
+                default:
+                    return "Unknown";
+            }
+        }
         // ヒットオブジェクトの種類
         internal enum NoteType
         {
@@ -145,7 +167,8 @@ namespace osu_taiko_Mapping_Helper.Properties
             BOOKMARK,
             CIRCLE,
             SLIDER,
-            SPINNER
+            SPINNER,
+            SPINNER_END,
         }
     }
 }
