@@ -395,11 +395,12 @@ namespace osu_taiko_Mapping_Helper
                 case Constants.UTILITY_TAG_EDIT:
                 case Constants.UTILITY_SETTING_COPIER:
                     var tags = txtTags.Text.Replace("\n", "");
-                    if (string.IsNullOrEmpty(beatmapDirectory) || beatmapData == null)
+                    if (string.IsNullOrEmpty(beatmapDirectory) ||
+                        (userInputUtilityData.utilityCode == Constants.UTILITY_SETTING_COPIER && beatmapData == null))
                     {
                         return;
                     }
-                    var timingPoints = beatmapData.timingPoints.Where(tp => tp.isRedLine).ToList();
+                    var timingPoints = beatmapData?.timingPoints.Where(tp => tp.isRedLine).ToList();
                     foreach (var beatmapPath in beatmapsPath)
                     {
                         // マップセットの内容を取得する
