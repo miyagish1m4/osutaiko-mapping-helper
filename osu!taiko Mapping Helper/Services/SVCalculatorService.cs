@@ -150,19 +150,19 @@ namespace osu_taiko_Mapping_Helper.Services
                     }
                     if (!beatmap.timingPoints[i].isRedLine)
                     {
-                        var tp = beatmap.timingPoints.LastOrDefault(tp => tp.time < beatmap.timingPoints[i].time && !tp.isRedLine);
-                        if (tp != null)
+                        if (outTimingPoints != null)
                         {
-                            if ((tp.effect & 1) != (beatmap.timingPoints[i].effect & 1))
+                            var ho = beatmap.hitObjects.LastOrDefault(ho => ho.time == beatmap.timingPoints[i].time);
+                            var otp = outTimingPoints.LastOrDefault(otp => otp.time == beatmap.timingPoints[i].time);
+                            if (ho == null && otp == null)
                             {
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            if ((beatmap.timingPoints[i].effect & 1) != 0)
-                            {
-                                continue;
+                                var tp = beatmap.timingPoints.LastOrDefault(tp => tp.time < beatmap.timingPoints[i].time && !tp.isRedLine);
+                                if (tp != null && (beatmap.timingPoints[i].effect & 1) != (tp.effect & 1))
+                                {
+                                    beatmap.timingPoints[i].sv = tp.sv;
+                                    beatmap.timingPoints[i].volume = tp.volume;
+                                    continue;
+                                }
                             }
                         }
                         beatmap.timingPoints.RemoveAt(i);
