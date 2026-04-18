@@ -265,6 +265,10 @@ namespace osu_taiko_Mapping_Helper
             rdoOnlyBarline.Checked = userInputTempData.setObjectOption.isOnlyBarlines;
             rdoOnlyBookMark.Checked = userInputTempData.setObjectOption.isOnlyBookmarks;
             rdoOnlySpecificHitObject.Checked = userInputTempData.setObjectOption.isOnlyHitObjects;
+            chkEnableOffset.Enabled = true;
+            txtOffset.Enabled = true;
+            txtOffset.BackColor = SystemColors.Window;
+            txtOffset.ForeColor = SystemColors.WindowText;
             Common.SetLabelText(chkEnableOffset, "LBL_APPLY_OFFSET");
         }
         /// <summary>
@@ -274,6 +278,10 @@ namespace osu_taiko_Mapping_Helper
         {
             chkEnableBeatSnap.CheckedChanged -= chkEnableBeatSnap_CheckedChanged;
             chkEnableBeatSnap.Checked = userInputTempData.setBeatSnapOption.isBeatSnap;
+            chkEnableOffset.Enabled = false;
+            txtOffset.Enabled = false;
+            txtOffset.BackColor = SystemColors.WindowFrame;
+            txtOffset.ForeColor = txtSvFrom.BackColor;
             chkEnableBeatSnap.CheckedChanged += chkEnableBeatSnap_CheckedChanged;
             Common.SetLabelText(chkEnableOffset, "LBL_APPLY_OFFSET");
         }
@@ -282,7 +290,10 @@ namespace osu_taiko_Mapping_Helper
         /// </summary>
         private void InitializeGreenLineControls()
         {
-            Common.SetLabelText(chkEnableOffset, "LBL_START_OFFSET");
+            chkEnableOffset.Enabled = false;
+            txtOffset.Enabled = false;
+            txtOffset.BackColor = SystemColors.WindowFrame;
+            txtOffset.ForeColor = txtSvFrom.BackColor;
         }
         /// <summary>
         /// メイン処理(SV Editor)
@@ -395,11 +406,12 @@ namespace osu_taiko_Mapping_Helper
                 case Constants.UTILITY_TAG_EDIT:
                 case Constants.UTILITY_SETTING_COPIER:
                     var tags = txtTags.Text.Replace("\n", "");
-                    if (string.IsNullOrEmpty(beatmapDirectory) || beatmapData == null)
+                    if (string.IsNullOrEmpty(beatmapDirectory) ||
+                        (userInputUtilityData.utilityCode == Constants.UTILITY_SETTING_COPIER && beatmapData == null))
                     {
                         return;
                     }
-                    var timingPoints = beatmapData.timingPoints.Where(tp => tp.isRedLine).ToList();
+                    var timingPoints = beatmapData?.timingPoints.Where(tp => tp.isRedLine).ToList();
                     foreach (var beatmapPath in beatmapsPath)
                     {
                         // マップセットの内容を取得する

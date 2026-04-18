@@ -7,7 +7,7 @@ namespace osu_taiko_Mapping_Helper.Properties
     {
         #region ファイル名
         internal const string APP_NAME = "osu!Taiko Mapping Helper";
-        internal const string APP_VERSION = "0.6.4-alpha";
+        internal const string APP_VERSION = "0.7.0-alpha";
         #endregion
         #region 言語設定
         internal static readonly string[] LANGUAGES = ["日本語",
@@ -139,6 +139,8 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const int DIALOG_OPTION_MODELESS = 0x00000001;
         internal const int DIALOG_OPTION_OKCANCEL = 0x00000002;
         #endregion
+
+        internal const double BASE_SLIDER_MULTIPLIER = 1.4;
 
         internal static string ConvertNoteType(NoteType noteType)
         {

@@ -373,12 +373,18 @@ namespace osu_taiko_Mapping_Helper.Utils
         /// <returns>変換後のタイミング</returns>
         internal static string ConvertFormatTiming(int currentTime)
         {
-            int minute = currentTime / 60000;
-            int second = (currentTime % 60000) / 1000;
-            int milliSecond = currentTime % 1000;
-            return minute.ToString("00") + ":" +
-                   second.ToString("00") + ":" +
-                   milliSecond.ToString("000");
+            try
+            {
+                int minute = currentTime / 60000;
+                int second = (currentTime % 60000) / 1000;
+                int milliSecond = currentTime % 1000;
+                return minute.ToString("00") + ":" +
+                       second.ToString("00") + ":" +
+                       milliSecond.ToString("000");
+            } catch
+            {
+                return string.Empty;
+            }
         }
     }
 }

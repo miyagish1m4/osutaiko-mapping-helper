@@ -1,10 +1,5 @@
-﻿using System.Diagnostics;
-using OsuMemoryDataProvider;
-using OsuMemoryDataProvider.OsuMemoryModels;
-using OsuParsers.Decoders;
-using osu_taiko_Mapping_Helper.Models;
+﻿using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
-using osu_taiko_Mapping_Helper.Services;
 using osu_taiko_Mapping_Helper.Utils;
 using osu_taiko_Mapping_Helper.Utils.Helper;
 
@@ -51,9 +46,10 @@ namespace osu_taiko_Mapping_Helper.Views
                         SetCurrentTimeInfo(lblCurrentSv, Constants.SET_SV);
                         SetCurrentTimeInfo(lblCurrentVolume, Constants.SET_VOLUME);
                         if (double.TryParse(lblCurrentBpm.Text, out double bpm) &&
-                            double.TryParse(lblCurrentSv.Text, out double sv))
+                            double.TryParse(lblCurrentSv.Text, out double sv) &&
+                            double.TryParse(beatmapData?.difficulty.FirstOrDefault(line => line.StartsWith("SliderMultiplier:"))?.Split(':')[1].Trim(), out double sliderMultiplier))
                         {
-                            double retSv = Math.Round(bpm * sv, 5, MidpointRounding.AwayFromZero);
+                            double retSv = Math.Round(bpm * sv * sliderMultiplier / Constants.BASE_SLIDER_MULTIPLIER, 5, MidpointRounding.AwayFromZero);
                             string retVisualizeBpmStr = (retSv).ToString();
                             if (retVisualizeBpmStr.Contains('.'))
                             {
@@ -138,7 +134,9 @@ namespace osu_taiko_Mapping_Helper.Views
 
         private void DebugForm_Load(object sender, EventArgs e)
         {
-
+#if DEBUG
+            this.TopMost = true;
+#endif
         }
     }
 }
