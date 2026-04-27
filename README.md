@@ -2,7 +2,7 @@
 
 ## 開発者用導入ライブラリ
 
-1.VisualStudioの開発用PowerShellで下記2点のコマンドをosuTaikoSvTool.csprojがあるフォルダ内で実行する。
+1.VisualStudioの開発用PowerShellで下記2点のコマンドをosu!taiko Mapping Helper.csprojがあるフォルダ内で実行する。
 
 [OsuMemoryDataProvider](https://www.nuget.org/packages/OsuMemoryDataProvider) ([GitHub](https://github.com/Piotrekol/ProcessMemoryDataFinder/tree/master))
 ```
