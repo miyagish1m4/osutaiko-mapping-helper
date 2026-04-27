@@ -129,19 +129,22 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 {
                     throw new Exception();
                 }
-                // 赤線と小節線を取得する
-                if (!GetOtherObject(ref timingPointList,
-                                    ref hitObjectList,
-                                    ref uninheritedTimingPointList,
-                                    ref bookmarkList))
+                if (!isThread)
                 {
-                    throw new Exception();
-                }
-                // HitObject に SVとBPMを適用(ソート後)
-                if (!SetSvAndBpmOnHitObjects(timingPointList,
-                                             ref hitObjectList))
-                {
-                    throw new Exception();
+                    // 赤線と小節線を取得する
+                    if (!GetOtherObject(ref timingPointList,
+                                        ref hitObjectList,
+                                        ref uninheritedTimingPointList,
+                                        ref bookmarkList))
+                    {
+                        throw new Exception();
+                    }
+                    // HitObject に SVとBPMを適用(ソート後)
+                    if (!SetSvAndBpmOnHitObjects(timingPointList,
+                                                 ref hitObjectList))
+                    {
+                        throw new Exception();
+                    }
                 }
                 // BeatmapInfo に渡す
                 return new Beatmap(version,
@@ -378,6 +381,10 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 for (int i = 0; i < uninheritedTimingPointList.Count; i++)
                 {
+                    if (uninheritedTimingPointList[i].bpm >= 60000)
+                    {
+                        continue;
+                    }
                     double startTime = uninheritedTimingPointList[i].time;
                     double currentTime = startTime;
                     int timeEnd = lastHitObject.time;
@@ -538,6 +545,13 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                             userInputUtilityData?.settingCopierCode == Constants.SETTING_COPIER_PREVIEW)
                         {
                             file.WriteLine(Constants.PREVIEW + beatmapInfo?.previewTime);
+                        }
+                        else if (userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET)
+                        {
+#pragma warning disable CS8602 // null 参照の可能性があるものの逆参照です。
+                            int preview = beatmapInfo.previewTime + userInputUtilityData.offset;
+#pragma warning restore CS8602 // null 参照の可能性があるものの逆参照です。
+                            file.WriteLine(Constants.PREVIEW + preview);
                         }
                         else
                         {
@@ -798,6 +812,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// </summary>
         /// <param name="hitObject">ヒットオブジェクトデータ</param>
         /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
+        /// <param name="endTime">スピナーの終了時間</param>
         /// <returns>ヒットオブジェクトの行</returns>
         private static string CreateHitObjectLine(HitObject hitObject, UserInputUtilityData? userInputUtilityData, int endTime)
         {
@@ -805,6 +820,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             int positionY = hitObject.positionY;
             int time = userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET ?
                        (hitObject.time + userInputUtilityData.offset) : hitObject.time;
+            int spinnerEndTime = (userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET && endTime != int.MinValue) ?
+                                 (endTime + userInputUtilityData.offset) : endTime;
             string hitSound = hitObject.hitSound;
             if (hitObject.noteType != Constants.NoteType.SPINNER)
             {
@@ -880,9 +897,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         break;
                 }
             }
-            else
-            {
-            }
             StringBuilder sb = new();
             sb.Append(positionX + ",");
             sb.Append(positionY + ",");
@@ -921,7 +935,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             else if (hitObject.noteType == Constants.NoteType.SPINNER)
             {
                 // スピナーの場合はendTimeとhitSampleを設定する
-                sb.Append(endTime + ",");
+                sb.Append(spinnerEndTime + ",");
                 sb.Append(hitObject.hitSample);
             }
             else

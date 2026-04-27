@@ -47,6 +47,8 @@
             txtPositionY = new TextBox();
             lblPisitionX = new Label();
             txtPisitionX = new TextBox();
+            chkUnicodeSupport = new CheckBox();
+            lblUnicodeSupport = new Label();
             pnlNotesKind.SuspendLayout();
             grpSeparateSetting.SuspendLayout();
             SuspendLayout();
@@ -103,7 +105,7 @@
             btnSave.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             btnSave.ForeColor = SystemColors.ControlLightLight;
             btnSave.ImageAlign = ContentAlignment.MiddleLeft;
-            btnSave.Location = new Point(146, 338);
+            btnSave.Location = new Point(146, 398);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(189, 39);
             btnSave.TabIndex = 15;
@@ -117,7 +119,7 @@
             label1.Anchor = AnchorStyles.Bottom;
             label1.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             label1.ForeColor = Color.White;
-            label1.Location = new Point(12, 282);
+            label1.Location = new Point(12, 342);
             label1.Name = "label1";
             label1.Size = new Size(256, 25);
             label1.TabIndex = 16;
@@ -131,7 +133,7 @@
             chkAdvanceMode.BackColor = Color.White;
             chkAdvanceMode.Font = new Font("MS UI Gothic", 15F, FontStyle.Regular, GraphicsUnit.Point, 128);
             chkAdvanceMode.ForeColor = Color.Green;
-            chkAdvanceMode.Location = new Point(273, 282);
+            chkAdvanceMode.Location = new Point(273, 342);
             chkAdvanceMode.Name = "chkAdvanceMode";
             chkAdvanceMode.Size = new Size(25, 25);
             chkAdvanceMode.TabIndex = 17;
@@ -278,11 +280,40 @@
             txtPisitionX.TextAlign = HorizontalAlignment.Right;
             txtPisitionX.TextChanged += txtPisitionX_TextChanged;
             // 
+            // chkUnicodeSupport
+            // 
+            chkUnicodeSupport.Anchor = AnchorStyles.Bottom;
+            chkUnicodeSupport.Appearance = Appearance.Button;
+            chkUnicodeSupport.BackColor = Color.White;
+            chkUnicodeSupport.Font = new Font("MS UI Gothic", 15F, FontStyle.Regular, GraphicsUnit.Point, 128);
+            chkUnicodeSupport.ForeColor = Color.Green;
+            chkUnicodeSupport.Location = new Point(273, 282);
+            chkUnicodeSupport.Name = "chkUnicodeSupport";
+            chkUnicodeSupport.Size = new Size(25, 25);
+            chkUnicodeSupport.TabIndex = 22;
+            chkUnicodeSupport.TextAlign = ContentAlignment.MiddleCenter;
+            chkUnicodeSupport.UseVisualStyleBackColor = false;
+            chkUnicodeSupport.CheckedChanged += chkUnicodeSupport_CheckedChanged;
+            // 
+            // lblUnicodeSupport
+            // 
+            lblUnicodeSupport.Anchor = AnchorStyles.Bottom;
+            lblUnicodeSupport.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            lblUnicodeSupport.ForeColor = Color.White;
+            lblUnicodeSupport.Location = new Point(12, 282);
+            lblUnicodeSupport.Name = "lblUnicodeSupport";
+            lblUnicodeSupport.Size = new Size(256, 25);
+            lblUnicodeSupport.TabIndex = 21;
+            lblUnicodeSupport.Text = "Unicode対応";
+            lblUnicodeSupport.TextAlign = ContentAlignment.MiddleLeft;
+            // 
             // SettingForm
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.FromArgb(0, 64, 64);
-            ClientSize = new Size(466, 408);
+            ClientSize = new Size(466, 468);
+            Controls.Add(chkUnicodeSupport);
+            Controls.Add(lblUnicodeSupport);
             Controls.Add(lblSeparateSetting);
             Controls.Add(chkAdvanceMode);
             Controls.Add(label1);
@@ -325,5 +356,7 @@
         private Label lblPisitionY;
         private TextBox txtPositionY;
         private Label lblPisitionX;
+        private CheckBox chkUnicodeSupport;
+        private Label lblUnicodeSupport;
     }
 }

@@ -22,6 +22,7 @@ namespace osu_taiko_Mapping_Helper.Views
             this.config = config;
             InitializeLabelText();
             SetChkAdvanceMode(config.advanceMode);
+            SetChkUnicodeSupport(config.unicodeSupport);
             SetNotesPosition();
         }
         /// <summary>
@@ -30,8 +31,9 @@ namespace osu_taiko_Mapping_Helper.Views
         private void InitializeLabelText()
         {
             Common.SetLabelText(lblLanguage, "LBL_SETTINGS_LANGUAGE");
-            Common.SetLabelText(lblMaxBackupCount, "LBL_SETTINGS_BACKUP_MAX_COUNT");
-            Common.SetLabelText(lblSeparateSetting, "LBL_SETTINGS_SEPARETE_SETTING");
+            Common.SetLabelText(lblMaxBackupCount, "LBL_SETTINGS_BACKUP_LIMIT");
+            Common.SetLabelText(lblSeparateSetting, "LBL_SETTINGS_NOTES_POSITION");
+            Common.SetLabelText(lblUnicodeSupport, "LBL_SETTINGS_UNICODE_SUPPORT");
             Common.SetLabelText(btnSave, "LBL_SETTINGS_SAVE");
         }
         /// <summary>
@@ -73,6 +75,7 @@ namespace osu_taiko_Mapping_Helper.Views
             if (SettingHelper.SetConfig(cmbLanguage.Text,
                                         txtMaxBackupCount.Text,
                                         chkAdvanceMode.Checked,
+                                        chkUnicodeSupport.Checked,
                                         notesPosition,
                                         config))
             {
@@ -81,13 +84,13 @@ namespace osu_taiko_Mapping_Helper.Views
                 if (SettingHelper.ResetBackupFile(config))
                 {
                     // 成功した場合はメッセージダイアログを表示する
-                    Common.ShowMessageDialog("I_A-P-003");
+                    Common.ShowMessageDialog("I_A-P-3");
                     this.Close();
                 }
                 else
                 {
                     // 失敗した場合はエラーダイアログを表示する
-                    Common.ShowMessageDialog("E_A-P-002");
+                    Common.ShowMessageDialog("E_A-P-2");
                 }
             }
         }
@@ -95,9 +98,17 @@ namespace osu_taiko_Mapping_Helper.Views
         {
             chkAdvanceMode.Text = chkAdvanceMode.Checked ? "✔" : "";
         }
+        private void chkUnicodeSupport_CheckedChanged(object sender, EventArgs e)
+        {
+            chkUnicodeSupport.Text = chkUnicodeSupport.Checked ? "✔" : "";
+        }
         private void SetChkAdvanceMode(int isAdvanceMode)
         {
             chkAdvanceMode.Checked = isAdvanceMode == 1 ? true : false;
+        }
+        private void SetChkUnicodeSupport(int isUnicodeSupport)
+        {
+            chkUnicodeSupport.Checked = isUnicodeSupport == 1 ? true : false;
         }
         private void rdoDon_CheckedChanged(object sender, EventArgs e)
         {

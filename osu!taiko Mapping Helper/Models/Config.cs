@@ -9,10 +9,10 @@ namespace osu_taiko_Mapping_Helper.Models
     {
         // バックアップの最大保持数
         internal int maxBackupCount { get; set; }
-        // 入力履歴ファイルの最大保持数
-        internal int maxHistoryCount { get; set; }
         // 言語設定
         internal string? language { get; set; }
+        // Unicode対応の有無
+        internal int unicodeSupport { get; set; }
         // AdvanceMode設定
         internal int advanceMode { get; set; }
         internal int donX { get; set; }
@@ -33,6 +33,7 @@ namespace osu_taiko_Mapping_Helper.Models
             // config読み込み
             maxBackupCount = Convert.ToInt32(config.AppSettings.Settings["maxBackupCount"].Value);
             language = config.AppSettings.Settings["language"].Value;
+            unicodeSupport = Convert.ToInt32(config.AppSettings.Settings["unicodeSupport"].Value);
             advanceMode = Convert.ToInt32(config.AppSettings.Settings["advanceMode"].Value);
             donX = Convert.ToInt32(config.AppSettings.Settings["donX"].Value);
             donY = Convert.ToInt32(config.AppSettings.Settings["donY"].Value);
@@ -53,6 +54,7 @@ namespace osu_taiko_Mapping_Helper.Models
             // config書き込み
             config.AppSettings.Settings["maxBackupCount"].Value = maxBackupCount.ToString();
             config.AppSettings.Settings["language"].Value = language;
+            config.AppSettings.Settings["unicodeSupport"].Value = unicodeSupport.ToString();
             config.AppSettings.Settings["advanceMode"].Value = advanceMode.ToString();
             config.AppSettings.Settings["donX"].Value = donX.ToString();
             config.AppSettings.Settings["donY"].Value = donY.ToString();

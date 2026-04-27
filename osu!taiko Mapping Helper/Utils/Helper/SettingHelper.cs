@@ -18,6 +18,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         internal static bool SetConfig(string language,
                                        string maxBackupCount,
                                        bool isAdvanceMode,
+                                       bool isUnicodeSupport,
                                        NotesPosition notesPosition,
                                        Config config)
         {
@@ -33,6 +34,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 int retFinisherKatX = 0;
                 int retFinisherKatY = 0;
                 int advanceMode = isAdvanceMode ? 1 : 0;
+                int unicodeSupport = isUnicodeSupport ? 1 : 0;
                 // 入力された値のバリデーションチェックをする
                 if (!ValidateMaxBackupCount(maxBackupCount, ref retMaxBackupCount) ||
                     !ValidatePosition(notesPosition.donX, ref retDonX, 0) ||
@@ -49,6 +51,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 config.language = language;
                 config.maxBackupCount = retMaxBackupCount;
+                config.unicodeSupport = unicodeSupport;
                 config.advanceMode = advanceMode;
                 config.donX = retDonX;
                 config.donY = retDonY;
@@ -80,20 +83,26 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             {
                 if (maxBackupCount == string.Empty)
                 {
-                    //バックアップの最大保持数の入力がない
-                    Common.ShowMessageDialog("E_V-EM-007");
+                    //バックアップの保持上限の入力がない
+                    Common.ShowMessageDialog("E_V-EM-1");
+                    return false;
+                }
+                if (!System.Text.RegularExpressions.Regex.IsMatch(maxBackupCount, @"^[-+]?[0-9]*\.?[0-9]+$"))
+                {
+                    //バックアップの保持上限が数値で指定されていない
+                    Common.ShowMessageDialog("E_V-T-2");
                     return false;
                 }
                 if (!int.TryParse(maxBackupCount, out retMaxBackupCount))
                 {
-                    //バックアップの最大保持数のフォーマットが間違えている
-                    Common.ShowMessageDialog("E_V-T-006");
+                    //バックアップの保持上限が整数で指定されていない
+                    Common.ShowMessageDialog("E_V-T-1");
                     return false;
                 }
                 if ((retMaxBackupCount < 1) || (retMaxBackupCount > 100))
                 {
                     //バックアップの最大保持数が1～100以内ではない
-                    Common.ShowMessageDialog("E_V-C-007");
+                    Common.ShowMessageDialog("E_V-C-1");
                     return false;
                 }
                 return true;
@@ -119,26 +128,26 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 int maxPosition = dimension == 0 ? 512 : 384;
                 if (position == string.Empty)
                 {
-                    retPosition = 0;
-                    return true;
+                    //ノーツの座標が指定されていない
+                    Common.ShowMessageDialog(dimension == 0 ? "E_V-EM-2" : "E_V-EM-3");
+                    return false;
+                }
+                if (!System.Text.RegularExpressions.Regex.IsMatch(position, @"^[-+]?[0-9]*\.?[0-9]+$"))
+                {
+                    //ノーツの座標が数値で指定されていない
+                    Common.ShowMessageDialog(dimension == 0 ? "E_V-T-4" : "E_V-T-6");
+                    return false;
                 }
                 if (!int.TryParse(position, out retPosition))
                 {
-                    //ノーツの座標のフォーマットが間違えている
-                    Common.ShowMessageDialog("E_V-T-007");
+                    //ノーツの座標が整数で指定されていない
+                    Common.ShowMessageDialog(dimension == 0 ? "E_V-T-3" : "E_V-T-5");
                     return false;
                 }
                 if ((retPosition < 0) || (retPosition > maxPosition))
                 {
-                    //ノーツの座標が指定の範囲内ではない
-                    if (maxPosition == 512)
-                    {
-                        Common.ShowMessageDialog("E_V-C-009");
-                    }
-                    else
-                    {
-                        Common.ShowMessageDialog("E_V-C-010");
-                    }
+                    //ノーツの座標が指定の範囲内で指定されていない
+                    Common.ShowMessageDialog(dimension == 0 ? "E_V-C-2" : "E_V-C-3");
                     return false;
                 }
                 return true;

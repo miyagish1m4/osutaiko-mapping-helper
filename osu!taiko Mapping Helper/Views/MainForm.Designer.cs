@@ -54,7 +54,6 @@ namespace osu_taiko_Mapping_Helper
             btnSwapSv = new Button();
             btnSwapVolume = new Button();
             btnRemove = new Button();
-            chkEnableBeatSnap = new CheckBox();
             txtBeatSnap = new TextBox();
             lblBeatSnap = new Label();
             picSpecificNormalDong = new PictureBox();
@@ -81,6 +80,7 @@ namespace osu_taiko_Mapping_Helper
             rdoOnlyBookMark = new RadioButton();
             rdoOnlySpecificHitObject = new RadioButton();
             tabBeatSnap = new TabPage();
+            lblBeatSnaps = new Label();
             tabGreenLine = new TabPage();
             tabRemovePage = new TabPage();
             chkEnableStartOffset = new CheckBox();
@@ -111,23 +111,23 @@ namespace osu_taiko_Mapping_Helper
             pnlGroupUtility = new Panel();
             label8 = new Label();
             txtTimingOffset = new TextBox();
-            btnApplyOffset = new Button();
-            lblTimingPointOffset = new Label();
+            btnApplyOffsetShifter = new Button();
+            lblOffsetShifter = new Label();
             btnApplyResnap = new Button();
             cmbResnapBeatSnap = new ComboBox();
-            label1 = new Label();
-            label6 = new Label();
+            lblBeatSnapDivisor = new Label();
+            lblResnap = new Label();
             btnApplySettingCopier = new Button();
-            label5 = new Label();
+            lblSettingCopier = new Label();
             cmbSettingCopier = new ComboBox();
             txtTags = new TextBox();
-            btnApplyTags = new Button();
-            label4 = new Label();
+            btnApplyTagEditor = new Button();
+            lblTagEditor = new Label();
             btnApplyNotesPosition = new Button();
-            label3 = new Label();
+            lblNotesPosition = new Label();
             cmbNotesPosition = new ComboBox();
-            btnApplyHitsound = new Button();
-            label2 = new Label();
+            btnApplyHitsoundOption = new Button();
+            lblHitsoundOption = new Label();
             cmbHitsoundTool = new ComboBox();
             btnSetResnapTimingTo = new Button();
             btnSetResnapTimingFrom = new Button();
@@ -339,7 +339,7 @@ namespace osu_taiko_Mapping_Helper
             pnlCalcurationTypeGroup.Controls.Add(rdoGeometric);
             pnlCalcurationTypeGroup.Location = new Point(9, 212);
             pnlCalcurationTypeGroup.Name = "pnlCalcurationTypeGroup";
-            pnlCalcurationTypeGroup.Size = new Size(128, 66);
+            pnlCalcurationTypeGroup.Size = new Size(113, 66);
             pnlCalcurationTypeGroup.TabIndex = 9;
             // 
             // btnApply
@@ -453,44 +453,31 @@ namespace osu_taiko_Mapping_Helper
             btnRemove.FlatStyle = FlatStyle.Flat;
             btnRemove.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             btnRemove.ForeColor = SystemColors.ControlLightLight;
-            btnRemove.Location = new Point(96, 235);
+            btnRemove.Location = new Point(102, 232);
             btnRemove.Name = "btnRemove";
-            btnRemove.Size = new Size(189, 39);
+            btnRemove.Size = new Size(181, 39);
             btnRemove.TabIndex = 10;
             btnRemove.TabStop = false;
             btnRemove.Text = "実行";
             btnRemove.UseVisualStyleBackColor = false;
             btnRemove.Click += btnRemove_Click;
             // 
-            // chkEnableBeatSnap
-            // 
-            chkEnableBeatSnap.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            chkEnableBeatSnap.ForeColor = Color.White;
-            chkEnableBeatSnap.Location = new Point(6, 6);
-            chkEnableBeatSnap.Name = "chkEnableBeatSnap";
-            chkEnableBeatSnap.Size = new Size(124, 37);
-            chkEnableBeatSnap.TabIndex = 0;
-            chkEnableBeatSnap.TabStop = false;
-            chkEnableBeatSnap.Text = "ビートスナップ間隔でSVを置く";
-            chkEnableBeatSnap.UseVisualStyleBackColor = true;
-            chkEnableBeatSnap.CheckedChanged += chkEnableBeatSnap_CheckedChanged;
-            // 
             // txtBeatSnap
             // 
-            txtBeatSnap.BackColor = SystemColors.WindowFrame;
+            txtBeatSnap.BackColor = SystemColors.Window;
             txtBeatSnap.BorderStyle = BorderStyle.FixedSingle;
-            txtBeatSnap.Enabled = false;
-            txtBeatSnap.Location = new Point(288, 14);
+            txtBeatSnap.Location = new Point(131, 14);
             txtBeatSnap.Name = "txtBeatSnap";
             txtBeatSnap.Size = new Size(40, 25);
             txtBeatSnap.TabIndex = 2;
             txtBeatSnap.TabStop = false;
+            txtBeatSnap.TextChanged += txtBeatSnap_TextChanged;
             // 
             // lblBeatSnap
             // 
             lblBeatSnap.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblBeatSnap.ForeColor = Color.White;
-            lblBeatSnap.Location = new Point(271, 17);
+            lblBeatSnap.Location = new Point(114, 17);
             lblBeatSnap.Name = "lblBeatSnap";
             lblBeatSnap.Size = new Size(17, 20);
             lblBeatSnap.TabIndex = 1;
@@ -598,15 +585,17 @@ namespace osu_taiko_Mapping_Helper
             // 
             tabExecuteType.Controls.Add(tabApplyPage);
             tabExecuteType.Controls.Add(tabRemovePage);
+            tabExecuteType.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabExecuteType.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             tabExecuteType.ItemSize = new Size(195, 40);
-            tabExecuteType.Location = new Point(3, 303);
+            tabExecuteType.Location = new Point(4, 303);
             tabExecuteType.Name = "tabExecuteType";
             tabExecuteType.SelectedIndex = 0;
             tabExecuteType.Size = new Size(393, 337);
             tabExecuteType.SizeMode = TabSizeMode.Fixed;
             tabExecuteType.TabIndex = 3;
             tabExecuteType.TabStop = false;
+            tabExecuteType.DrawItem += tabExecuteType_DrawItem;
             tabExecuteType.SelectedIndexChanged += tabExecuteType_SelectedIndexChanged;
             // 
             // tabApplyPage
@@ -647,6 +636,7 @@ namespace osu_taiko_Mapping_Helper
             tabSetType.Controls.Add(tabHitObjectsPage);
             tabSetType.Controls.Add(tabBeatSnap);
             tabSetType.Controls.Add(tabGreenLine);
+            tabSetType.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabSetType.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
             tabSetType.ImeMode = ImeMode.NoControl;
             tabSetType.ItemSize = new Size(126, 40);
@@ -657,6 +647,7 @@ namespace osu_taiko_Mapping_Helper
             tabSetType.SizeMode = TabSizeMode.Fixed;
             tabSetType.TabIndex = 2;
             tabSetType.TabStop = false;
+            tabSetType.DrawItem += tabSetType_DrawItem;
             tabSetType.SelectedIndexChanged += tabSetType_SelectedIndexChanged;
             // 
             // tabHitObjectsPage
@@ -778,7 +769,7 @@ namespace osu_taiko_Mapping_Helper
             // 
             tabBeatSnap.BackColor = Color.FromArgb(0, 64, 64);
             tabBeatSnap.BorderStyle = BorderStyle.FixedSingle;
-            tabBeatSnap.Controls.Add(chkEnableBeatSnap);
+            tabBeatSnap.Controls.Add(lblBeatSnaps);
             tabBeatSnap.Controls.Add(lblBeatSnap);
             tabBeatSnap.Controls.Add(txtBeatSnap);
             tabBeatSnap.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
@@ -789,7 +780,18 @@ namespace osu_taiko_Mapping_Helper
             tabBeatSnap.RightToLeft = RightToLeft.No;
             tabBeatSnap.Size = new Size(375, 120);
             tabBeatSnap.TabIndex = 1;
-            tabBeatSnap.Text = "BeatSnap間隔";
+            tabBeatSnap.Text = "BeatSnap";
+            // 
+            // lblBeatSnaps
+            // 
+            lblBeatSnaps.AutoSize = true;
+            lblBeatSnaps.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
+            lblBeatSnaps.ForeColor = Color.White;
+            lblBeatSnaps.Location = new Point(11, 18);
+            lblBeatSnaps.Name = "lblBeatSnaps";
+            lblBeatSnaps.Size = new Size(100, 15);
+            lblBeatSnaps.TabIndex = 3;
+            lblBeatSnaps.Text = "Beat Snap Divisor";
             // 
             // tabGreenLine
             // 
@@ -944,7 +946,7 @@ namespace osu_taiko_Mapping_Helper
             pnlRelativeSvGroup.Controls.Add(lblRelativeBaseSv);
             pnlRelativeSvGroup.Controls.Add(rdoRelativeMultiply);
             pnlRelativeSvGroup.Controls.Add(rdoRelativeSum);
-            pnlRelativeSvGroup.Location = new Point(143, 212);
+            pnlRelativeSvGroup.Location = new Point(131, 212);
             pnlRelativeSvGroup.Name = "pnlRelativeSvGroup";
             pnlRelativeSvGroup.Size = new Size(140, 76);
             pnlRelativeSvGroup.TabIndex = 11;
@@ -1005,7 +1007,7 @@ namespace osu_taiko_Mapping_Helper
             chkRelative.AutoSize = true;
             chkRelative.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkRelative.ForeColor = Color.White;
-            chkRelative.Location = new Point(146, 188);
+            chkRelative.Location = new Point(134, 188);
             chkRelative.Name = "chkRelative";
             chkRelative.Size = new Size(118, 24);
             chkRelative.TabIndex = 13;
@@ -1035,7 +1037,7 @@ namespace osu_taiko_Mapping_Helper
             chkEnableSvTo.AutoSize = true;
             chkEnableSvTo.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkEnableSvTo.ForeColor = Color.White;
-            chkEnableSvTo.Location = new Point(289, 216);
+            chkEnableSvTo.Location = new Point(277, 216);
             chkEnableSvTo.Name = "chkEnableSvTo";
             chkEnableSvTo.Size = new Size(96, 19);
             chkEnableSvTo.TabIndex = 15;
@@ -1191,23 +1193,23 @@ namespace osu_taiko_Mapping_Helper
             // 
             pnlGroupUtility.Controls.Add(label8);
             pnlGroupUtility.Controls.Add(txtTimingOffset);
-            pnlGroupUtility.Controls.Add(btnApplyOffset);
-            pnlGroupUtility.Controls.Add(lblTimingPointOffset);
+            pnlGroupUtility.Controls.Add(btnApplyOffsetShifter);
+            pnlGroupUtility.Controls.Add(lblOffsetShifter);
             pnlGroupUtility.Controls.Add(btnApplyResnap);
             pnlGroupUtility.Controls.Add(cmbResnapBeatSnap);
-            pnlGroupUtility.Controls.Add(label1);
-            pnlGroupUtility.Controls.Add(label6);
+            pnlGroupUtility.Controls.Add(lblBeatSnapDivisor);
+            pnlGroupUtility.Controls.Add(lblResnap);
             pnlGroupUtility.Controls.Add(btnApplySettingCopier);
-            pnlGroupUtility.Controls.Add(label5);
+            pnlGroupUtility.Controls.Add(lblSettingCopier);
             pnlGroupUtility.Controls.Add(cmbSettingCopier);
             pnlGroupUtility.Controls.Add(txtTags);
-            pnlGroupUtility.Controls.Add(btnApplyTags);
-            pnlGroupUtility.Controls.Add(label4);
+            pnlGroupUtility.Controls.Add(btnApplyTagEditor);
+            pnlGroupUtility.Controls.Add(lblTagEditor);
             pnlGroupUtility.Controls.Add(btnApplyNotesPosition);
-            pnlGroupUtility.Controls.Add(label3);
+            pnlGroupUtility.Controls.Add(lblNotesPosition);
             pnlGroupUtility.Controls.Add(cmbNotesPosition);
-            pnlGroupUtility.Controls.Add(btnApplyHitsound);
-            pnlGroupUtility.Controls.Add(label2);
+            pnlGroupUtility.Controls.Add(btnApplyHitsoundOption);
+            pnlGroupUtility.Controls.Add(lblHitsoundOption);
             pnlGroupUtility.Controls.Add(cmbHitsoundTool);
             pnlGroupUtility.Controls.Add(btnSetResnapTimingTo);
             pnlGroupUtility.Controls.Add(btnSetResnapTimingFrom);
@@ -1225,7 +1227,7 @@ namespace osu_taiko_Mapping_Helper
             label8.AutoSize = true;
             label8.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
             label8.ForeColor = Color.White;
-            label8.Location = new Point(235, 44);
+            label8.Location = new Point(252, 44);
             label8.Name = "label8";
             label8.Size = new Size(28, 20);
             label8.TabIndex = 42;
@@ -1237,37 +1239,37 @@ namespace osu_taiko_Mapping_Helper
             txtTimingOffset.Location = new Point(13, 41);
             txtTimingOffset.Name = "txtTimingOffset";
             txtTimingOffset.RightToLeft = RightToLeft.No;
-            txtTimingOffset.Size = new Size(218, 29);
+            txtTimingOffset.Size = new Size(233, 29);
             txtTimingOffset.TabIndex = 41;
             txtTimingOffset.TextAlign = HorizontalAlignment.Right;
             // 
-            // btnApplyOffset
+            // btnApplyOffsetShifter
             // 
-            btnApplyOffset.BackColor = Color.DarkCyan;
-            btnApplyOffset.FlatAppearance.BorderColor = Color.Cyan;
-            btnApplyOffset.FlatAppearance.BorderSize = 2;
-            btnApplyOffset.FlatStyle = FlatStyle.Flat;
-            btnApplyOffset.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnApplyOffset.ForeColor = SystemColors.ControlLightLight;
-            btnApplyOffset.Location = new Point(278, 36);
-            btnApplyOffset.Name = "btnApplyOffset";
-            btnApplyOffset.Size = new Size(111, 38);
-            btnApplyOffset.TabIndex = 40;
-            btnApplyOffset.TabStop = false;
-            btnApplyOffset.Text = "Apply to All";
-            btnApplyOffset.UseVisualStyleBackColor = false;
-            btnApplyOffset.Click += btnApplyOffset_Click;
+            btnApplyOffsetShifter.BackColor = Color.DarkCyan;
+            btnApplyOffsetShifter.FlatAppearance.BorderColor = Color.Cyan;
+            btnApplyOffsetShifter.FlatAppearance.BorderSize = 2;
+            btnApplyOffsetShifter.FlatStyle = FlatStyle.Flat;
+            btnApplyOffsetShifter.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            btnApplyOffsetShifter.ForeColor = SystemColors.ControlLightLight;
+            btnApplyOffsetShifter.Location = new Point(306, 36);
+            btnApplyOffsetShifter.Name = "btnApplyOffsetShifter";
+            btnApplyOffsetShifter.Size = new Size(83, 38);
+            btnApplyOffsetShifter.TabIndex = 40;
+            btnApplyOffsetShifter.TabStop = false;
+            btnApplyOffsetShifter.Text = "Apply to All";
+            btnApplyOffsetShifter.UseVisualStyleBackColor = false;
+            btnApplyOffsetShifter.Click += btnApplyOffset_Click;
             // 
-            // lblTimingPointOffset
+            // lblOffsetShifter
             // 
-            lblTimingPointOffset.AutoSize = true;
-            lblTimingPointOffset.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
-            lblTimingPointOffset.ForeColor = Color.White;
-            lblTimingPointOffset.Location = new Point(175, 10);
-            lblTimingPointOffset.Name = "lblTimingPointOffset";
-            lblTimingPointOffset.Size = new Size(49, 20);
-            lblTimingPointOffset.TabIndex = 39;
-            lblTimingPointOffset.Text = "Offset";
+            lblOffsetShifter.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
+            lblOffsetShifter.ForeColor = Color.White;
+            lblOffsetShifter.Location = new Point(0, 10);
+            lblOffsetShifter.Name = "lblOffsetShifter";
+            lblOffsetShifter.Size = new Size(400, 20);
+            lblOffsetShifter.TabIndex = 39;
+            lblOffsetShifter.Text = "Offset";
+            lblOffsetShifter.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // btnApplyResnap
             // 
@@ -1277,12 +1279,12 @@ namespace osu_taiko_Mapping_Helper
             btnApplyResnap.FlatStyle = FlatStyle.Flat;
             btnApplyResnap.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             btnApplyResnap.ForeColor = SystemColors.ControlLightLight;
-            btnApplyResnap.Location = new Point(291, 595);
+            btnApplyResnap.Location = new Point(306, 595);
             btnApplyResnap.Name = "btnApplyResnap";
-            btnApplyResnap.Size = new Size(99, 38);
+            btnApplyResnap.Size = new Size(83, 38);
             btnApplyResnap.TabIndex = 37;
             btnApplyResnap.TabStop = false;
-            btnApplyResnap.Text = "Run";
+            btnApplyResnap.Text = "Apply";
             btnApplyResnap.UseVisualStyleBackColor = false;
             btnApplyResnap.Click += btnApplyResnap_Click;
             // 
@@ -1294,33 +1296,32 @@ namespace osu_taiko_Mapping_Helper
             cmbResnapBeatSnap.FormattingEnabled = true;
             cmbResnapBeatSnap.IntegralHeight = false;
             cmbResnapBeatSnap.Items.AddRange(new object[] { "1/24 (1/8, 1/12)", "1/36 (1/4, 1/6, 1/9)", "1/48 (1/12, 1/16)", "1/60 (1/4, 1/5, 1/12)" });
-            cmbResnapBeatSnap.Location = new Point(102, 599);
+            cmbResnapBeatSnap.Location = new Point(148, 599);
             cmbResnapBeatSnap.Name = "cmbResnapBeatSnap";
-            cmbResnapBeatSnap.Size = new Size(179, 29);
+            cmbResnapBeatSnap.Size = new Size(151, 29);
             cmbResnapBeatSnap.TabIndex = 36;
             cmbResnapBeatSnap.SelectedIndexChanged += cmbResnapBeatSnap_SelectedIndexChanged;
             // 
-            // label1
+            // lblBeatSnapDivisor
             // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
-            label1.ForeColor = Color.White;
-            label1.Location = new Point(17, 602);
-            label1.Name = "label1";
-            label1.Size = new Size(73, 20);
-            label1.TabIndex = 35;
-            label1.Text = "BeatSnap";
+            lblBeatSnapDivisor.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
+            lblBeatSnapDivisor.ForeColor = Color.White;
+            lblBeatSnapDivisor.Location = new Point(17, 602);
+            lblBeatSnapDivisor.Name = "lblBeatSnapDivisor";
+            lblBeatSnapDivisor.Size = new Size(139, 20);
+            lblBeatSnapDivisor.TabIndex = 35;
+            lblBeatSnapDivisor.Text = "Beat Snap Divisor";
             // 
-            // label6
+            // lblResnap
             // 
-            label6.AutoSize = true;
-            label6.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
-            label6.ForeColor = Color.White;
-            label6.Location = new Point(171, 506);
-            label6.Name = "label6";
-            label6.Size = new Size(58, 20);
-            label6.TabIndex = 34;
-            label6.Text = "Resnap";
+            lblResnap.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
+            lblResnap.ForeColor = Color.White;
+            lblResnap.Location = new Point(0, 506);
+            lblResnap.Name = "lblResnap";
+            lblResnap.Size = new Size(400, 20);
+            lblResnap.TabIndex = 34;
+            lblResnap.Text = "Resnap";
+            lblResnap.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // btnApplySettingCopier
             // 
@@ -1330,25 +1331,25 @@ namespace osu_taiko_Mapping_Helper
             btnApplySettingCopier.FlatStyle = FlatStyle.Flat;
             btnApplySettingCopier.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             btnApplySettingCopier.ForeColor = SystemColors.ControlLightLight;
-            btnApplySettingCopier.Location = new Point(277, 459);
+            btnApplySettingCopier.Location = new Point(306, 459);
             btnApplySettingCopier.Name = "btnApplySettingCopier";
-            btnApplySettingCopier.Size = new Size(111, 38);
+            btnApplySettingCopier.Size = new Size(83, 38);
             btnApplySettingCopier.TabIndex = 33;
             btnApplySettingCopier.TabStop = false;
             btnApplySettingCopier.Text = "Apply to All";
             btnApplySettingCopier.UseVisualStyleBackColor = false;
             btnApplySettingCopier.Click += btnApplySettingCopier_Click;
             // 
-            // label5
+            // lblSettingCopier
             // 
-            label5.AutoSize = true;
-            label5.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
-            label5.ForeColor = Color.White;
-            label5.Location = new Point(147, 433);
-            label5.Name = "label5";
-            label5.Size = new Size(106, 20);
-            label5.TabIndex = 32;
-            label5.Text = "Setting Copier";
+            lblSettingCopier.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
+            lblSettingCopier.ForeColor = Color.White;
+            lblSettingCopier.Location = new Point(0, 433);
+            lblSettingCopier.Name = "lblSettingCopier";
+            lblSettingCopier.Size = new Size(400, 20);
+            lblSettingCopier.TabIndex = 32;
+            lblSettingCopier.Text = "Setting Copier";
+            lblSettingCopier.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // cmbSettingCopier
             // 
@@ -1360,7 +1361,7 @@ namespace osu_taiko_Mapping_Helper
             cmbSettingCopier.Items.AddRange(new object[] { "Metadata", "BG Position", "Preview", "Timing Points" });
             cmbSettingCopier.Location = new Point(12, 464);
             cmbSettingCopier.Name = "cmbSettingCopier";
-            cmbSettingCopier.Size = new Size(253, 29);
+            cmbSettingCopier.Size = new Size(287, 29);
             cmbSettingCopier.TabIndex = 31;
             cmbSettingCopier.SelectedIndexChanged += cmbMetadataSetting_SelectedIndexChanged;
             // 
@@ -1376,33 +1377,33 @@ namespace osu_taiko_Mapping_Helper
             txtTags.TextChanged += txtTags_TextChanged;
             txtTags.KeyPress += txtTags_KeyPress;
             // 
-            // btnApplyTags
+            // btnApplyTagEditor
             // 
-            btnApplyTags.BackColor = Color.DarkCyan;
-            btnApplyTags.FlatAppearance.BorderColor = Color.Cyan;
-            btnApplyTags.FlatAppearance.BorderSize = 2;
-            btnApplyTags.FlatStyle = FlatStyle.Flat;
-            btnApplyTags.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnApplyTags.ForeColor = SystemColors.ControlLightLight;
-            btnApplyTags.Location = new Point(277, 386);
-            btnApplyTags.Name = "btnApplyTags";
-            btnApplyTags.Size = new Size(111, 38);
-            btnApplyTags.TabIndex = 29;
-            btnApplyTags.TabStop = false;
-            btnApplyTags.Text = "Apply to All";
-            btnApplyTags.UseVisualStyleBackColor = false;
-            btnApplyTags.Click += btnApplyTags_Click;
+            btnApplyTagEditor.BackColor = Color.DarkCyan;
+            btnApplyTagEditor.FlatAppearance.BorderColor = Color.Cyan;
+            btnApplyTagEditor.FlatAppearance.BorderSize = 2;
+            btnApplyTagEditor.FlatStyle = FlatStyle.Flat;
+            btnApplyTagEditor.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            btnApplyTagEditor.ForeColor = SystemColors.ControlLightLight;
+            btnApplyTagEditor.Location = new Point(306, 386);
+            btnApplyTagEditor.Name = "btnApplyTagEditor";
+            btnApplyTagEditor.Size = new Size(83, 38);
+            btnApplyTagEditor.TabIndex = 29;
+            btnApplyTagEditor.TabStop = false;
+            btnApplyTagEditor.Text = "Apply to All";
+            btnApplyTagEditor.UseVisualStyleBackColor = false;
+            btnApplyTagEditor.Click += btnApplyTags_Click;
             // 
-            // label4
+            // lblTagEditor
             // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
-            label4.ForeColor = Color.White;
-            label4.Location = new Point(169, 229);
-            label4.Name = "label4";
-            label4.Size = new Size(62, 20);
-            label4.TabIndex = 28;
-            label4.Text = "Tag Edit";
+            lblTagEditor.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
+            lblTagEditor.ForeColor = Color.White;
+            lblTagEditor.Location = new Point(0, 229);
+            lblTagEditor.Name = "lblTagEditor";
+            lblTagEditor.Size = new Size(400, 20);
+            lblTagEditor.TabIndex = 28;
+            lblTagEditor.Text = "Tag Edit";
+            lblTagEditor.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // btnApplyNotesPosition
             // 
@@ -1412,25 +1413,25 @@ namespace osu_taiko_Mapping_Helper
             btnApplyNotesPosition.FlatStyle = FlatStyle.Flat;
             btnApplyNotesPosition.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             btnApplyNotesPosition.ForeColor = SystemColors.ControlLightLight;
-            btnApplyNotesPosition.Location = new Point(290, 182);
+            btnApplyNotesPosition.Location = new Point(306, 182);
             btnApplyNotesPosition.Name = "btnApplyNotesPosition";
-            btnApplyNotesPosition.Size = new Size(99, 38);
+            btnApplyNotesPosition.Size = new Size(83, 38);
             btnApplyNotesPosition.TabIndex = 26;
             btnApplyNotesPosition.TabStop = false;
-            btnApplyNotesPosition.Text = "Run";
+            btnApplyNotesPosition.Text = "Apply";
             btnApplyNotesPosition.UseVisualStyleBackColor = false;
             btnApplyNotesPosition.Click += btnApplyNotesPosition_Click;
             // 
-            // label3
+            // lblNotesPosition
             // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
-            label3.ForeColor = Color.White;
-            label3.Location = new Point(146, 156);
-            label3.Name = "label3";
-            label3.Size = new Size(108, 20);
-            label3.TabIndex = 25;
-            label3.Text = "Notes Position";
+            lblNotesPosition.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
+            lblNotesPosition.ForeColor = Color.White;
+            lblNotesPosition.Location = new Point(0, 156);
+            lblNotesPosition.Name = "lblNotesPosition";
+            lblNotesPosition.Size = new Size(400, 20);
+            lblNotesPosition.TabIndex = 25;
+            lblNotesPosition.Text = "Notes Position";
+            lblNotesPosition.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // cmbNotesPosition
             // 
@@ -1442,37 +1443,37 @@ namespace osu_taiko_Mapping_Helper
             cmbNotesPosition.Items.AddRange(new object[] { "Center", "Sepatate", "Random" });
             cmbNotesPosition.Location = new Point(13, 187);
             cmbNotesPosition.Name = "cmbNotesPosition";
-            cmbNotesPosition.Size = new Size(268, 29);
+            cmbNotesPosition.Size = new Size(287, 29);
             cmbNotesPosition.TabIndex = 24;
             cmbNotesPosition.SelectedIndexChanged += cmbNotesPosition_SelectedIndexChanged;
             // 
-            // btnApplyHitsound
+            // btnApplyHitsoundOption
             // 
-            btnApplyHitsound.BackColor = Color.DarkCyan;
-            btnApplyHitsound.FlatAppearance.BorderColor = Color.Cyan;
-            btnApplyHitsound.FlatAppearance.BorderSize = 2;
-            btnApplyHitsound.FlatStyle = FlatStyle.Flat;
-            btnApplyHitsound.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            btnApplyHitsound.ForeColor = SystemColors.ControlLightLight;
-            btnApplyHitsound.Location = new Point(290, 109);
-            btnApplyHitsound.Name = "btnApplyHitsound";
-            btnApplyHitsound.Size = new Size(99, 38);
-            btnApplyHitsound.TabIndex = 23;
-            btnApplyHitsound.TabStop = false;
-            btnApplyHitsound.Text = "Run";
-            btnApplyHitsound.UseVisualStyleBackColor = false;
-            btnApplyHitsound.Click += btnApplyHitsound_Click;
+            btnApplyHitsoundOption.BackColor = Color.DarkCyan;
+            btnApplyHitsoundOption.FlatAppearance.BorderColor = Color.Cyan;
+            btnApplyHitsoundOption.FlatAppearance.BorderSize = 2;
+            btnApplyHitsoundOption.FlatStyle = FlatStyle.Flat;
+            btnApplyHitsoundOption.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            btnApplyHitsoundOption.ForeColor = SystemColors.ControlLightLight;
+            btnApplyHitsoundOption.Location = new Point(306, 109);
+            btnApplyHitsoundOption.Name = "btnApplyHitsoundOption";
+            btnApplyHitsoundOption.Size = new Size(83, 38);
+            btnApplyHitsoundOption.TabIndex = 23;
+            btnApplyHitsoundOption.TabStop = false;
+            btnApplyHitsoundOption.Text = "Apply";
+            btnApplyHitsoundOption.UseVisualStyleBackColor = false;
+            btnApplyHitsoundOption.Click += btnApplyHitsound_Click;
             // 
-            // label2
+            // lblHitsoundOption
             // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
-            label2.ForeColor = Color.White;
-            label2.Location = new Point(148, 83);
-            label2.Name = "label2";
-            label2.Size = new Size(103, 20);
-            label2.TabIndex = 20;
-            label2.Text = "Hitsound Tool";
+            lblHitsoundOption.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
+            lblHitsoundOption.ForeColor = Color.White;
+            lblHitsoundOption.Location = new Point(0, 83);
+            lblHitsoundOption.Name = "lblHitsoundOption";
+            lblHitsoundOption.Size = new Size(400, 20);
+            lblHitsoundOption.TabIndex = 20;
+            lblHitsoundOption.Text = "Hitsound Tool";
+            lblHitsoundOption.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // cmbHitsoundTool
             // 
@@ -1484,7 +1485,7 @@ namespace osu_taiko_Mapping_Helper
             cmbHitsoundTool.Items.AddRange(new object[] { "Clap", "Whistle" });
             cmbHitsoundTool.Location = new Point(13, 114);
             cmbHitsoundTool.Name = "cmbHitsoundTool";
-            cmbHitsoundTool.Size = new Size(268, 29);
+            cmbHitsoundTool.Size = new Size(287, 29);
             cmbHitsoundTool.TabIndex = 19;
             cmbHitsoundTool.SelectedIndexChanged += cmbHitsoundTool_SelectedIndexChanged;
             // 
@@ -1669,7 +1670,6 @@ namespace osu_taiko_Mapping_Helper
         private Button btnSwapSv;
         private Button btnSwapVolume;
         private Button btnRemove;
-        private CheckBox chkEnableBeatSnap;
         private TextBox txtBeatSnap;
         private Label lblBeatSnap;
         private PictureBox picSpecificNormalDong;
@@ -1732,25 +1732,26 @@ namespace osu_taiko_Mapping_Helper
         private TextBox txtResnapTimingFrom;
         private TextBox txtResnapTimingTo;
         private Button btnApplyNotesPosition;
-        private Label label3;
+        private Label lblNotesPosition;
         private ComboBox cmbNotesPosition;
-        private Button btnApplyHitsound;
-        private Label label2;
+        private Button btnApplyHitsoundOption;
+        private Label lblHitsoundOption;
         private TextBox txtTags;
-        private Button btnApplyTags;
-        private Label label4;
+        private Button btnApplyTagEditor;
+        private Label lblTagEditor;
         private Button btnApplySettingCopier;
-        private Label label5;
+        private Label lblSettingCopier;
         private ComboBox cmbSettingCopier;
-        private Label label6;
+        private Label lblResnap;
         private Button btnApplyResnap;
         private ComboBox cmbResnapBeatSnap;
-        private Label label1;
+        private Label lblBeatSnapDivisor;
         private Button btnBackup;
         private ToolStripMenuItem timingPropertyToolStripMenuItem;
-        private Button btnApplyOffset;
-        private Label lblTimingPointOffset;
+        private Button btnApplyOffsetShifter;
+        private Label lblOffsetShifter;
         private Label label8;
         private TextBox txtTimingOffset;
+        private Label lblBeatSnaps;
     }
 }

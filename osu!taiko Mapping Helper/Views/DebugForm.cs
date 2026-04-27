@@ -13,24 +13,39 @@ namespace osu_taiko_Mapping_Helper.Views
         private int currentTime;
         delegate void DelegateProcess();//delegateを宣言
         private int updateInterval = 15;
+        public MainForm parentForm { get; set; }
+        private bool isClose = false;
         #endregion
         #region メソッド
         /// <summary>
         /// コンストラクタ
         /// </summary>
+#pragma warning disable CS8618 // null 非許容のフィールドには、コンストラクターの終了時に null 以外の値が入っていなければなりません。'required' 修飾子を追加するか、Null 許容として宣言することを検討してください。
         public DebugForm()
+#pragma warning restore CS8618 // null 非許容のフィールドには、コンストラクターの終了時に null 以外の値が入っていなければなりません。'required' 修飾子を追加するか、Null 許容として宣言することを検討してください。
         {
             InitializeComponent();
-            Thread getMemoryDataThread = new Thread(UpdateBeatmap) { IsBackground = true };
+            Thread getMemoryDataThread = new(UpdateBeatmap) { IsBackground = true };
             getMemoryDataThread.Start();
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
         }
-
+        /// <summary>
+        /// ラベルテキストの初期化設定
+        /// </summary>
+        private void InitializeLabelText()
+        {
+            Common.SetLabelText(lblScrollSpeed, "LBL_DEBUG_SCROLL_SPEED");
+            lblScrollSpeed.Text += " : ";
+        }
         private void UpdateBeatmap()
         {
             while (true)
             {
+                if (isClose)
+                {
+                    break;
+                }
                 //if (!isLoad)
                 //{
                 //    Thread.Sleep(15);
@@ -137,6 +152,19 @@ namespace osu_taiko_Mapping_Helper.Views
 #if DEBUG
             this.TopMost = true;
 #endif
+            InitializeLabelText();
+            parentForm.updateInterval = 15;
+            GetBeatmap();
+        }
+
+        private void DebugForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            parentForm.updateInterval = 100;
+        }
+
+        private void DebugForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            isClose = true;
         }
     }
 }

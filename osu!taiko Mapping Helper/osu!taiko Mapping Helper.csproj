@@ -17,6 +17,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\BackupForm.cs" />
+    <Compile Remove="Views\BackupForm.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="Views\BackupForm.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resources\backGround.png" />
   </ItemGroup>
 
@@ -29,9 +38,6 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Views\BackupForm.cs">
-      <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
 
