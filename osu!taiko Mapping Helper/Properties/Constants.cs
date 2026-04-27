@@ -7,15 +7,15 @@ namespace osu_taiko_Mapping_Helper.Properties
     {
         #region ファイル名
         internal const string APP_NAME = "osu!Taiko Mapping Helper";
-        internal const string APP_VERSION = "0.7.0-alpha";
+        internal const string APP_VERSION = "1.0.0-beta";
         #endregion
         #region 言語設定
-        internal static readonly string[] LANGUAGES = ["日本語",
-                                                       "English"];
+        internal static readonly string[] LANGUAGES = ["English",
+                                                       "日本語"];
         #endregion
         #region ディレクトリ
         // バックアップディレクトリ
-        internal const string BACKUP_DIRECTORY = "\\BackUp";
+        internal const string BACKUP_DIRECTORY = "\\Backup";
         // Infoログディレクトリ
         internal const string LOG_DIRECTORY = "\\Log";
         // Infoログディレクトリ
@@ -139,9 +139,7 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const int DIALOG_OPTION_MODELESS = 0x00000001;
         internal const int DIALOG_OPTION_OKCANCEL = 0x00000002;
         #endregion
-
         internal const double BASE_SLIDER_MULTIPLIER = 1.4;
-
         internal static string ConvertNoteType(NoteType noteType)
         {
             switch (noteType)

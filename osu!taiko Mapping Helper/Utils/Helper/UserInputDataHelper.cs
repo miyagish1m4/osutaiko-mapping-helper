@@ -26,21 +26,22 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     if (userInputTempData.isRelativeMultiply)
                     {
                         userInputData.relativeCode = Constants.RELATIVE_MULTIPLY;
-                        userInputData.relativeBaseSv = double.Parse(userInputTempData.relativeMultiplyBaseSv);
                         if (userInputTempData.relativeMultiplyBaseSv == string.Empty)
                         {
-                            //基準SVの入力がない
-                            Common.ShowMessageDialog("E_V-EM-002");
+                            //基準SVが指定されていない
+                            Common.ShowMessageDialog("E_V-EM-7");
                             return false;
                         }
                         if (!double.TryParse(userInputTempData.relativeMultiplyBaseSv, out retBaseSv))
                         {
-                            //SVのフォーマットが間違えている
-                            Common.ShowMessageDialog("E_V-T-001");
+                            //基準SVが数値で指定されていない
+                            Common.ShowMessageDialog("E_V-T-11");
                             return false;
                         }
                         if (retBaseSv < 0)
                         {
+                            //基準SVが負の値で指定されている
+                            Common.ShowMessageDialog("E_V-T-12");
                             return false;
                         }
                         userInputData.relativeBaseSv = retBaseSv;
@@ -76,12 +77,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         {
             try
             {
-                if (!userInputTempData.isArithmetic && !userInputTempData.isGeometric)
-                {
-                    //計算方法が指定されていない
-                    Common.ShowMessageDialog("E_V-EM-005");
-                    return false;
-                }
                 if (userInputTempData.isRelative)
                 {
                     userInputData.calculationCode = Constants.CALCULATION_ARITHMETIC;
@@ -96,12 +91,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     {
                         userInputData.calculationCode = Constants.CALCULATION_GEOMETRIC;
                     }
-                }
-                if ((userInputData.calculationCode == 0) && userInputTempData.isSv)
-                {
-                    //計算方法が指定されていない
-                    Common.ShowMessageDialog("E_V-EM-005");
-                    return false;
                 }
                 return true;
             }
@@ -259,21 +248,21 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 int retTimingTo = 0;
                 if ((userInputTempData.timingFrom == string.Empty) || (userInputTempData.timingTo == string.Empty))
                 {
-                    //タイミングの入力がない
-                    Common.ShowMessageDialog("E_V-EM-001");
+                    //タイミングが指定されていない
+                    Common.ShowMessageDialog("E_V-EM-4");
                     return false;
                 }
                 if (!Common.ConvertMsTiming(userInputTempData.timingFrom, ref retTimingFrom) ||
                     !Common.ConvertMsTiming(userInputTempData.timingTo, ref retTimingTo))
                 {
                     //タイミングのフォーマットが間違えている
-                    Common.ShowMessageDialog("E_V-C-001");
+                    Common.ShowMessageDialog("E_V-C-4");
                     return false;
                 }
                 if (retTimingFrom > retTimingTo)
                 {
                     //タイミングの開始位置が終了位置より大きい
-                    Common.ShowMessageDialog("E_V-C-002");
+                    Common.ShowMessageDialog("E_V-C-5");
                     return false;
                 }
                 // ユーザー入力データにタイミング情報をセットする
@@ -339,42 +328,28 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 if (((tempSvFrom == string.Empty) || (tempSvTo == string.Empty)))
                 {
-                    //SVの入力がない
-                    Common.ShowMessageDialog("E_V-EM-002");
+                    //SVが指定されていない
+                    Common.ShowMessageDialog("E_V-EM-5");
                     return false;
                 }
                 if (!double.TryParse(tempSvFrom, out retSvFrom) ||
                     !double.TryParse(tempSvTo, out retSvTo))
                 {
-                    //SVのフォーマットが間違えている
-                    Common.ShowMessageDialog("E_V-T-001");
+                    //SVが数値で指定されていない
+                    Common.ShowMessageDialog("E_V-T-7");
                     return false;
                 }
                 switch (userInputData.relativeCode)
                 {
                     case Constants.RELATIVE_DISABLE:
-                        // 相対速度変化オプションが無効の場合は
-                        // SVがosu側で指定できる範囲内かチェックする
-                        if (((retSvFrom < 0.01) || (retSvFrom > 10) || (retSvTo < 0.01) || (retSvTo > 10)))
+                        if ((retSvFrom <= 0) || (retSvTo <= 0))
                         {
-                            retSvFrom = -1;
-                            retSvTo = -1;
-                            // SVがosu側で指定できる範囲外の値
-                            Common.ShowMessageDialog("E_V-C-003");
+                            //SVが0が指定されている
+                            Common.ShowMessageDialog("E_V-T-8");
                             return false;
                         }
                         break;
                     case Constants.RELATIVE_SUM:
-                        // 相対速度変化オプションが加算の場合は
-                        // SVがosu側で指定できる範囲内かチェックする
-                        if (((retSvFrom <= -10) || (retSvFrom >= 10) || (retSvTo <= -10) || (retSvTo >= 10)))
-                        {
-                            retSvFrom = -1;
-                            retSvTo = -1;
-                            // SVがosu側で指定できる範囲外の値
-                            Common.ShowMessageDialog("E_V-C-003");
-                            return false;
-                        }
                         break;
                     case Constants.RELATIVE_MULTIPLY:
                         // 相対速度変化オプションが乗算の場合は
@@ -384,8 +359,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         {
                             retSvFrom = -1;
                             retSvTo = -1;
-                            // SVがosu側で指定できる範囲外の値
-                            Common.ShowMessageDialog("E_V-C-003");
+                            // SVが0が指定されている
+                            Common.ShowMessageDialog("E_V-T-8");
                             return false;
                         }
                         break;
@@ -424,29 +399,35 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 if ((userInputTempData.volumeFrom == string.Empty) ||
                     (userInputTempData.volumeTo == string.Empty))
                 {
-                    //Volumeの入力がない
-                    Common.ShowMessageDialog("E_V-EM-003");
+                    //Volumeが指定されていない
+                    Common.ShowMessageDialog("E_V-EM-6");
+                    return false;
+                }
+                if (!System.Text.RegularExpressions.Regex.IsMatch(userInputTempData.volumeFrom, @"^[-+]?[0-9]*\.?[0-9]+$") ||
+                    !System.Text.RegularExpressions.Regex.IsMatch(userInputTempData.volumeTo, @"^[-+]?[0-9]*\.?[0-9]+$"))
+                {
+                    //Volumeが数値で指定されていない
+                    Common.ShowMessageDialog("E_V-T-9");
                     return false;
                 }
                 if (!int.TryParse(userInputTempData.volumeFrom, out retVolumeFrom) ||
                     !int.TryParse(userInputTempData.volumeTo, out retVolumeTo))
                 {
-                    //Volumeのフォーマットが間違えている
-                    Common.ShowMessageDialog("E_V-T-002");
+                    //Volumeが整数で指定されていない
+                    Common.ShowMessageDialog("E_V-T-10");
                     return false;
                 }
-                if ((retVolumeFrom < 5) || (retVolumeFrom > 100) ||
-                    (retVolumeTo < 5) || (retVolumeTo > 100))
+                if ((retVolumeFrom < 0) || (retVolumeFrom > 100) ||
+                    (retVolumeTo < 0) || (retVolumeTo > 100))
                 {
                     retVolumeFrom = -1;
                     retVolumeTo = -1;
-                    //Volumeがosu側で指定できる範囲外の値
-                    Common.ShowMessageDialog("E_V-C-006");
+                    //Volumeが0から100の範囲で指定されていない
+                    Common.ShowMessageDialog("E_V-C-6");
                     return false;
                 }
                 userInputData.volumeFrom = retVolumeFrom;
                 userInputData.volumeTo = retVolumeTo;
-                // osu側で指定できるVolumeの範囲内の場合はバリデーションチェックを完了する
                 return true;
             }
             catch (Exception ex)
@@ -481,10 +462,16 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     retOffset = 0;
                     return true;
                 }
+                if (!System.Text.RegularExpressions.Regex.IsMatch(userInputTempData.offset, @"^[-+]?[0-9]*\.?[0-9]+$"))
+                {
+                    //Offsetが数値で指定されていない
+                    Common.ShowMessageDialog("E_V-T-15");
+                    return false;
+                }
                 if (!int.TryParse(userInputTempData.offset, out retOffset))
                 {
-                    //Offsetのフォーマットが間違えている
-                    Common.ShowMessageDialog("E_V-T-003");
+                    //Offsetが整数で指定されていない
+                    Common.ShowMessageDialog("E_V-T-16");
                     return false;
                 }
                 userInputData.offset = retOffset;
@@ -514,28 +501,23 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     return true;
                 }
                 int retBeatSnap = -1;
-                userInputData.setBeatSnapOption.isBeatSnap = userInputTempData.setBeatSnapOption.isBeatSnap;
-                if (!userInputData.setBeatSnapOption.isBeatSnap)
-                {
-                    retBeatSnap = -1;
-                    return true;
-                }
                 if (userInputTempData.setBeatSnapOption.beatSnap == string.Empty)
                 {
-                    //ビートスナップ間隔が空欄
-                    Common.ShowMessageDialog("E_V-EM-004");
+                    //ビートスナップ間隔が指定されていない
+                    Common.ShowMessageDialog("E_V-EM-8");
+                    return false;
+                }
+                if (!System.Text.RegularExpressions.Regex.IsMatch(userInputTempData.setBeatSnapOption.beatSnap, @"^[-+]?[0-9]*\.?[0-9]+$") ||
+                    retBeatSnap <= 0)
+                {
+                    //ビートスナップ間隔が数値で指定されていない
+                    Common.ShowMessageDialog("E_V-T-13");
                     return false;
                 }
                 if (!int.TryParse(userInputTempData.setBeatSnapOption.beatSnap, out retBeatSnap))
                 {
-                    //ビートスナップ間隔が整数ではない
-                    Common.ShowMessageDialog("E_V-T-004");
-                    return false;
-                }
-                if (retBeatSnap <= 0)
-                {
-                    //ビートスナップ間隔が0以下の整数
-                    Common.ShowMessageDialog("E_V-T-004");
+                    //ビートスナップ間隔が自然数で指定されていない
+                    Common.ShowMessageDialog("E_V-T-14");
                     return false;
                 }
                 userInputData.setBeatSnapOption.beatSnap = retBeatSnap;

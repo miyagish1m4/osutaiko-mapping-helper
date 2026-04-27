@@ -13,13 +13,20 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 int retOffset = 0;
                 if (offset == string.Empty)
                 {
-                    //オフセットの入力がない
-                    offset = "0";
+                    //オフセットのフォーマットが間違えている
+                    Common.ShowMessageDialog("E_V-EM-9");
+                    return false;
+                }
+                if (!System.Text.RegularExpressions.Regex.IsMatch(offset, @"^[-+]?[0-9]*\.?[0-9]+$"))
+                {
+                    //Offsetが数値で指定されていない
+                    Common.ShowMessageDialog("E_V-T-15");
+                    return false;
                 }
                 if (!int.TryParse(offset, out retOffset))
                 {
-                    //オフセットのフォーマットが間違えている
-                    Common.ShowMessageDialog("E_V-T-003");
+                    //Offsetが整数で指定されていない
+                    Common.ShowMessageDialog("E_V-T-16");
                     return false;
                 }
                 // ユーザー入力データにオフセット情報をセットする
@@ -51,7 +58,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 if ((timingFrom == string.Empty) && (timingTo == string.Empty))
                 {
                     //タイミングの入力がない
-                    if (Common.ShowMessageDialog("I_A-P-005", Constants.DIALOG_OPTION_OKCANCEL))
+                    if (Common.ShowMessageDialog("I_A-P-4", Constants.DIALOG_OPTION_OKCANCEL))
                     {
                         userInputUtilityData.isAllNotes = true;
                         return 1;
@@ -64,20 +71,20 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 if ((timingFrom == string.Empty) || (timingTo == string.Empty))
                 {
                     //タイミングの入力がない
-                    Common.ShowMessageDialog("E_V-EM-001");
+                    Common.ShowMessageDialog("E_V-EM-4");
                     return -1;
                 }
                 if (!Common.ConvertMsTiming(timingFrom, ref retTimingFrom) ||
                     !Common.ConvertMsTiming(timingTo, ref retTimingTo))
                 {
                     //タイミングのフォーマットが間違えている
-                    Common.ShowMessageDialog("E_V-C-001");
+                    Common.ShowMessageDialog("E_V-C-4");
                     return -1;
                 }
                 if (retTimingFrom > retTimingTo)
                 {
                     //タイミングの開始位置が終了位置より大きい
-                    Common.ShowMessageDialog("E_V-C-002");
+                    Common.ShowMessageDialog("E_V-C-5");
                     return -1;
                 }
                 // ユーザー入力データにタイミング情報をセットする

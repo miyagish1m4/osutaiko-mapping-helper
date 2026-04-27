@@ -78,13 +78,13 @@
             // btnCancel
             // 
             btnCancel.BackColor = Color.Transparent;
-            btnCancel.Location = new Point(303, 79);
+            btnCancel.Location = new Point(-100, 79);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new Size(75, 23);
             btnCancel.TabIndex = 5;
             btnCancel.Text = "OK";
             btnCancel.UseVisualStyleBackColor = false;
-            btnCancel.Click += this.btnCancel_Click;
+            btnCancel.Click += btnCancel_Click;
             // 
             // DialogForm
             // 

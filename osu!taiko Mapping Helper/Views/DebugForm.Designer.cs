@@ -38,7 +38,7 @@
             lblCurrentSv = new Label();
             lblCurrentVolume = new Label();
             lblVisualizeBpm = new Label();
-            label5 = new Label();
+            lblScrollSpeed = new Label();
             SuspendLayout();
             // 
             // lblMaxHistoryCount
@@ -50,7 +50,7 @@
             lblMaxHistoryCount.Name = "lblMaxHistoryCount";
             lblMaxHistoryCount.Size = new Size(190, 25);
             lblMaxHistoryCount.TabIndex = 3;
-            lblMaxHistoryCount.Text = "TIming : ";
+            lblMaxHistoryCount.Text = "Timing : ";
             lblMaxHistoryCount.TextAlign = ContentAlignment.MiddleRight;
             // 
             // label1
@@ -146,25 +146,25 @@
             lblVisualizeBpm.Text = "1";
             lblVisualizeBpm.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // label5
+            // lblScrollSpeed
             // 
-            label5.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            label5.ForeColor = Color.White;
-            label5.Location = new Point(2, 125);
-            label5.Name = "label5";
-            label5.Size = new Size(190, 25);
-            label5.TabIndex = 11;
-            label5.Text = "Visualization BPM : ";
-            label5.TextAlign = ContentAlignment.MiddleRight;
+            lblScrollSpeed.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            lblScrollSpeed.ForeColor = Color.White;
+            lblScrollSpeed.Location = new Point(2, 125);
+            lblScrollSpeed.Name = "lblScrollSpeed";
+            lblScrollSpeed.Size = new Size(190, 25);
+            lblScrollSpeed.TabIndex = 11;
+            lblScrollSpeed.Text = "Scroll Speed(BPM) : ";
+            lblScrollSpeed.TextAlign = ContentAlignment.MiddleRight;
             // 
             // DebugForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(0, 64, 64);
-            ClientSize = new Size(334, 211);
+            ClientSize = new Size(357, 211);
             Controls.Add(lblVisualizeBpm);
-            Controls.Add(label5);
+            Controls.Add(lblScrollSpeed);
             Controls.Add(lblCurrentVolume);
             Controls.Add(lblCurrentSv);
             Controls.Add(lblCurrentBpm);
@@ -176,6 +176,8 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "DebugForm";
             Text = "DebugForm";
+            FormClosing += DebugForm_FormClosing;
+            FormClosed += DebugForm_FormClosed;
             Load += DebugForm_Load;
             ResumeLayout(false);
         }
@@ -191,6 +193,6 @@
         private Label lblCurrentSv;
         private Label lblCurrentVolume;
         private Label lblVisualizeBpm;
-        private Label label5;
+        private Label lblScrollSpeed;
     }
 }

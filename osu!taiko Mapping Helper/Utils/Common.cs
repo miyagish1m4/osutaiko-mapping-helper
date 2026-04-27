@@ -84,6 +84,29 @@ namespace osu_taiko_Mapping_Helper.Utils
             {
                 Directory.CreateDirectory(Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY);
             }
+            // ログファイルの削除処理(30日以上経過したログファイルを削除)
+            CheckLogFiles(Directory.GetCurrentDirectory() + Constants.ERROR_LOG_DIRECTORY, Constants.LOG_LEVEL_ERROR.ToLower());
+            CheckLogFiles(Directory.GetCurrentDirectory() + Constants.WARNING_LOG_DIRECTORY, Constants.LOG_LEVEL_WARNING.ToLower());
+            CheckLogFiles(Directory.GetCurrentDirectory() + Constants.INFO_LOG_DIRECTORY, Constants.LOG_LEVEL_INFO.ToLower());
+        }
+        /// <summary>
+        /// ログファイルの削除処理
+        /// </summary>
+        /// <param name="folderPath">ログファイルが存在するフォルダのパス</param>
+        /// <param name="logLevel">ログの種類（error, warning, info）</param>
+        internal static void CheckLogFiles(string folderPath, string logLevel)
+        {
+            int pastDate = int.Parse(DateTime.Now.AddDays(-30).ToString("yyyyMMdd"));
+            string[] files = Directory.GetFiles(folderPath, logLevel + "_*" + Constants.LOG_EXTENSION);
+            for (int i = 0; i < files.Length; i++)
+            {
+                var date = int.Parse(files[i].Replace(folderPath + "\\" + logLevel + "_", "").Replace(Constants.LOG_EXTENSION, ""));
+                if (date < pastDate)
+                {
+                    File.Delete(files[i]);
+                }
+            }
+            return;
         }
         /// <summary>
         /// songsフォルダを取得する
