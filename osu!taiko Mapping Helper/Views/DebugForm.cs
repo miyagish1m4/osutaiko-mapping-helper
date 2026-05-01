@@ -33,7 +33,7 @@ namespace osu_taiko_Mapping_Helper.Views
         /// <summary>
         /// ラベルテキストの初期化設定
         /// </summary>
-        private void InitializeLabelText()
+        internal void InitializeLabelText()
         {
             Common.SetLabelText(lblScrollSpeed, "LBL_DEBUG_SCROLL_SPEED");
             lblScrollSpeed.Text += " : ";

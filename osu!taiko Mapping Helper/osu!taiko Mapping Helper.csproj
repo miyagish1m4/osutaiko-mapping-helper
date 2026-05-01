@@ -10,6 +10,7 @@
     <AssemblyName>osu!taiko Mapping Helper</AssemblyName>
     <RootNamespace>osu_taiko_Mapping_Helper</RootNamespace>
     <PackageId>$(AssemblyName)</PackageId>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

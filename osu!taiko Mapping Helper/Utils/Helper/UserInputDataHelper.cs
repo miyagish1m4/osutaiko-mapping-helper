@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using System.Xml.Serialization;
 using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
@@ -507,14 +508,13 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     Common.ShowMessageDialog("E_V-EM-8");
                     return false;
                 }
-                if (!System.Text.RegularExpressions.Regex.IsMatch(userInputTempData.setBeatSnapOption.beatSnap, @"^[-+]?[0-9]*\.?[0-9]+$") ||
-                    retBeatSnap <= 0)
+                if (!System.Text.RegularExpressions.Regex.IsMatch(userInputTempData.setBeatSnapOption.beatSnap, @"^[-+]?[0-9]*\.?[0-9]+$"))
                 {
                     //ビートスナップ間隔が数値で指定されていない
                     Common.ShowMessageDialog("E_V-T-13");
                     return false;
                 }
-                if (!int.TryParse(userInputTempData.setBeatSnapOption.beatSnap, out retBeatSnap))
+                if (!int.TryParse(userInputTempData.setBeatSnapOption.beatSnap, out retBeatSnap) || retBeatSnap <= 0)
                 {
                     //ビートスナップ間隔が自然数で指定されていない
                     Common.ShowMessageDialog("E_V-T-14");
