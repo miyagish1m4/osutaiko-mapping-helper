@@ -1142,6 +1142,12 @@ namespace osu_taiko_Mapping_Helper
             Form settingForm = new SettingForm(config);
             settingForm.ShowDialog();
             InitializeLabelText();
+            try
+            {
+                DebugForm?.InitializeLabelText();
+            } catch
+            {
+            }
             if (preUnicodeSupport != config.unicodeSupport)
             {
                 // テキストラベルに譜面の情報を書き込む
