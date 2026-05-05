@@ -2,7 +2,6 @@ using System.Text;
 using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Views;
-using System.Globalization;
 
 namespace osu_taiko_Mapping_Helper.Utils
 {
@@ -11,7 +10,10 @@ namespace osu_taiko_Mapping_Helper.Utils
         internal static bool isDialogResult { get; set; }
         private static Config? config;
         private static Form? executeResultForm;
-
+        /// <summary>
+        /// 設定の読み込み処理
+        /// </summary>
+        /// <param name="userConfig">コンフィグクラス</param>
         internal static void LoadConfig(Config userConfig)
         {
             config = userConfig;
@@ -404,7 +406,8 @@ namespace osu_taiko_Mapping_Helper.Utils
                 return minute.ToString("00") + ":" +
                        second.ToString("00") + ":" +
                        milliSecond.ToString("000");
-            } catch
+            }
+            catch
             {
                 return string.Empty;
             }

@@ -64,7 +64,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 int endTime = int.MinValue;
                 if (i != beatmap.hitObjects.Count - 1 && beatmap.hitObjects[i].noteType == Constants.NoteType.SPINNER)
                 {
-                    for(int j = i; j < beatmap.hitObjects.Count; j++)
+                    for (int j = i; j < beatmap.hitObjects.Count; j++)
                     {
                         if (beatmap.hitObjects[j].noteType == Constants.NoteType.SPINNER_END)
                         {
@@ -108,7 +108,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 {
                     sliderLength = sliderLength.TrimEnd('.');
                 }
-                sb.Append(hitObject.curveSetting + ",");
+                sb.Append(hitObject.curveType + ",");
                 sb.Append(hitObject.slides + ",");
                 sb.Append(sliderLength);
                 if ((hitObject.edgeSounds != null) && (hitObject.edgeSets) != null && (hitObject.hitSample != null))

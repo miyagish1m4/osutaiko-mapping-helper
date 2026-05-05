@@ -1,5 +1,4 @@
-﻿using System.Windows.Forms.Design;
-using osu_taiko_Mapping_Helper.Utils;
+﻿using osu_taiko_Mapping_Helper.Utils;
 
 namespace osu_taiko_Mapping_Helper.Views
 {
@@ -26,12 +25,14 @@ namespace osu_taiko_Mapping_Helper.Views
             InitializeLabelText();
 
         }
+        /// <summary>
+        /// ラベルテキストを初期化する
+        /// </summary>
         private void InitializeLabelText()
         {
             Common.SetLabelText(btnOk, "LBL_DIALOG_OK");
             Common.SetLabelText(btnCancel, "LBL_DIALOG_CANCEL");
         }
-
         /// <summary>
         /// コントロールの初期化設定
         /// </summary>

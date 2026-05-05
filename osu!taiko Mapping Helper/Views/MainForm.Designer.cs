@@ -136,6 +136,7 @@ namespace osu_taiko_Mapping_Helper
             txtResnapTimingFrom = new TextBox();
             txtResnapTimingTo = new TextBox();
             btnBackup = new Button();
+            bGSetterToolStripMenuItem = new ToolStripMenuItem();
             pnlBeatmapInfoGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picDisplayBg).BeginInit();
             pnlCalcurationTypeGroup.SuspendLayout();
@@ -1121,7 +1122,7 @@ namespace osu_taiko_Mapping_Helper
             // menuStrip1
             // 
             menuStrip1.BackColor = Color.FromArgb(0, 64, 64);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { sVEditorToolStripMenuItem, utilityToolStripMenuItem, timingPropertyToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { sVEditorToolStripMenuItem, utilityToolStripMenuItem, timingPropertyToolStripMenuItem, bGSetterToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(408, 24);
@@ -1592,6 +1593,15 @@ namespace osu_taiko_Mapping_Helper
             btnBackup.UseVisualStyleBackColor = false;
             btnBackup.Click += btnBackup_Click;
             // 
+            // bGSetterToolStripMenuItem
+            // 
+            bGSetterToolStripMenuItem.BackColor = Color.FromArgb(0, 96, 96);
+            bGSetterToolStripMenuItem.ForeColor = Color.White;
+            bGSetterToolStripMenuItem.Name = "bGSetterToolStripMenuItem";
+            bGSetterToolStripMenuItem.Size = new Size(67, 20);
+            bGSetterToolStripMenuItem.Text = "BG Setter";
+            bGSetterToolStripMenuItem.Click += bGSetterToolStripMenuItem_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1753,5 +1763,6 @@ namespace osu_taiko_Mapping_Helper
         private Label label8;
         private TextBox txtTimingOffset;
         private Label lblBeatSnaps;
+        private ToolStripMenuItem bGSetterToolStripMenuItem;
     }
 }

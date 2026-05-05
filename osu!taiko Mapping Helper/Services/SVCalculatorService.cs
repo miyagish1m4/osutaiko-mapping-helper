@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using osu_taiko_Mapping_Helper.Models;
+﻿using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Utils;
 using osu_taiko_Mapping_Helper.Utils.Helper;

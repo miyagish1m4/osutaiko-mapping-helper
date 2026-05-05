@@ -50,7 +50,9 @@ namespace osu_taiko_Mapping_Helper.Models
         #endregion
         #region slider専用変数
         // sliderのカーブ設定を表す文字列
-        public string? curveSetting { set; get; } = null;
+        public string? curveType { set; get; } = null;
+        public List<int> curveX { set; get; } = [];
+        public List<int> curveY { set; get; } = [];
         // sliderの折り返し回数
         public double slides { set; get; }
         // sliderの長さ
@@ -88,7 +90,16 @@ namespace osu_taiko_Mapping_Helper.Models
             {
                 // スライダーの場合
                 noteType = Constants.NoteType.SLIDER;
-                curveSetting = buff[5];
+                var curveParts = buff[5].Split('|');
+                curveType = curveParts[0];
+                curveX = [];
+                curveY = [];
+                for (int i = 1; i < curveParts.Length; i++)
+                {
+                    var points = curveParts[i].Split(':');
+                    curveX.Add(int.Parse(points[0]));
+                    curveY.Add(int.Parse(points[1]));
+                }
                 slides = double.Parse(buff[6]);
                 sliderLength = double.Parse(buff[7]);
                 if (buff.Length > 8)

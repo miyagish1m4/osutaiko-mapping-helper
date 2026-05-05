@@ -77,7 +77,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <param name="maxBackupCount">バックアップの最大保持数</param>
         /// <param name="retMaxBackupCount">チェック後のバックアップの最大保持数</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool ValidateMaxBackupCount(string maxBackupCount, ref int retMaxBackupCount)
+        private static bool ValidateMaxBackupCount(string maxBackupCount, 
+                                                   ref int retMaxBackupCount)
         {
             try
             {
@@ -121,7 +122,9 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <param name="retPosition">チェック後のノーツ座標</param>
         /// <param name="dimension">次元(x,y)</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool ValidatePosition(string position, ref int retPosition, int dimension)
+        private static bool ValidatePosition(string position, 
+                                             ref int retPosition, 
+                                             int dimension)
         {
             try
             {

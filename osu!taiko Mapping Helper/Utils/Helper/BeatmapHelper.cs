@@ -10,89 +10,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
     /// </summary>
     class BeatmapHelper
     {
-        /// <summary>
-        /// BGを取得して、フォームの背景に設定する
-        /// </summary>
-        /// <param name="path">ファイルパス</param>
-        /// <returns>加工したBGデータ</returns>
-        internal static Bitmap SetBgOnForm(string path)
-        {
-            const double DARKNESS_FACTOR = 0.5;
-            Bitmap canvas = new(384, 216);
-            try
-            {
-                if (path == "")
-                {
-                    throw new Exception("背景画像が見つかりませんでした。");
-                }
-                Bitmap image = new(path);
-                float width = 0;
-                float height = 0;
-                float diffWidth = 0;
-                float diffHeight = 0;
-                float zoomRatio = 0;
-                // 横長画像の場合
-                if (((float)image.Height / (float)image.Width) < 0.5625f)
-                {
-                    // 縦の長さから拡大率を求める
-                    zoomRatio = ((float)image.Height / 216f);
-                    // 縦の長さからアスペクト比が16:9の場合の横の長さを求める
-                    height = image.Height;
-                    float heightRatio = (float)image.Height / 9f;
-                    width = heightRatio * 16;
-                    // 中央部を表示したいため、表示する際の横の座標を求める
-                    diffWidth = ((float)image.Width - width) / 2;
-                }
-                else if (((float)image.Height / (float)image.Width) > 0.5625f)
-                {
-                    // 横の長さから拡大率を求める
-                    zoomRatio = ((float)image.Width / 384f);
-                    // 横の長さからアスペクト比が16:9の場合の縦の長さを求める
-                    width = image.Width;
-                    float widthRatio = (float)image.Width / 16f;
-                    height = widthRatio * 9;
-                    // 中央部を表示したいため、表示する際の縦の座標を求める
-                    diffHeight = ((float)image.Height - height) / 2;
-                }
-                else
-                {
-                    // 拡大率を求める
-                    zoomRatio = ((float)image.Width / 384f);
-                    width = image.Width;
-                    height = image.Height;
-                }
-                RectangleF destinationRect = new(0, 0, width / zoomRatio, height / zoomRatio);
-                RectangleF sourceRect = new(diffWidth, diffHeight, width, height);
-                Graphics graphic = Graphics.FromImage(canvas);
-                // 補間方法を高品質双三次補間に設定
-                graphic.InterpolationMode =
-                    System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                // 表示する
-                graphic.DrawImage(image, destinationRect, sourceRect, GraphicsUnit.Pixel);
-                image.Dispose();
-                graphic.Dispose();
-                // BGの明度を下げる
-                for (int y = 0; y < 216; y++)
-                {
-                    for (int x = 0; x < 384; x++)
-                    {
-                        Color pixel = canvas.GetPixel(x, y);
-                        int r = (int)(pixel.R * DARKNESS_FACTOR);
-                        int g = (int)(pixel.G * DARKNESS_FACTOR);
-                        int b = (int)(pixel.B * DARKNESS_FACTOR);
-                        Color darkPixel = Color.FromArgb(r, g, b);
-                        canvas.SetPixel(x, y, darkPixel);
-                    }
-                }
 
-                return canvas;
-            }
-            catch
-            {
-                Common.WriteWarningMessage("LOG_W-GET-BG");
-                return canvas;
-            }
-        }
         /// <summary>
         /// beatmapのデータを取得する
         /// </summary>
@@ -516,7 +434,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
         }
         /// <summary>
-        /// osuファイルを作成する
+        /// osuファイルを作成する (SVEditor,Utility)
         /// </summary>
         /// <param name="beatmap">譜面情報</param>
         /// <param name="beatmapPath">ファイル名</param>
@@ -647,7 +565,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     timingPoints != null)
                 {
                     tempTimingPoints.AddRange(timingPoints);
-                } else
+                }
+                else
                 {
                     tempTimingPoints = beatmap.timingPoints.Where(tp => tp.isRedLine).ToList();
                 }
@@ -732,12 +651,137 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             return true;
         }
         /// <summary>
+        /// osuファイルを作成する (BGSetter)
+        /// </summary>
+        /// <param name="beatmap">譜面情報</param>
+        /// <param name="beatmapPath">ファイル名</param>
+        /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
+        /// <param name="beatmapInfo">選択している譜面情報</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool ExportToOsuFile(Beatmap beatmap,
+                                             string beatmapPath,
+                                             string[] backgrounds)
+        {
+            StreamWriter? file = null;
+            try
+            {
+                file = new(beatmapPath, false, Encoding.GetEncoding("utf-8"));
+                // 設定されている譜面データをすべて出力する
+                file.WriteLine(beatmap.version);
+                file.WriteLine("");
+                file.WriteLine(Constants.GENERAL);
+                foreach (var line in beatmap.general)
+                {
+                    file.WriteLine(line);
+                }
+                file.WriteLine("");
+                file.WriteLine(Constants.EDITOR);
+                beatmap.editor.ForEach(line => file.WriteLine(line));
+                file.WriteLine("");
+                file.WriteLine(Constants.METADATA);
+                for (int i = 0; i < beatmap.metadata.Count; i++)
+                {
+                    file.WriteLine(beatmap.metadata[i]);
+                }
+                file.WriteLine("");
+                file.WriteLine(Constants.DIFFICULTY);
+                beatmap.difficulty.ForEach(line => file.WriteLine(line));
+                file.WriteLine("");
+                file.WriteLine(Constants.EVENTS);
+                for (global::System.Int32 i = 0; i < beatmap.events.Count; i++)
+                {
+                    if (beatmap.events[i].Contains(Constants.JPG_EXTENSION) ||
+                        beatmap.events[i].Contains(Constants.JPEG_EXTENSION) ||
+                        beatmap.events[i].Contains(Constants.PNG_EXTENSION) ||
+                        beatmap.events[i].Contains(Constants.WEBP_EXTENSION))
+                    {
+                        file.WriteLine(string.Join(",", backgrounds));
+                    }
+                    else
+                    {
+                        file.WriteLine(beatmap.events[i]);
+                    }
+                }
+                file.WriteLine("");
+                file.WriteLine(Constants.TIMING_POINTS);
+                foreach (var timingPoint in beatmap.timingPoints)
+                {
+                    // beatLengthは桁数を指定して求める
+                    string beatLength = (timingPoint.isRedLine ?
+                                        Math.Round(60000 / timingPoint.bpm, 12, MidpointRounding.AwayFromZero).ToString() :
+                                        Math.Round(-100 / timingPoint.sv, 12, MidpointRounding.AwayFromZero).ToString());
+                    if (beatLength.Contains('.'))
+                    {
+                        // beatLengthが整数だった場合は"0"と"."を削除する
+                        beatLength = beatLength.TrimEnd('0');
+                        beatLength = beatLength.TrimEnd('.');
+                    }
+                    string timingPointLine = timingPoint.time + "," +
+                                             beatLength + "," +
+                                             timingPoint.meter + "," +
+                                             timingPoint.sampleSet + "," +
+                                             timingPoint.sampleIndex + "," +
+                                             timingPoint.volume + "," +
+                                             (timingPoint.isRedLine ? "1" : "0") + "," +
+                                             timingPoint.effect;
+                    file.WriteLine(timingPointLine);
+                }
+                file.WriteLine("");
+                if (beatmap.colours.Count != 0)
+                {
+                    file.WriteLine(Constants.COLOURS);
+                    beatmap.colours.ForEach(line => file.WriteLine(line));
+                }
+                file.WriteLine("");
+                file.WriteLine(Constants.HIT_OBJECTS);
+                for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
+                {
+                    int endTime = int.MinValue;
+                    if (beatmap.hitObjects[i].noteType == Constants.NoteType.SPINNER)
+                    {
+                        for (int j = i; j < beatmap.hitObjects.Count; j++)
+                        {
+                            if (beatmap.hitObjects[j].noteType == Constants.NoteType.SPINNER_END)
+                            {
+                                endTime = beatmap.hitObjects[j].time;
+                                break;
+                            }
+                        }
+                    }
+                    // HitObjectsの1行のデータを作成する
+                    if (beatmap.hitObjects[i].noteType != Constants.NoteType.BARLINE &&
+                        beatmap.hitObjects[i].noteType != Constants.NoteType.BOOKMARK &&
+                        beatmap.hitObjects[i].noteType != Constants.NoteType.SPINNER_END)
+                    {
+                        string hitObjectLine = CreateHitObjectLine(beatmap.hitObjects[i],
+                                                                   endTime);
+                        file.WriteLine(hitObjectLine);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+            finally
+            {
+                if (file != null)
+                {
+                    file.Close();
+                }
+            }
+            return true;
+        }
+        /// <summary>
         /// 前に実行したファイルをコピーする処理
         /// </summary>
         /// <param name="path">osuファイルが格納されているフォルダ</param>
         /// <param name="backupDirectory">バックアップディレクトリ</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool ExportToPreviousOsuFile(string path, string backupDirectory)
+        internal static bool ExportToPreviousOsuFile(string path, 
+                                                     string backupDirectory)
         {
             try
             {
@@ -787,37 +831,20 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
         }
         /// <summary>
-        /// 指定したバックアップファイルをコピーする処理
-        /// </summary>
-        /// <param name="beatmapPath">osuファイルが格納されているフォルダ</param>
-        /// <param name="backupFile">バックアップファイル</param>
-        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool ExportToOsuFileFromBackup(string beatmapPath, string backupFile)
-        {
-            try
-            {
-                // Songsフォルダにコピーの作成
-                File.Copy(backupFile, beatmapPath, true);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
-                Common.WriteExceptionMessage(ex);
-                return false;
-            }
-        }
-        /// <summary>
         /// osuファイルのヒットオブジェクトの行を作成する
         /// </summary>
         /// <param name="hitObject">ヒットオブジェクトデータ</param>
         /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
         /// <param name="endTime">スピナーの終了時間</param>
         /// <returns>ヒットオブジェクトの行</returns>
-        private static string CreateHitObjectLine(HitObject hitObject, UserInputUtilityData? userInputUtilityData, int endTime)
+        private static string CreateHitObjectLine(HitObject hitObject, 
+                                                  UserInputUtilityData? userInputUtilityData, 
+                                                  int endTime)
         {
             int positionX = hitObject.positionX;
             int positionY = hitObject.positionY;
+            int deltaX = 0;
+            int deltaY = 0;
             int time = userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET ?
                        (hitObject.time + userInputUtilityData.offset) : hitObject.time;
             int spinnerEndTime = (userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET && endTime != int.MinValue) ?
@@ -868,6 +895,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                             case Constants.NOTES_POSITION_CENTER:
                                 positionX = Constants.CENTER_NOTES.X;
                                 positionY = Constants.CENTER_NOTES.Y;
+                                deltaX = Constants.CENTER_NOTES.X - hitObject.positionX;
+                                deltaY = Constants.CENTER_NOTES.Y - hitObject.positionY;
                                 break;
                             case Constants.NOTES_POSITION_SEPARATE:
                                 if (hitObject.noteType == Constants.NoteType.CIRCLE)
@@ -879,6 +908,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                                 {
                                     positionX = Constants.CENTER_NOTES.X;
                                     positionY = Constants.CENTER_NOTES.Y;
+                                    deltaX = Constants.CENTER_NOTES.X - hitObject.positionX;
+                                    deltaY = Constants.CENTER_NOTES.Y - hitObject.positionY;
                                 }
                                 break;
                             case Constants.NOTES_POSITION_RANDOM:
@@ -887,6 +918,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                                 int randomY = random.Next(0, 384);
                                 positionX = randomX;
                                 positionY = randomY;
+                                deltaX = randomX - hitObject.positionX;
+                                deltaY = randomY - hitObject.positionY;
                                 break;
                         }
                         break;
@@ -917,7 +950,15 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 {
                     sliderLength = sliderLength.TrimEnd('.');
                 }
-                sb.Append(hitObject.curveSetting + ",");
+                var curveSetting = hitObject.curveType;
+                for (int i = 0; i < hitObject.curveX.Count; i++)
+                {
+                    var curveX = hitObject.curveX[i] + deltaX;
+                    var curveY = hitObject.curveY[i] + deltaY;
+                    var curvePoints = curveX.ToString() + ":" + curveY.ToString();
+                    curveSetting += "|" + curvePoints;
+                }
+                sb.Append(curveSetting + ",");
                 sb.Append(hitObject.slides + ",");
                 sb.Append(sliderLength);
                 if ((hitObject.edgeSounds != null) && (hitObject.edgeSets) != null && (hitObject.hitSample != null))
@@ -946,13 +987,79 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             return sb.ToString();
         }
         /// <summary>
-        /// 
+        /// osuファイルのヒットオブジェクトの行を作成する
+        /// </summary>
+        /// <param name="hitObject">ヒットオブジェクトデータ</param>
+        /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
+        /// <param name="endTime">スピナーの終了時間</param>
+        /// <returns>ヒットオブジェクトの行</returns>
+        private static string CreateHitObjectLine(HitObject hitObject, 
+                                                  int endTime)
+        {
+            StringBuilder sb = new();
+            sb.Append(hitObject.positionX + ",");
+            sb.Append(hitObject.positionY + ",");
+            sb.Append(hitObject.time + ",");
+            sb.Append(hitObject.type + ",");
+            sb.Append(hitObject.hitSound + ",");
+            if (hitObject.noteType == Constants.NoteType.SLIDER)
+            {
+                // スライダーの場合はsliderLengthを13桁に指定して
+                // curveSetting,
+                // slides,
+                // sliderLength,
+                // (edgeSounds),
+                // (edgeSets),
+                // (hitSample)を設定する
+                string sliderLength = hitObject.sliderLength.ToString($"F13").TrimEnd('0');
+                if (sliderLength.Substring(sliderLength.Length - 1, 1) == ".")
+                {
+                    sliderLength = sliderLength.TrimEnd('.');
+                }
+                var curveSetting = hitObject.curveType;
+                for (int i = 0; i < hitObject.curveX.Count; i++)
+                {
+                    var curvePoints = hitObject.curveX[i].ToString() + ":" + hitObject.curveY[i].ToString();
+                    curveSetting += "|" + curvePoints;
+                }
+                sb.Append(curveSetting + ",");
+                sb.Append(hitObject.slides + ",");
+                sb.Append(sliderLength);
+                if ((hitObject.edgeSounds != null) && (hitObject.edgeSets) != null && (hitObject.hitSample != null))
+                {
+                    sb.Append(",");
+                    sb.Append(hitObject.edgeSounds + ",");
+                    sb.Append(hitObject.edgeSets + ",");
+                    sb.Append(hitObject.hitSample);
+                }
+                else
+                {
+                    sb.Append("");
+                }
+            }
+            else if (hitObject.noteType == Constants.NoteType.SPINNER)
+            {
+                // スピナーの場合はendTimeとhitSampleを設定する
+                sb.Append(endTime + ",");
+                sb.Append(hitObject.hitSample);
+            }
+            else
+            {
+                // 通常ノーツの場合はhitSampleを設定する
+                sb.Append(hitObject.hitSample);
+            }
+            return sb.ToString();
+        }
+        /// <summary>
+        /// ノーツの座標を設定する
         /// </summary>
         /// <param name="hitObject">ヒットオブジェクト情報</param>
         /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
         /// <param name="dimension">次元</param>
         /// <returns>座標の値</returns>
-        private static int SetNotesPosition(HitObject hitObject, UserInputUtilityData userInputUtilityData, int dimension)
+        private static int SetNotesPosition(HitObject hitObject, 
+                                            UserInputUtilityData userInputUtilityData, 
+                                            int dimension)
         {
             bool isKat = (hitObject.hitObjectCode & 0b00001100) != 0;
             bool isFinisher = (hitObject.hitObjectCode & 0b00001010) != 0;
@@ -1057,7 +1164,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// 指定されたタイミングがosuの動作対象内の場合 : 算出された正確なタイミング<br/>
         /// 指定されたタイミングがosuの動作対象外の場合 : 引数で指定されたタイミング<br/>
         /// 処理が異常終了した場合 : double型の最小値</returns>
-        internal static double GetRawTiming(List<TimingPoint> timingPoints, int timing)
+        internal static double GetRawTiming(List<TimingPoint> timingPoints, 
+                                            int timing)
         {
             // snapPerMs[0] 1/16のノーツ間隔(ms) -> 1/1,1/2,1/4,1/8,1/16 に対応可
             // snapPerMs[1] 1/12のノーツ間隔(ms) ->         1/3,1/6,1/12 に対応可

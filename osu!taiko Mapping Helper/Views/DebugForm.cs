@@ -8,12 +8,12 @@ namespace osu_taiko_Mapping_Helper.Views
     public partial class DebugForm : Form
     {
         #region クラス変数
+        public MainForm parentForm { get; set; }
         private BeatmapMetadata beatmapInfo = new();
         private Beatmap? beatmapData;
         private int currentTime;
         delegate void DelegateProcess();//delegateを宣言
         private int updateInterval = 15;
-        public MainForm parentForm { get; set; }
         private bool isClose = false;
         #endregion
         #region メソッド
@@ -25,7 +25,7 @@ namespace osu_taiko_Mapping_Helper.Views
 #pragma warning restore CS8618 // null 非許容のフィールドには、コンストラクターの終了時に null 以外の値が入っていなければなりません。'required' 修飾子を追加するか、Null 許容として宣言することを検討してください。
         {
             InitializeComponent();
-            Thread getMemoryDataThread = new(UpdateBeatmap) { IsBackground = true };
+            Thread getMemoryDataThread = new(UpdateLabelText) { IsBackground = true };
             getMemoryDataThread.Start();
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
@@ -38,13 +38,16 @@ namespace osu_taiko_Mapping_Helper.Views
             Common.SetLabelText(lblScrollSpeed, "LBL_DEBUG_SCROLL_SPEED");
             lblScrollSpeed.Text += " : ";
         }
-        private void UpdateBeatmap()
+        /// <summary>
+        /// ラベルテキストの更新処理
+        /// </summary>
+        private void UpdateLabelText()
         {
             while (true)
             {
                 if (isClose)
                 {
-                    break;
+                    return;
                 }
                 //if (!isLoad)
                 //{
@@ -88,7 +91,12 @@ namespace osu_taiko_Mapping_Helper.Views
                 }
             }
         }
-        internal void UpdateMemoryData(BeatmapMetadata beatmapInfo, int currentTime)
+        /// <summary>
+        /// Osu!から譜面情報を受け取る処理
+        /// </summary>
+        /// <param name="beatmapInfo">更新する譜面情報</param>
+        /// <param name="currentTime">現在の時間</param>
+        internal void SetOsuData(BeatmapMetadata beatmapInfo, int currentTime)
         {
             if (beatmapInfo.beatmapPath == null || beatmapInfo.beatmapPath == string.Empty)
             {
@@ -98,6 +106,11 @@ namespace osu_taiko_Mapping_Helper.Views
             this.beatmapInfo = beatmapInfo;
             this.currentTime = currentTime;
         }
+        /// <summary>
+        /// 譜面情報を取得する
+        /// </summary>
+        /// <returns>取得に成功した場合はtrue、失敗した場合はfalseを返す</returns>
+        /// <returns>取得に成功した場合はtrue、失敗した場合はfalseを返す</returns>
         internal bool GetBeatmap()
         {
             // 譜面情報がリアルタイムで取得できていない場合はエラーダイアログを表示する
@@ -113,7 +126,6 @@ namespace osu_taiko_Mapping_Helper.Views
             }
             return true;
         }
-
         /// <summary>
         /// 現地点の情報を取得する処理
         /// </summary>
@@ -146,7 +158,8 @@ namespace osu_taiko_Mapping_Helper.Views
                 Common.WriteErrorMessage("LOG_E-GET-BEATMAP");
             }
         }
-
+        #endregion
+        #region イベント
         private void DebugForm_Load(object sender, EventArgs e)
         {
 #if DEBUG
@@ -156,16 +169,14 @@ namespace osu_taiko_Mapping_Helper.Views
             parentForm.updateInterval = 15;
             GetBeatmap();
         }
-
         private void DebugForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             parentForm.updateInterval = 100;
         }
-
         private void DebugForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             isClose = true;
         }
+        #endregion
     }
 }
-#endregion
