@@ -1,4 +1,5 @@
 ﻿using osu_taiko_Mapping_Helper.Properties;
+using System.Security.Cryptography.X509Certificates;
 
 namespace osu_taiko_Mapping_Helper.Models
 {
@@ -13,6 +14,10 @@ namespace osu_taiko_Mapping_Helper.Models
         public double sv { set; get; }
         // SVが掛かるタイミング
         public int svApplyTime { set; get; }
+        // スナップ間隔
+        public int snap { set; get; } = 0;
+        // 厳密なタイミング
+        public double rawTime { set; get; }
         // ヒットオブジェクトの種類
         public Constants.NoteType noteType;
         // ノーツの種類

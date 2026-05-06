@@ -448,10 +448,17 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             try
             {
                 int retOffset = 0;
+                userInputData.offsetMode = userInputTempData.offsetMode;
                 userInputData.isOffset = userInputTempData.isOffset;
+                userInputData.isDuoOffset = userInputTempData.isDuoOffset;
                 if (!userInputData.isOffset)
                 {
                     //Offset有効化フラグが有効ではない
+                    retOffset = 0;
+                    return true;
+                }
+                if (userInputData.offsetMode == 0)
+                {
                     retOffset = 0;
                     return true;
                 }

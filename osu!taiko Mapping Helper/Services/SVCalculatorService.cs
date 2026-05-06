@@ -2,6 +2,7 @@
 using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Utils;
 using osu_taiko_Mapping_Helper.Utils.Helper;
+using static System.Windows.Forms.Design.AxImporter;
 
 namespace osu_taiko_Mapping_Helper.Services
 {
@@ -21,6 +22,13 @@ namespace osu_taiko_Mapping_Helper.Services
             {
                 if (userInputData.setOption.isSetObjects)
                 {
+                    if (userInputData.offsetMode == 0 && userInputData.isOffset)
+                    {
+                        if (!BeatmapHelper.GetSnapsOnHitObjects(ref beatmap))
+                        {
+                            throw new Exception();
+                        }
+                    }
                     // objectに緑線を置く場合
                     if (!ApplyOnObjects(userInputData, beatmap, ref timingPointsBuff))
                     {
@@ -103,7 +111,7 @@ namespace osu_taiko_Mapping_Helper.Services
             try
             {
                 double baseSv = 1;
-                int offset = userInputData.isOffset ? userInputData.offset : 0;
+                int offset = (userInputData.isOffset && userInputData.offsetMode == 1) ? userInputData.offset : 0;
                 // 削除後の適用されるSVと音量を求める
                 var applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time < (userInputData.timingFrom + offset));
                 if (applyInheritedPoint != null)
@@ -229,7 +237,7 @@ namespace osu_taiko_Mapping_Helper.Services
             double svPerMs = 0;
             double volumePerMs = 0;
             bool isIgnoreObject = false;
-            int offset = userInputData.isOffset ? userInputData.offset : 0;
+            int offset = (userInputData.isOffset && userInputData.offsetMode == 1) ? userInputData.offset : 0;
             List<int> removeList = [];
             try
             {
@@ -340,6 +348,36 @@ namespace osu_taiko_Mapping_Helper.Services
                                 }
                             }
                         }
+                        //////
+                        int time;
+                        if (userInputData.isOffset)
+                        {
+                            switch (userInputData.offsetMode)
+                            {
+                                case 0:
+                                    if (i != 0 && applyTimingPoint != null)
+                                    {
+                                        HitObject? prevHo = (i == 0) ? null : beatmap.hitObjects[i - 1];
+                                        HitObject? nextHo = (i == beatmap.hitObjects.Count - 1) ? null : beatmap.hitObjects[i + 1];
+                                        offset = -(int)GetOffsetTiming(userInputData,
+                                                                       applyTimingPoint,
+                                                                       beatmap.hitObjects[i],
+                                                                       prevHo,
+                                                                       nextHo);
+                                    }
+                                    time = (int)(beatmap.hitObjects[i].rawTime + offset);
+                                    break;
+                                case 1:
+                                    time = beatmap.hitObjects[i].time + (int)offset;
+                                    break;
+                                default:
+                                    throw new Exception();
+                            }
+                        }
+                        else
+                        {
+                            time = beatmap.hitObjects[i].time;
+                        }
                         if (userInputData.isSv)
                         {
                             // 直前のSVを取得する
@@ -380,7 +418,7 @@ namespace osu_taiko_Mapping_Helper.Services
                                                                  (sv / beatmap.hitObjects[i].sv);
                         }
                         // 緑線を追加する
-                        outTimingPoints.Add(new TimingPoint(beatmap.hitObjects[i].time + offset,
+                        outTimingPoints.Add(new TimingPoint(time,
                                                             0,//bpmは緑線には不要な情報の為、0を設定する
                                                             sv,
                                                             0,//barLengthは緑線には不要な情報の為、0を設定する
@@ -621,7 +659,7 @@ namespace osu_taiko_Mapping_Helper.Services
             double baseBpm = 120;
             double svPerMs = 0;
             double volumePerMs = 0;
-            int offset = userInputData.isOffset ? userInputData.offset : 0;
+            int offset = (userInputData.isOffset && userInputData.offsetMode == 1) ? userInputData.offset : 0;
             List<TimingPoint> timingPointsBuff = [];
             List<int> removeList = [];
             try
@@ -880,7 +918,7 @@ namespace osu_taiko_Mapping_Helper.Services
                 var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= rawTimingFrom) && tp.isRedLine) ?? throw new Exception();
                 double currentTiming = applyTimingPoint.time;
                 baseBpm = applyTimingPoint != null ? applyTimingPoint.bpm : 120;
-                double beatSnapTiming = 60 / baseBpm / userInputData.setBeatSnapOption.beatSnap * 1000;
+                double beatSnapTiming = Constants.ONE_MINUTE / baseBpm / userInputData.setBeatSnapOption.beatSnap;
                 // timingが指定されたビートスナップ間隔からどれぐらいズレてるか算出する
                 while (true)
                 {
@@ -1012,7 +1050,7 @@ namespace osu_taiko_Mapping_Helper.Services
                                                     timingOffset *
                                                     (applyTimingPoint.bpm /
                                                      redLineList[i + 1].bpm);
-                                    beatSnapTiming = 60 / redLineList[i + 1].bpm / userInputData.setBeatSnapOption.beatSnap * 1000;
+                                    beatSnapTiming = Constants.ONE_MINUTE / redLineList[i + 1].bpm / userInputData.setBeatSnapOption.beatSnap;
                                 }
                                 break;
                             }
@@ -1116,6 +1154,42 @@ namespace osu_taiko_Mapping_Helper.Services
                                               int currentTiming)
         {
             return volumeFrom + (volumePerMs * (currentTiming - timingFrom));
+        }
+        private static double GetOffsetTiming(UserInputData userInputData,
+                                              TimingPoint timingPoint,
+                                              HitObject hitObject,
+                                              HitObject? prevHitObject,
+                                              HitObject? nextHitObject)
+        {
+            double hexaOffset = Constants.ONE_MINUTE / timingPoint.bpm / Constants.HEXA_SNAP;
+            double duoOffset = Constants.ONE_MINUTE / timingPoint.bpm / Constants.DUO_SNAP;
+            if (userInputData.isDuoOffset)
+            {
+                if (hitObject.snap != Constants.DUO_SNAP)
+                {
+                    double intervalTri = Constants.ONE_MINUTE / timingPoint.bpm / Constants.TRI_SNAP;
+
+                    bool isOddAdjacent = (prevHitObject != null && prevHitObject.time >= hitObject.time - intervalTri - Constants.MILLISECOND_TOLERANCE && prevHitObject.snap == Constants.DUO_SNAP)
+                                       || (nextHitObject != null && nextHitObject.time <= hitObject.time + intervalTri + Constants.MILLISECOND_TOLERANCE && nextHitObject.snap == Constants.DUO_SNAP);
+
+                    if (isOddAdjacent)
+                    {
+                        return duoOffset;
+                    }
+                    else
+                    {
+                        return hexaOffset;
+                    }
+                }
+                else
+                {
+                    return duoOffset;
+                }
+            }
+            else
+            {
+                return hexaOffset;
+            }
         }
     }
 }

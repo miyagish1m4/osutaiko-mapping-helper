@@ -11,6 +11,8 @@ namespace osu_taiko_Mapping_Helper.Models
         internal int maxBackupCount { get; set; }
         // 言語設定
         internal string? language { get; set; }
+        // オフセットモード設定
+        internal int offsetMode { get; set; }
         // Unicode対応の有無
         internal int unicodeSupport { get; set; }
         // AdvanceMode設定
@@ -33,6 +35,7 @@ namespace osu_taiko_Mapping_Helper.Models
             // config読み込み
             maxBackupCount = Convert.ToInt32(config.AppSettings.Settings["maxBackupCount"].Value);
             language = config.AppSettings.Settings["language"].Value;
+            offsetMode = Convert.ToInt32(config.AppSettings.Settings["offsetMode"].Value);
             unicodeSupport = Convert.ToInt32(config.AppSettings.Settings["unicodeSupport"].Value);
             advanceMode = Convert.ToInt32(config.AppSettings.Settings["advanceMode"].Value);
             donX = Convert.ToInt32(config.AppSettings.Settings["donX"].Value);
@@ -54,6 +57,7 @@ namespace osu_taiko_Mapping_Helper.Models
             // config書き込み
             config.AppSettings.Settings["maxBackupCount"].Value = maxBackupCount.ToString();
             config.AppSettings.Settings["language"].Value = language;
+            config.AppSettings.Settings["offsetMode"].Value = offsetMode.ToString();
             config.AppSettings.Settings["unicodeSupport"].Value = unicodeSupport.ToString();
             config.AppSettings.Settings["advanceMode"].Value = advanceMode.ToString();
             config.AppSettings.Settings["donX"].Value = donX.ToString();

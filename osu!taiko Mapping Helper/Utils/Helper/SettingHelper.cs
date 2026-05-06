@@ -17,6 +17,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
         internal static bool SetConfig(string language,
                                        string maxBackupCount,
+                                       int offsetMode,
                                        bool isAdvanceMode,
                                        bool isUnicodeSupport,
                                        NotesPosition notesPosition,
@@ -51,6 +52,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 config.language = language;
                 config.maxBackupCount = retMaxBackupCount;
+                config.offsetMode = offsetMode;
                 config.unicodeSupport = unicodeSupport;
                 config.advanceMode = advanceMode;
                 config.donX = retDonX;

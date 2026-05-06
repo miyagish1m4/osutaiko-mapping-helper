@@ -299,7 +299,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 for (int i = 0; i < uninheritedTimingPointList.Count; i++)
                 {
-                    if (uninheritedTimingPointList[i].bpm >= 60000)
+                    if (uninheritedTimingPointList[i].bpm >= Constants.ONE_MINUTE)
                     {
                         continue;
                     }
@@ -403,6 +403,83 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 return false;
             }
         }
+        internal static bool GetSnapsOnHitObjects(ref Beatmap beatmap)
+        {
+            double hexaSnapLength;
+            double duoSnapLength;
+            try
+            {
+                // 赤線リストの取得
+                var timingPoints = beatmap.timingPoints.Where(tp => tp.isRedLine).ToList();
+                // タイミングポイントでループする
+                for (int i = 0, hoIndex = 0; i < timingPoints.Count; i++)
+                {
+                    hexaSnapLength = Constants.ONE_MINUTE / timingPoints[i].bpm / Constants.HEXA_SNAP;
+                    duoSnapLength = Constants.ONE_MINUTE / timingPoints[i].bpm / Constants.DUO_SNAP;
+                    // ヒットオブジェクトでループする(次のタイミングポイントまで)
+                    for (int j = hoIndex; j < beatmap.hitObjects.Count; j++)
+                    {
+                        // 次のタイミングポイントの時間と比較して、次のタイミングポイントの時間±2msの範囲にある場合は次のタイミングポイントで処理する
+                        if (i != timingPoints.Count - 1)
+                        {
+                            if (beatmap.hitObjects[j].time >= timingPoints[i + 1].time - Constants.MILLISECOND_TOLERANCE &&
+                                beatmap.hitObjects[j].time <= timingPoints[i + 1].time + Constants.MILLISECOND_TOLERANCE)
+                            {
+                                hoIndex = j;
+                                break;
+                            }
+                        }
+                        // タイミングポイントとの差分を求める
+                        int timingDiff = beatmap.hitObjects[j].time - timingPoints[i].time;
+                        // 差分を1/16で何分割されるかを算出する
+                        double hexaTicks = timingDiff / hexaSnapLength;
+                        // 四捨五入して整数にする
+                        int hexaTicksInt = (int)Math.Round(hexaTicks, MidpointRounding.AwayFromZero);
+                        // 整数にした値と小数点以下の値の差を求める
+                        double hexaTickDiff = Math.Abs(hexaTicks - hexaTicksInt);
+                        // 差が0.15以下の場合は1/16とみなし、ヒットオブジェクトのsnapに1/16を設定し、rawTimeを求める
+                        if (hexaTickDiff <= Constants.TICK_TOLERANCE)
+                        {
+
+                            beatmap.hitObjects[j].snap = Constants.HEXA_SNAP;
+                            beatmap.hitObjects[j].rawTime = timingPoints[i].time + hexaTicksInt * hexaSnapLength;
+                            continue;
+                        }
+                        // 差分を1/12で何分割されるかを算出する
+                        double duoTicks = timingDiff / duoSnapLength;
+                        // 四捨五入して整数にする
+                        int duoTicksInt = (int)Math.Round(duoTicks, MidpointRounding.AwayFromZero);
+                        // 整数にした値と小数点以下の値の差を求める
+                        double duoTickDiff = Math.Abs(duoTicks - duoTicksInt);
+                        // 差が0.15以下の場合は1/12とみなし、ヒットオブジェクトのsnapに1/12を設定し、rawTimeを求める
+                        if (duoTickDiff <= Constants.TICK_TOLERANCE)
+                        {
+                            beatmap.hitObjects[j].snap = Constants.DUO_SNAP;
+                            beatmap.hitObjects[j].rawTime = timingPoints[i].time + duoTicksInt * duoSnapLength;
+                            continue;
+                        }
+                        // どちらにも該当しない場合は1/16とみなし、ヒットオブジェクトのsnapに1/16を設定し、設定されているtimingをrawTimeとする
+                        beatmap.hitObjects[j].snap = Constants.HEXA_SNAP;
+                        beatmap.hitObjects[j].rawTime = timingPoints[i].time;
+                    }
+                }
+#if DEBUG
+                // デバッグ用にHitObjectの時間、BPM、Snap、RawTime、NotesTypeを出力する
+                foreach (var hitObject in beatmap.hitObjects)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Time: {hitObject.time}, BPM: {hitObject.bpm}, Snap: {hitObject.snap}, RawTime: {hitObject.rawTime}, NotesType: {Constants.ConvertNoteType(hitObject.noteType)}");
+                }
+#endif
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+
         /// <summary>
         /// バックアップフォルダを作成する
         /// </summary>
@@ -581,7 +658,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 {
                     // beatLengthは桁数を指定して求める
                     string beatLength = (timingPoint.isRedLine ?
-                                        Math.Round(60000 / timingPoint.bpm, 12, MidpointRounding.AwayFromZero).ToString() :
+                                        Math.Round(Constants.ONE_MINUTE / timingPoint.bpm, 12, MidpointRounding.AwayFromZero).ToString() :
                                         Math.Round(-100 / timingPoint.sv, 12, MidpointRounding.AwayFromZero).ToString());
                     if (beatLength.Contains('.'))
                     {
@@ -708,7 +785,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 {
                     // beatLengthは桁数を指定して求める
                     string beatLength = (timingPoint.isRedLine ?
-                                        Math.Round(60000 / timingPoint.bpm, 12, MidpointRounding.AwayFromZero).ToString() :
+                                        Math.Round(Constants.ONE_MINUTE / timingPoint.bpm, 12, MidpointRounding.AwayFromZero).ToString() :
                                         Math.Round(-100 / timingPoint.sv, 12, MidpointRounding.AwayFromZero).ToString());
                     if (beatLength.Contains('.'))
                     {
@@ -736,25 +813,12 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 file.WriteLine(Constants.HIT_OBJECTS);
                 for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
                 {
-                    int endTime = int.MinValue;
-                    if (beatmap.hitObjects[i].noteType == Constants.NoteType.SPINNER)
-                    {
-                        for (int j = i; j < beatmap.hitObjects.Count; j++)
-                        {
-                            if (beatmap.hitObjects[j].noteType == Constants.NoteType.SPINNER_END)
-                            {
-                                endTime = beatmap.hitObjects[j].time;
-                                break;
-                            }
-                        }
-                    }
                     // HitObjectsの1行のデータを作成する
                     if (beatmap.hitObjects[i].noteType != Constants.NoteType.BARLINE &&
                         beatmap.hitObjects[i].noteType != Constants.NoteType.BOOKMARK &&
                         beatmap.hitObjects[i].noteType != Constants.NoteType.SPINNER_END)
                     {
-                        string hitObjectLine = CreateHitObjectLine(beatmap.hitObjects[i],
-                                                                   endTime);
+                        string hitObjectLine = CreateHitObjectLine(beatmap.hitObjects[i]);
                         file.WriteLine(hitObjectLine);
                     }
                 }
@@ -780,7 +844,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <param name="path">osuファイルが格納されているフォルダ</param>
         /// <param name="backupDirectory">バックアップディレクトリ</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool ExportToPreviousOsuFile(string path, 
+        internal static bool ExportToPreviousOsuFile(string path,
                                                      string backupDirectory)
         {
             try
@@ -837,8 +901,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
         /// <param name="endTime">スピナーの終了時間</param>
         /// <returns>ヒットオブジェクトの行</returns>
-        private static string CreateHitObjectLine(HitObject hitObject, 
-                                                  UserInputUtilityData? userInputUtilityData, 
+        private static string CreateHitObjectLine(HitObject hitObject,
+                                                  UserInputUtilityData? userInputUtilityData,
                                                   int endTime)
         {
             int positionX = hitObject.positionX;
@@ -993,8 +1057,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
         /// <param name="endTime">スピナーの終了時間</param>
         /// <returns>ヒットオブジェクトの行</returns>
-        private static string CreateHitObjectLine(HitObject hitObject, 
-                                                  int endTime)
+        private static string CreateHitObjectLine(HitObject hitObject)
         {
             StringBuilder sb = new();
             sb.Append(hitObject.positionX + ",");
@@ -1040,7 +1103,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             else if (hitObject.noteType == Constants.NoteType.SPINNER)
             {
                 // スピナーの場合はendTimeとhitSampleを設定する
-                sb.Append(endTime + ",");
+                sb.Append(hitObject.endTime + ",");
                 sb.Append(hitObject.hitSample);
             }
             else
@@ -1057,8 +1120,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
         /// <param name="dimension">次元</param>
         /// <returns>座標の値</returns>
-        private static int SetNotesPosition(HitObject hitObject, 
-                                            UserInputUtilityData userInputUtilityData, 
+        private static int SetNotesPosition(HitObject hitObject,
+                                            UserInputUtilityData userInputUtilityData,
                                             int dimension)
         {
             bool isKat = (hitObject.hitObjectCode & 0b00001100) != 0;
@@ -1164,7 +1227,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// 指定されたタイミングがosuの動作対象内の場合 : 算出された正確なタイミング<br/>
         /// 指定されたタイミングがosuの動作対象外の場合 : 引数で指定されたタイミング<br/>
         /// 処理が異常終了した場合 : double型の最小値</returns>
-        internal static double GetRawTiming(List<TimingPoint> timingPoints, 
+        internal static double GetRawTiming(List<TimingPoint> timingPoints,
                                             int timing)
         {
             // snapPerMs[0] 1/16のノーツ間隔(ms) -> 1/1,1/2,1/4,1/8,1/16 に対応可

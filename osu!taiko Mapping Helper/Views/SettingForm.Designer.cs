@@ -49,6 +49,10 @@
             txtPisitionX = new TextBox();
             chkUnicodeSupport = new CheckBox();
             lblUnicodeSupport = new Label();
+            label2 = new Label();
+            rdoHexaAndDuoOffset = new RadioButton();
+            rdoMiliSecondOffset = new RadioButton();
+            panel1 = new Panel();
             pnlNotesKind.SuspendLayout();
             grpSeparateSetting.SuspendLayout();
             SuspendLayout();
@@ -105,7 +109,7 @@
             btnSave.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             btnSave.ForeColor = SystemColors.ControlLightLight;
             btnSave.ImageAlign = ContentAlignment.MiddleLeft;
-            btnSave.Location = new Point(146, 398);
+            btnSave.Location = new Point(146, 482);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(189, 39);
             btnSave.TabIndex = 15;
@@ -119,7 +123,7 @@
             label1.Anchor = AnchorStyles.Bottom;
             label1.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             label1.ForeColor = Color.White;
-            label1.Location = new Point(12, 342);
+            label1.Location = new Point(12, 426);
             label1.Name = "label1";
             label1.Size = new Size(256, 25);
             label1.TabIndex = 16;
@@ -133,7 +137,7 @@
             chkAdvanceMode.BackColor = Color.White;
             chkAdvanceMode.Font = new Font("MS UI Gothic", 15F, FontStyle.Regular, GraphicsUnit.Point, 128);
             chkAdvanceMode.ForeColor = Color.Green;
-            chkAdvanceMode.Location = new Point(273, 342);
+            chkAdvanceMode.Location = new Point(273, 426);
             chkAdvanceMode.Name = "chkAdvanceMode";
             chkAdvanceMode.Size = new Size(25, 25);
             chkAdvanceMode.TabIndex = 17;
@@ -147,7 +151,7 @@
             pnlNotesKind.Controls.Add(rdoFinisherDon);
             pnlNotesKind.Controls.Add(rdoKat);
             pnlNotesKind.Controls.Add(rdoDon);
-            pnlNotesKind.Location = new Point(1, 10);
+            pnlNotesKind.Location = new Point(1, 9);
             pnlNotesKind.Name = "pnlNotesKind";
             pnlNotesKind.Size = new Size(135, 105);
             pnlNotesKind.TabIndex = 18;
@@ -212,7 +216,7 @@
             // 
             lblSeparateSetting.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblSeparateSetting.ForeColor = Color.White;
-            lblSeparateSetting.Location = new Point(12, 160);
+            lblSeparateSetting.Location = new Point(12, 244);
             lblSeparateSetting.Name = "lblSeparateSetting";
             lblSeparateSetting.Size = new Size(203, 25);
             lblSeparateSetting.TabIndex = 19;
@@ -226,7 +230,7 @@
             grpSeparateSetting.Controls.Add(txtPositionY);
             grpSeparateSetting.Controls.Add(lblPisitionX);
             grpSeparateSetting.Controls.Add(txtPisitionX);
-            grpSeparateSetting.Location = new Point(215, 150);
+            grpSeparateSetting.Location = new Point(215, 234);
             grpSeparateSetting.Name = "grpSeparateSetting";
             grpSeparateSetting.Size = new Size(239, 117);
             grpSeparateSetting.TabIndex = 20;
@@ -287,7 +291,7 @@
             chkUnicodeSupport.BackColor = Color.White;
             chkUnicodeSupport.Font = new Font("MS UI Gothic", 15F, FontStyle.Regular, GraphicsUnit.Point, 128);
             chkUnicodeSupport.ForeColor = Color.Green;
-            chkUnicodeSupport.Location = new Point(273, 282);
+            chkUnicodeSupport.Location = new Point(273, 366);
             chkUnicodeSupport.Name = "chkUnicodeSupport";
             chkUnicodeSupport.Size = new Size(25, 25);
             chkUnicodeSupport.TabIndex = 22;
@@ -300,18 +304,68 @@
             lblUnicodeSupport.Anchor = AnchorStyles.Bottom;
             lblUnicodeSupport.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblUnicodeSupport.ForeColor = Color.White;
-            lblUnicodeSupport.Location = new Point(12, 282);
+            lblUnicodeSupport.Location = new Point(12, 366);
             lblUnicodeSupport.Name = "lblUnicodeSupport";
             lblUnicodeSupport.Size = new Size(256, 25);
             lblUnicodeSupport.TabIndex = 21;
             lblUnicodeSupport.Text = "Unicode対応";
             lblUnicodeSupport.TextAlign = ContentAlignment.MiddleLeft;
             // 
+            // label2
+            // 
+            label2.Anchor = AnchorStyles.Bottom;
+            label2.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            label2.ForeColor = Color.White;
+            label2.Location = new Point(12, 160);
+            label2.Name = "label2";
+            label2.Size = new Size(256, 25);
+            label2.TabIndex = 23;
+            label2.Text = "Unicode対応";
+            label2.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // rdoHexaAndDuoOffset
+            // 
+            rdoHexaAndDuoOffset.AutoSize = true;
+            rdoHexaAndDuoOffset.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            rdoHexaAndDuoOffset.ForeColor = Color.White;
+            rdoHexaAndDuoOffset.Location = new Point(274, 160);
+            rdoHexaAndDuoOffset.Name = "rdoHexaAndDuoOffset";
+            rdoHexaAndDuoOffset.Size = new Size(135, 24);
+            rdoHexaAndDuoOffset.TabIndex = 24;
+            rdoHexaAndDuoOffset.TabStop = true;
+            rdoHexaAndDuoOffset.Text = "1/16 (1/12) offset";
+            rdoHexaAndDuoOffset.UseVisualStyleBackColor = true;
+            rdoHexaAndDuoOffset.CheckedChanged += rdoHexaAndDuoOffset_CheckedChanged;
+            // 
+            // rdoMiliSecondOffset
+            // 
+            rdoMiliSecondOffset.AutoSize = true;
+            rdoMiliSecondOffset.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            rdoMiliSecondOffset.ForeColor = Color.White;
+            rdoMiliSecondOffset.Location = new Point(273, 190);
+            rdoMiliSecondOffset.Name = "rdoMiliSecondOffset";
+            rdoMiliSecondOffset.Size = new Size(88, 24);
+            rdoMiliSecondOffset.TabIndex = 25;
+            rdoMiliSecondOffset.TabStop = true;
+            rdoMiliSecondOffset.Text = "ms offset";
+            rdoMiliSecondOffset.UseVisualStyleBackColor = true;
+            rdoMiliSecondOffset.CheckedChanged += rdoMiliSecondOffset_CheckedChanged;
+            // 
+            // panel1
+            // 
+            panel1.Location = new Point(268, 156);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(186, 72);
+            panel1.TabIndex = 26;
+            // 
             // SettingForm
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.FromArgb(0, 64, 64);
-            ClientSize = new Size(466, 468);
+            ClientSize = new Size(466, 552);
+            Controls.Add(rdoMiliSecondOffset);
+            Controls.Add(rdoHexaAndDuoOffset);
+            Controls.Add(label2);
             Controls.Add(chkUnicodeSupport);
             Controls.Add(lblUnicodeSupport);
             Controls.Add(lblSeparateSetting);
@@ -323,6 +377,7 @@
             Controls.Add(lblMaxBackupCount);
             Controls.Add(lblLanguage);
             Controls.Add(grpSeparateSetting);
+            Controls.Add(panel1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "SettingForm";
@@ -358,5 +413,9 @@
         private Label lblPisitionX;
         private CheckBox chkUnicodeSupport;
         private Label lblUnicodeSupport;
+        private Label label2;
+        private RadioButton rdoHexaAndDuoOffset;
+        private RadioButton rdoMiliSecondOffset;
+        private Panel panel1;
     }
 }

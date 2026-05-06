@@ -28,10 +28,16 @@ namespace osu_taiko_Mapping_Helper.Models
         internal int volumeFrom { set; get; }
         // 音量(終了)
         internal int volumeTo { set; get; }
+        // オフセットモード
+        // 0 : 1/16
+        // 1 : ms指定
+        internal int offsetMode { set; get; }
         // オフセット有効化設定
         internal bool isOffset { set; get; }
         // オフセット値
         internal int offset { set; get; }
+        // 1/12offset有効化設定
+        internal bool isDuoOffset { set; get; }
         // kiai有効化設定
         internal bool isKiai { set; get; }
         // 相対速度オプション

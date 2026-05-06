@@ -243,6 +243,22 @@ namespace osu_taiko_Mapping_Helper
             lblSpecificGridLine.Visible = false;
             lblSpecificGridLine2.Visible = false;
             rdoAllHitObjects.Checked = true;
+            userInputTempData.offsetMode = config.offsetMode;
+            switch (config.offsetMode)
+            {
+                case 0:
+                    pnlMiliSecondOffset.Visible = false;
+                    pnlMiliSecondStartOffset.Visible = false;
+                    pnlHexaAndDecaOffset.Visible = true;
+                    userInputTempData.isOffset = chkEnableHexaOffset.Checked;
+                    break;
+                case 1:
+                    pnlMiliSecondOffset.Visible = true;
+                    pnlMiliSecondStartOffset.Visible = true;
+                    pnlHexaAndDecaOffset.Visible = false;
+                    userInputTempData.isOffset = chkEnableOffset.Checked;
+                    break;
+            }
             if (config.advanceMode == 1)
             {
                 chkRelative.Visible = true;
@@ -270,6 +286,8 @@ namespace osu_taiko_Mapping_Helper
             txtOffset.BackColor = SystemColors.Window;
             txtOffset.ForeColor = SystemColors.WindowText;
             Common.SetLabelText(chkEnableOffset, "LBL_APPLY_OFFSET");
+            Common.SetLabelText(chkEnableHexaOffset, "LBL_APPLY_HEXA_OFFSET");
+            Common.SetLabelText(chkEnableDuoOffset, "LBL_APPLY_DUO_OFFSET");
         }
         /// <summary>
         /// 処理項目タブが"ビートスナップ間隔"の時のコントロールの初期化処理
@@ -629,6 +647,8 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(tabApplyPage, "LBL_TAB_APPLY");
             Common.SetLabelText(tabRemovePage, "LBL_TAB_DELETE");
             Common.SetLabelText(chkEnableOffset, "LBL_APPLY_OFFSET");
+            Common.SetLabelText(chkEnableHexaOffset, "LBL_APPLY_HEXA_OFFSET");
+            Common.SetLabelText(chkEnableDuoOffset, "LBL_APPLY_DUO_OFFSET");
             Common.SetLabelText(btnApply, "LBL_EXECUTE");
             Common.SetLabelText(tabHitObjectsPage, "LBL_APPLY_TAB_OBJECTS");
             Common.SetLabelText(tabBeatSnap, "LBL_APPLY_TAB_BEATSNAPS");
@@ -1158,6 +1178,22 @@ namespace osu_taiko_Mapping_Helper
                                    beatmapInfo.version.Replace("&", "&&") +
                                    (beatmapInfo.version == string.Empty ? "" : "]"));
             }
+            userInputTempData.offsetMode = config.offsetMode;
+            switch (config.offsetMode)
+            {
+                case 0:
+                    pnlMiliSecondOffset.Visible = false;
+                    pnlMiliSecondStartOffset.Visible = false;
+                    pnlHexaAndDecaOffset.Visible = true;
+                    userInputTempData.isOffset = chkEnableHexaOffset.Checked;
+                    break;
+                case 1:
+                    pnlMiliSecondOffset.Visible = true;
+                    pnlMiliSecondStartOffset.Visible = true;
+                    pnlHexaAndDecaOffset.Visible = false;
+                    userInputTempData.isOffset = chkEnableOffset.Checked;
+                    break;
+            }
             if (config.advanceMode == 1)
             {
                 chkRelative.Visible = true;
@@ -1442,6 +1478,22 @@ namespace osu_taiko_Mapping_Helper
         private void txtOffset_TextChanged(object sender, EventArgs e)
         {
             userInputTempData.offset = txtOffset.Text;
+        }
+        private void chkEnableHexaOffset_CheckedChanged(object sender, EventArgs e)
+        {
+            userInputTempData.isOffset = chkEnableHexaOffset.Checked;
+            if (!userInputTempData.isOffset)
+            {
+                chkEnableDuoOffset.Checked = false;
+            }
+        }
+        private void chkEnableDuoOffset_CheckedChanged(object sender, EventArgs e)
+        {
+            userInputTempData.isDuoOffset = chkEnableDuoOffset.Checked;
+            if (!userInputTempData.isOffset && userInputTempData.isDuoOffset)
+            {
+                chkEnableHexaOffset.Checked = true;
+            }
         }
         private void chkEnableKiai_CheckedChanged(object sender, EventArgs e)
         {
