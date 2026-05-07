@@ -2,7 +2,6 @@ using System.Text;
 using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Views;
-using System.Globalization;
 
 namespace osu_taiko_Mapping_Helper.Utils
 {
@@ -11,7 +10,10 @@ namespace osu_taiko_Mapping_Helper.Utils
         internal static bool isDialogResult { get; set; }
         private static Config? config;
         private static Form? executeResultForm;
-
+        /// <summary>
+        /// 設定の読み込み処理
+        /// </summary>
+        /// <param name="userConfig">コンフィグクラス</param>
         internal static void LoadConfig(Config userConfig)
         {
             config = userConfig;
@@ -380,8 +382,8 @@ namespace osu_taiko_Mapping_Helper.Utils
                 // mm:ss:fff表記で指定されていた場合はms表記に変換し、int型に変換する
                 arr[2] = arr[2][..3];
                 returnTiming = Convert.ToInt32(arr[2]) +
-                               Convert.ToInt32(arr[1]) * 1000 +
-                               Convert.ToInt32(arr[0]) * 60000;
+                               Convert.ToInt32(arr[1]) * Constants.ONE_SECOND +
+                               Convert.ToInt32(arr[0]) * Constants.ONE_MINUTE;
                 return true;
             }
             catch
@@ -398,13 +400,14 @@ namespace osu_taiko_Mapping_Helper.Utils
         {
             try
             {
-                int minute = currentTime / 60000;
-                int second = (currentTime % 60000) / 1000;
-                int milliSecond = currentTime % 1000;
+                int minute = currentTime / Constants.ONE_MINUTE;
+                int second = (currentTime % Constants.ONE_MINUTE) / Constants.ONE_SECOND;
+                int milliSecond = currentTime % Constants.ONE_SECOND;
                 return minute.ToString("00") + ":" +
                        second.ToString("00") + ":" +
                        milliSecond.ToString("000");
-            } catch
+            }
+            catch
             {
                 return string.Empty;
             }

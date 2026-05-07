@@ -110,15 +110,15 @@ namespace osu_taiko_Mapping_Helper
                     // 譜面のパス
                     beatmapInfo.beatmapPath = osuBeatmapPath;
                     // BGのパス
-                    string backgroundPath = Path.Combine(songsPath ?? "",
+                    string backgroundPath = beatmapData.EventsSection.BackgroundImage != null ?
+                                                         Path.Combine(songsPath ?? "",
                                                          baseAddresses.Beatmap.FolderName ?? "",
-                                                         beatmapData.EventsSection.BackgroundImage ?? "");
+                                                         beatmapData.EventsSection.BackgroundImage) : "";
                     beatmapInfo.backgroundPath = backgroundPath ?? "";
                     beatmapInfo.lastUpdate = File.GetLastWriteTime(beatmapInfo.beatmapPath).ToString("yyyy-MM-dd HH:mm:ss");
                     try
                     {
-                        DebugForm?.UpdateMemoryData(beatmapInfo, currentTime);
-
+                        DebugForm?.SetOsuData(beatmapInfo, currentTime);
                     }
                     catch
                     {
@@ -203,16 +203,7 @@ namespace osu_taiko_Mapping_Helper
                     preBeatmapInfo.previewTime = beatmapInfo.previewTime;
                     preBeatmapInfo.beatmapPath = beatmapInfo.beatmapPath;
                     preBeatmapInfo.lastUpdate = beatmapInfo.lastUpdate;
-                    // BGのパスが取得できている場合はBGをフォームに表示する
-                    if (beatmapInfo.backgroundPath == null || beatmapInfo.backgroundPath == string.Empty)
-                    {
-                        picDisplayBg.Image = null;
-                        Common.WriteWarningMessage("LOG_W-GET-BG");
-                    }
-                    else
-                    {
-                        picDisplayBg.Image = BeatmapHelper.SetBgOnForm(beatmapInfo.backgroundPath);
-                    }
+                    picDisplayBg.Image = BGHelper.SetBgOnForm(beatmapInfo.backgroundPath ?? "", new Point(384, 216));
                 }
                 catch (Exception ex)
                 {
@@ -252,17 +243,33 @@ namespace osu_taiko_Mapping_Helper
             lblSpecificGridLine.Visible = false;
             lblSpecificGridLine2.Visible = false;
             rdoAllHitObjects.Checked = true;
+            userInputTempData.offsetMode = config.offsetMode;
+            switch (config.offsetMode)
+            {
+                case 0:
+                    pnlMiliSecondOffset.Visible = false;
+                    pnlMiliSecondStartOffset.Visible = false;
+                    pnlHexaAndDecaOffset.Visible = true;
+                    userInputTempData.isOffset = chkEnableHexaOffset.Checked;
+                    break;
+                case 1:
+                    pnlMiliSecondOffset.Visible = true;
+                    pnlMiliSecondStartOffset.Visible = true;
+                    pnlHexaAndDecaOffset.Visible = false;
+                    userInputTempData.isOffset = chkEnableOffset.Checked;
+                    break;
+            }
             if (config.advanceMode == 1)
             {
                 chkRelative.Visible = true;
                 menuStrip1.Items.Clear();
-                menuStrip1.Items.AddRange([sVEditorToolStripMenuItem, utilityToolStripMenuItem, timingPropertyToolStripMenuItem]);
+                menuStrip1.Items.AddRange([sVEditorToolStripMenuItem, utilityToolStripMenuItem, timingPropertyToolStripMenuItem, bGSetterToolStripMenuItem]);
             }
             else
             {
                 chkRelative.Visible = false;
                 menuStrip1.Items.Clear();
-                menuStrip1.Items.AddRange([sVEditorToolStripMenuItem, utilityToolStripMenuItem]);
+                menuStrip1.Items.AddRange([sVEditorToolStripMenuItem, utilityToolStripMenuItem, bGSetterToolStripMenuItem]);
             }
         }
         /// <summary>
@@ -279,6 +286,8 @@ namespace osu_taiko_Mapping_Helper
             txtOffset.BackColor = SystemColors.Window;
             txtOffset.ForeColor = SystemColors.WindowText;
             Common.SetLabelText(chkEnableOffset, "LBL_APPLY_OFFSET");
+            Common.SetLabelText(chkEnableHexaOffset, "LBL_APPLY_HEXA_OFFSET");
+            Common.SetLabelText(chkEnableDuoOffset, "LBL_APPLY_DUO_OFFSET");
         }
         /// <summary>
         /// 処理項目タブが"ビートスナップ間隔"の時のコントロールの初期化処理
@@ -638,6 +647,8 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(tabApplyPage, "LBL_TAB_APPLY");
             Common.SetLabelText(tabRemovePage, "LBL_TAB_DELETE");
             Common.SetLabelText(chkEnableOffset, "LBL_APPLY_OFFSET");
+            Common.SetLabelText(chkEnableHexaOffset, "LBL_APPLY_HEXA_OFFSET");
+            Common.SetLabelText(chkEnableDuoOffset, "LBL_APPLY_DUO_OFFSET");
             Common.SetLabelText(btnApply, "LBL_EXECUTE");
             Common.SetLabelText(tabHitObjectsPage, "LBL_APPLY_TAB_OBJECTS");
             Common.SetLabelText(tabBeatSnap, "LBL_APPLY_TAB_BEATSNAPS");
@@ -1145,7 +1156,8 @@ namespace osu_taiko_Mapping_Helper
             try
             {
                 DebugForm?.InitializeLabelText();
-            } catch
+            }
+            catch
             {
             }
             if (preUnicodeSupport != config.unicodeSupport)
@@ -1166,18 +1178,34 @@ namespace osu_taiko_Mapping_Helper
                                    beatmapInfo.version.Replace("&", "&&") +
                                    (beatmapInfo.version == string.Empty ? "" : "]"));
             }
+            userInputTempData.offsetMode = config.offsetMode;
+            switch (config.offsetMode)
+            {
+                case 0:
+                    pnlMiliSecondOffset.Visible = false;
+                    pnlMiliSecondStartOffset.Visible = false;
+                    pnlHexaAndDecaOffset.Visible = true;
+                    userInputTempData.isOffset = chkEnableHexaOffset.Checked;
+                    break;
+                case 1:
+                    pnlMiliSecondOffset.Visible = true;
+                    pnlMiliSecondStartOffset.Visible = true;
+                    pnlHexaAndDecaOffset.Visible = false;
+                    userInputTempData.isOffset = chkEnableOffset.Checked;
+                    break;
+            }
             if (config.advanceMode == 1)
             {
                 chkRelative.Visible = true;
                 menuStrip1.Items.Clear();
-                menuStrip1.Items.AddRange(new ToolStripItem[] { sVEditorToolStripMenuItem, utilityToolStripMenuItem, timingPropertyToolStripMenuItem });
+                menuStrip1.Items.AddRange([sVEditorToolStripMenuItem, utilityToolStripMenuItem, timingPropertyToolStripMenuItem, bGSetterToolStripMenuItem]);
             }
             else
             {
                 chkRelative.Checked = false;
                 chkRelative.Visible = false;
                 menuStrip1.Items.Clear();
-                menuStrip1.Items.AddRange([sVEditorToolStripMenuItem, utilityToolStripMenuItem]);
+                menuStrip1.Items.AddRange([sVEditorToolStripMenuItem, utilityToolStripMenuItem, bGSetterToolStripMenuItem]);
             }
             preUnicodeSupport = config.unicodeSupport;
         }
@@ -1200,12 +1228,33 @@ namespace osu_taiko_Mapping_Helper
                 parentForm = this
             };
             DebugForm.Show();
+            DebugForm.Text = "Timing Property";
+            if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
+            {
+                return;
+            }
             bool isGetBeatmap = false;
             while (!isGetBeatmap)
             {
                 isGetBeatmap = DebugForm.GetBeatmap();
             }
-            DebugForm.Text = "Timing Property";
+        }
+        private void bGSetterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (beatmapInfo.backgroundPath != null && beatmapInfo.backgroundPath != string.Empty)
+            {
+                BGSetterForm bgSetterForm = new(config,
+                                                beatmapInfo.beatmapPath,
+                                                beatmapInfo.backgroundPath,
+                                                beatmapInfo.background,
+                                                backupDirectoryName);
+                bgSetterForm.ShowDialog();
+            }
+            else
+            {
+                Common.ShowMessageDialog("E_A-D-2");
+            }
+
         }
         #endregion
         #region SV Editorタブのイベントハンドラ
@@ -1429,6 +1478,22 @@ namespace osu_taiko_Mapping_Helper
         private void txtOffset_TextChanged(object sender, EventArgs e)
         {
             userInputTempData.offset = txtOffset.Text;
+        }
+        private void chkEnableHexaOffset_CheckedChanged(object sender, EventArgs e)
+        {
+            userInputTempData.isOffset = chkEnableHexaOffset.Checked;
+            if (!userInputTempData.isOffset)
+            {
+                chkEnableDuoOffset.Checked = false;
+            }
+        }
+        private void chkEnableDuoOffset_CheckedChanged(object sender, EventArgs e)
+        {
+            userInputTempData.isDuoOffset = chkEnableDuoOffset.Checked;
+            if (!userInputTempData.isOffset && userInputTempData.isDuoOffset)
+            {
+                chkEnableHexaOffset.Checked = true;
+            }
         }
         private void chkEnableKiai_CheckedChanged(object sender, EventArgs e)
         {

@@ -18,6 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Utils\TestUtils.cs" />
     <Compile Remove="Views\BackupForm.cs" />
     <Compile Remove="Views\BackupForm.Designer.cs" />
   </ItemGroup>

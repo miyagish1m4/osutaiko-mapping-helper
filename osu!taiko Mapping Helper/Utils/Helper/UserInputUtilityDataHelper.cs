@@ -5,8 +5,14 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
 {
     internal class UserInputUtilityDataHelper
     {
-
-        internal static bool SetOffsetData(UserInputUtilityData userInputUtilityData, string offset)
+        /// <summary>
+        /// オフセットの入力値をユーザー入力データにセットする処理
+        /// </summary>
+        /// <param name="userInputUtilityData">入力データ</param>
+        /// <param name="offset">オフセット</param>
+        /// <returns></returns>
+        internal static bool SetOffsetData(UserInputUtilityData userInputUtilityData, 
+                                           string offset)
         {
             try
             {

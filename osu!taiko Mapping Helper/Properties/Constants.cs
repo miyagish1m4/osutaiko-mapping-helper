@@ -7,7 +7,7 @@ namespace osu_taiko_Mapping_Helper.Properties
     {
         #region ファイル名
         internal const string APP_NAME = "osu!Taiko Mapping Helper";
-        internal const string APP_VERSION = "1.0.1-beta";
+        internal const string APP_VERSION = "1.1.0-beta";
         #endregion
         #region 言語設定
         internal static readonly string[] LANGUAGES = ["English",
@@ -127,6 +127,13 @@ namespace osu_taiko_Mapping_Helper.Properties
         #endregion
         #region ビートスナップ間隔
         internal static readonly int[] BEAT_SNAP_INTERVALS = [24, 36, 48, 60];
+        internal const int TRI_SNAP = 3;
+        internal const int DUO_SNAP = 12;
+        internal const int HEXA_SNAP = 16;
+        #endregion
+        #region 補正
+        internal const double TICK_TOLERANCE = 0.15;
+        internal const int MILLISECOND_TOLERANCE = 2;
         #endregion
         #region ダイアログのボタンの種類
         internal const int DIALOG_BUTTON_OK = 0;
@@ -139,6 +146,12 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const int DIALOG_OPTION_MODELESS = 0x00000001;
         internal const int DIALOG_OPTION_OKCANCEL = 0x00000002;
         #endregion
+        #region タイミング定数
+        internal const int ONE_MINUTE = 60000;
+        internal const int ONE_SECOND = 1000;
+        #endregion
+
+
         internal const double BASE_SLIDER_MULTIPLIER = 1.4;
         internal static string ConvertNoteType(NoteType noteType)
         {

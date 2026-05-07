@@ -10,6 +10,7 @@ namespace osu_taiko_Mapping_Helper.Views
         #region クラス変数
         private Config config;
         private NotesPosition notesPosition = new NotesPosition();
+        private int offsetMode = 0;
         #endregion
         #region メソッド
         /// <summary>
@@ -21,6 +22,7 @@ namespace osu_taiko_Mapping_Helper.Views
             InitializeComponent();
             this.config = config;
             InitializeLabelText();
+            SetOffsetMode(config.offsetMode);
             SetChkAdvanceMode(config.advanceMode);
             SetChkUnicodeSupport(config.unicodeSupport);
             SetNotesPosition();
@@ -62,6 +64,28 @@ namespace osu_taiko_Mapping_Helper.Views
             notesPosition.finisherKatX = config.finisherKatX.ToString();
             notesPosition.finisherKatY = config.finisherKatY.ToString();
         }
+        private void SetOffsetMode(int offsetMode)
+        {
+            switch (offsetMode)
+            {
+                case 0:
+                    rdoHexaAndDuoOffset.Checked = true;
+                    rdoMiliSecondOffset.Checked = false;
+                    break;
+                case 1:
+                    rdoHexaAndDuoOffset.Checked = false;
+                    rdoMiliSecondOffset.Checked = true;
+                    break;
+            }
+        }
+        private void SetChkAdvanceMode(int isAdvanceMode)
+        {
+            chkAdvanceMode.Checked = isAdvanceMode == 1 ? true : false;
+        }
+        private void SetChkUnicodeSupport(int isUnicodeSupport)
+        {
+            chkUnicodeSupport.Checked = isUnicodeSupport == 1 ? true : false;
+        }
         #endregion
         #region イベントハンドラ
         private void SettingForm_Load(object sender, EventArgs e)
@@ -74,6 +98,7 @@ namespace osu_taiko_Mapping_Helper.Views
             // app.configに設定値をセットする
             if (SettingHelper.SetConfig(cmbLanguage.Text,
                                         txtMaxBackupCount.Text,
+                                        offsetMode,
                                         chkAdvanceMode.Checked,
                                         chkUnicodeSupport.Checked,
                                         notesPosition,
@@ -101,14 +126,6 @@ namespace osu_taiko_Mapping_Helper.Views
         private void chkUnicodeSupport_CheckedChanged(object sender, EventArgs e)
         {
             chkUnicodeSupport.Text = chkUnicodeSupport.Checked ? "✔" : "";
-        }
-        private void SetChkAdvanceMode(int isAdvanceMode)
-        {
-            chkAdvanceMode.Checked = isAdvanceMode == 1 ? true : false;
-        }
-        private void SetChkUnicodeSupport(int isUnicodeSupport)
-        {
-            chkUnicodeSupport.Checked = isUnicodeSupport == 1 ? true : false;
         }
         private void rdoDon_CheckedChanged(object sender, EventArgs e)
         {
@@ -180,7 +197,20 @@ namespace osu_taiko_Mapping_Helper.Views
                 notesPosition.finisherKatY = txtPositionY.Text;
             }
         }
+        private void rdoHexaAndDuoOffset_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdoHexaAndDuoOffset.Checked)
+            {
+                offsetMode = 0;
+            }
+        }
+        private void rdoMiliSecondOffset_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdoMiliSecondOffset.Checked)
+            {
+                offsetMode = 1;
+            }
+        }
         #endregion
-
     }
 }

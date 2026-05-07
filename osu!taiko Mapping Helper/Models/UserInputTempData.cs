@@ -53,10 +53,16 @@ namespace osu_taiko_Mapping_Helper.Models
         internal bool isEnableRelativeEnd { set; get; } = false;
         // kiai有効化設定
         internal bool isKiai { set; get; } = false;
+        // オフセットモード
+        // 0 : 1/16
+        // 1 : ms指定
+        internal int offsetMode { set; get; }
         // オフセット有効化設定
         internal bool isOffset { set; get; } = true;
         // オフセット値
         internal string offset { set; get; } = string.Empty;
+        // 1/12offset有効化設定
+        internal bool isDuoOffset { set; get; }
         internal SetOption setOption = new();
         internal SetObjectOption setObjectOption = new();
         internal SetBeatSnapOption setBeatSnapOption = new();

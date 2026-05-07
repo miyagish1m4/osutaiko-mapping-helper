@@ -1,5 +1,3 @@
-using System.Reflection.Metadata.Ecma335;
-using System.Xml.Serialization;
 using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
 
@@ -450,10 +448,17 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             try
             {
                 int retOffset = 0;
+                userInputData.offsetMode = userInputTempData.offsetMode;
                 userInputData.isOffset = userInputTempData.isOffset;
+                userInputData.isDuoOffset = userInputTempData.isDuoOffset;
                 if (!userInputData.isOffset)
                 {
                     //Offset有効化フラグが有効ではない
+                    retOffset = 0;
+                    return true;
+                }
+                if (userInputData.offsetMode == 0)
+                {
                     retOffset = 0;
                     return true;
                 }
@@ -608,7 +613,9 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <param name="beatmap">譜面情報</param>
         /// <param name="currentTime">タイミング</param>
         /// <returns>SVの値</returns>
-        internal static string SetCurrentSv(Beatmap? beatmap, int currentTime, bool isDebug = false)
+        internal static string SetCurrentSv(Beatmap? beatmap, 
+                                            int currentTime, 
+                                            bool isDebug = false)
         {
             TimingPoint timingPointBuff = new();
             double retSv = 0;
@@ -645,7 +652,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <param name="beatmap">譜面情報</param>
         /// <param name="currentTime">タイミング</param>
         /// <returns>Volumeの値</returns>
-        internal static string SetCurrentVolume(Beatmap? beatmap, int currentTime)
+        internal static string SetCurrentVolume(Beatmap? beatmap, 
+                                                int currentTime)
         {
             TimingPoint timingPointBuff = new();
             int retVolume = 0;
