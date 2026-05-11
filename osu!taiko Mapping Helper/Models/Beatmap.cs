@@ -16,7 +16,7 @@
         // Difficulty
         internal List<string> difficulty { set; get; }
         // イベント
-        internal List<string> events { set; get; }
+        internal List<Events> events { set; get; }
         // Colours
         internal List<string> colours { set; get; }
         // タイミングポイント
@@ -44,7 +44,7 @@
                          List<string> editor,
                          List<string> metadata,
                          List<string> difficulty,
-                         List<string> events,
+                         List<Events> events,
                          List<TimingPoint> timingPoints,
                          List<string> colours,
                          List<HitObject> hitObject,

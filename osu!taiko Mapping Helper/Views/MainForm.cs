@@ -248,13 +248,11 @@ namespace osu_taiko_Mapping_Helper
             {
                 case 0:
                     pnlMiliSecondOffset.Visible = false;
-                    pnlMiliSecondStartOffset.Visible = false;
                     pnlHexaAndDecaOffset.Visible = true;
                     userInputTempData.isOffset = chkEnableHexaOffset.Checked;
                     break;
                 case 1:
                     pnlMiliSecondOffset.Visible = true;
-                    pnlMiliSecondStartOffset.Visible = true;
                     pnlHexaAndDecaOffset.Visible = false;
                     userInputTempData.isOffset = chkEnableOffset.Checked;
                     break;
@@ -277,6 +275,17 @@ namespace osu_taiko_Mapping_Helper
         /// </summary>
         private void InitializeHitObjectsControls()
         {
+            switch (config.offsetMode)
+            {
+                case 0:
+                    pnlHexaAndDecaOffset.Visible = true;
+                    pnlMiliSecondOffset.Visible = false;
+                    break;
+                case 1:
+                    pnlHexaAndDecaOffset.Visible = false;
+                    pnlMiliSecondOffset.Visible = true;
+                    break;
+            }
             rdoAllHitObjects.Checked = userInputTempData.setObjectOption.isAllHitObjects;
             rdoOnlyBarline.Checked = userInputTempData.setObjectOption.isOnlyBarlines;
             rdoOnlyBookMark.Checked = userInputTempData.setObjectOption.isOnlyBookmarks;
@@ -294,6 +303,8 @@ namespace osu_taiko_Mapping_Helper
         /// </summary>
         private void InitializeBeatSnapControls()
         {
+            pnlHexaAndDecaOffset.Visible = false;
+            pnlMiliSecondOffset.Visible = false;
             chkEnableOffset.Enabled = false;
             txtOffset.Enabled = false;
             txtOffset.BackColor = SystemColors.WindowFrame;
@@ -304,6 +315,8 @@ namespace osu_taiko_Mapping_Helper
         /// </summary>
         private void InitializeGreenLineControls()
         {
+            pnlHexaAndDecaOffset.Visible = false;
+            pnlMiliSecondOffset.Visible = false;
             chkEnableOffset.Enabled = false;
             txtOffset.Enabled = false;
             txtOffset.BackColor = SystemColors.WindowFrame;
@@ -671,7 +684,6 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(lblSpecificFinisher, "LBL_OBJECTS_FINISHER");
             Common.SetLabelText(lblBeatSnaps, "LBL_BEATSNAPS_DIVISOR");
             Common.SetLabelText(chkEnableOffset, "LBL_APPLY_OFFSET");
-            Common.SetLabelText(chkEnableStartOffset, "LBL_DELETE_OFFSET");
             Common.SetLabelText(btnRemove, "LBL_EXECUTE");
             // MainForm(Utility)
             Common.SetLabelText(lblOffsetShifter, "LBL_OFFSET_SHIFTER");
@@ -687,373 +699,6 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(btnApplyTagEditor, "LBL_UTILITY_APPLY");
             Common.SetLabelText(btnApplySettingCopier, "LBL_UTILITY_APPLY");
             Common.SetLabelText(btnApplyResnap, "LBL_UTILITY_APPLY");
-        }
-        /// <summary>
-        /// SV始点テキストボックスの有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable">有効化フラグ</param>
-        private void SetTxtSvFromEnabledState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                if (userInputTempData.isRelative)
-                {
-                    if (userInputTempData.isRelativeMultiply)
-                    {
-                        txtSvFrom.Text = userInputTempData.relativeMultiplySvFrom;
-                    }
-                    else if (userInputTempData.isRelativeSum)
-                    {
-                        txtSvFrom.Text = userInputTempData.relativeSumSvFrom;
-                    }
-                    else
-                    {
-                        txtSvFrom.Text = userInputTempData.svFrom;
-                    }
-                }
-                else
-                {
-                    txtSvFrom.Text = userInputTempData.svFrom;
-                }
-                txtSvFrom.Enabled = true;
-                txtSvFrom.BackColor = SystemColors.Window;
-                txtSvFrom.ForeColor = SystemColors.WindowText;
-            }
-            else
-            {
-                txtSvFrom.Enabled = false;
-                txtSvFrom.BackColor = SystemColors.WindowFrame;
-                txtSvFrom.ForeColor = txtSvFrom.BackColor;
-            }
-        }
-        /// <summary>
-        /// SV終点テキストボックスの有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable">有効化フラグ</param>
-        private void SetTxtSvToEnabledState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                txtSvTo.Enabled = true;
-                txtSvTo.ForeColor = SystemColors.WindowText;
-                txtSvTo.BackColor = SystemColors.Window;
-            }
-            else
-            {
-                txtSvTo.Enabled = false;
-                txtSvTo.BackColor = SystemColors.WindowFrame;
-                txtSvTo.ForeColor = txtSvTo.BackColor;
-            }
-        }
-        /// <summary>
-        /// SV入れ替えボタンの有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable">有効化フラグ</param>
-        private void SetBtnSwapSvEnabledState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                btnSwapSv.Enabled = true;
-                btnSwapSv.ForeColor = Color.Cyan;
-                btnSwapSv.FlatAppearance.BorderColor = Color.Cyan;
-            }
-            else
-            {
-                btnSwapSv.Enabled = false;
-                btnSwapSv.ForeColor = SystemColors.WindowFrame;
-                btnSwapSv.FlatAppearance.BorderColor = SystemColors.WindowFrame;
-            }
-        }
-        /// <summary>
-        /// 始点SV設定ボタンの有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable"></param>
-        private void SetBtnSetSvFromEnabledState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                btnSetSvFrom.Enabled = true;
-                btnSetSvFrom.ForeColor = SystemColors.Control;
-                btnSetSvFrom.FlatAppearance.BorderColor = Color.Cyan;
-            }
-            else
-            {
-                btnSetSvFrom.Enabled = false;
-                btnSetSvFrom.ForeColor = SystemColors.WindowFrame;
-                btnSetSvFrom.FlatAppearance.BorderColor = SystemColors.WindowFrame;
-            }
-        }
-        /// <summary>
-        /// 終点SV設定ボタンの有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable"></param>
-        private void SetBtnSetSvToEnabledState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                btnSetSvTo.Enabled = true;
-                btnSetSvTo.ForeColor = SystemColors.Control;
-                btnSetSvTo.FlatAppearance.BorderColor = Color.Cyan;
-            }
-            else
-            {
-                btnSetSvTo.Enabled = false;
-                btnSetSvTo.ForeColor = SystemColors.WindowFrame;
-                btnSetSvTo.FlatAppearance.BorderColor = SystemColors.WindowFrame;
-            }
-        }
-        /// <summary>
-        /// Volume始点テキストボックスの有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable">有効化フラグ</param>
-        private void SetTxtVolumeFromEnabledState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                txtVolumeFrom.Enabled = true;
-                txtVolumeFrom.ForeColor = SystemColors.WindowText;
-                txtVolumeFrom.BackColor = SystemColors.Window;
-            }
-            else
-            {
-                txtVolumeFrom.Enabled = false;
-                txtVolumeFrom.ForeColor = SystemColors.WindowFrame;
-                txtVolumeFrom.BackColor = SystemColors.WindowFrame;
-            }
-        }
-        /// <summary>
-        /// Volume終点テキストボックスの有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable">有効化フラグ</param>
-        private void SetTxtVolumeToEnabledState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                txtVolumeTo.Enabled = true;
-                txtVolumeTo.ForeColor = SystemColors.WindowText;
-                txtVolumeTo.BackColor = SystemColors.Window;
-            }
-            else
-            {
-                txtVolumeTo.Enabled = false;
-                txtVolumeTo.ForeColor = SystemColors.WindowFrame;
-                txtVolumeTo.BackColor = SystemColors.WindowFrame;
-            }
-        }
-        /// <summary>
-        /// Volume入れ替えボタンの有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable">有効化フラグ</param>
-        private void SetBtnSwapVolumeEnabledState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                btnSwapVolume.Enabled = true;
-                btnSwapVolume.ForeColor = Color.Cyan;
-                btnSwapVolume.FlatAppearance.BorderColor = Color.Cyan;
-            }
-            else
-            {
-                btnSwapVolume.Enabled = false;
-                btnSwapVolume.ForeColor = SystemColors.WindowFrame;
-                btnSwapVolume.FlatAppearance.BorderColor = SystemColors.WindowFrame;
-            }
-        }
-        /// <summary>
-        /// 始点Volume設定ボタンの有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable"></param>
-        private void SetBtnSetVolumeFromEnabledState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                btnSetVolumeFrom.Enabled = true;
-                btnSetVolumeFrom.ForeColor = SystemColors.Control;
-                btnSetVolumeFrom.FlatAppearance.BorderColor = Color.Cyan;
-            }
-            else
-            {
-                btnSetVolumeFrom.Enabled = false;
-                btnSetVolumeFrom.ForeColor = SystemColors.WindowFrame;
-                btnSetVolumeFrom.FlatAppearance.BorderColor = SystemColors.WindowFrame;
-            }
-        }
-        /// <summary>
-        /// 終点Volume設定ボタンの有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable"></param>
-        private void SetBtnSetVolumeToEnabledState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                btnSetVolumeTo.Enabled = true;
-                btnSetVolumeTo.ForeColor = SystemColors.Control;
-                btnSetVolumeTo.FlatAppearance.BorderColor = Color.Cyan;
-            }
-            else
-            {
-                btnSetVolumeTo.Enabled = false;
-                btnSetVolumeTo.ForeColor = SystemColors.WindowFrame;
-                btnSetVolumeTo.FlatAppearance.BorderColor = SystemColors.WindowFrame;
-            }
-        }
-        /// <summary>
-        /// 相対速度変化オプションの有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable">有効化フラグ</param>
-        private void SetRelativeEnabledState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                pnlRelativeSvGroup.Visible = true;
-                chkEnableSvTo.Visible = true;
-                chkEnableSv.Enabled = false;
-                rdoArithmetic.Enabled = false;
-                rdoGeometric.Enabled = false;
-                if (userInputTempData.isRelativeMultiply)
-                {
-                    txtSvFrom.Text = userInputTempData.relativeMultiplySvFrom;
-                    txtSvTo.Text = userInputTempData.relativeMultiplySvTo;
-                }
-                else if (userInputTempData.isRelativeSum)
-                {
-                    txtSvFrom.Text = userInputTempData.relativeSumSvFrom;
-                    txtSvTo.Text = userInputTempData.relativeSumSvTo;
-                }
-            }
-            else
-            {
-                pnlRelativeSvGroup.Visible = false;
-                chkEnableSvTo.Visible = false;
-                chkEnableSv.Enabled = true;
-                rdoArithmetic.Enabled = true;
-                rdoGeometric.Enabled = true;
-                txtSvFrom.Text = userInputTempData.svFrom;
-                txtSvTo.Text = userInputTempData.svTo;
-            }
-        }
-        /// <summary>
-        /// 相対速度変化オプション(乗算)の有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable">有効化フラグ</param>
-        private void SetRelativeMultiplyEnableState(bool isEnable)
-        {
-            if (isEnable)
-            {
-                txtRelativeBaseSv.Enabled = true;
-                txtRelativeBaseSv.ForeColor = SystemColors.WindowText;
-                txtRelativeBaseSv.BackColor = SystemColors.Window;
-                txtSvFrom.Text = userInputTempData.relativeMultiplySvFrom;
-                txtSvTo.Text = userInputTempData.relativeMultiplySvTo;
-            }
-            else
-            {
-                txtRelativeBaseSv.Enabled = false;
-                txtRelativeBaseSv.ForeColor = SystemColors.WindowFrame;
-                txtRelativeBaseSv.BackColor = SystemColors.WindowFrame;
-            }
-        }
-        /// <summary>
-        /// Offset有効化チェックボックス(適用)の有効/無効状態に応じたUI設定処理
-        /// </summary>
-        /// <param name="isEnable">有効化フラグ</param>
-        private void SetChkEnableOffset(bool isEnable)
-        {
-            if (isEnable)
-            {
-                txtOffset.ForeColor = SystemColors.WindowText;
-                txtOffset.BackColor = SystemColors.Window;
-                txtOffset.Enabled = true;
-            }
-            else
-            {
-                txtOffset.ForeColor = SystemColors.WindowFrame;
-                txtOffset.BackColor = SystemColors.WindowFrame;
-                txtOffset.Enabled = false;
-            }
-        }
-        /// <summary>
-        /// 処理項目タブが"適用"の時のコントロールの初期化処理
-        /// </summary>
-        private void SetApplyControls(bool isEnable)
-        {
-            bool isAdvanceMode = (config.advanceMode == 1 && isEnable);
-            chkEnableSv.Enabled = isEnable;
-            chkEnableVolume.Enabled = isEnable;
-            chkApplyStartObject.Enabled = isEnable;
-            chkApplyEndObject.Enabled = isEnable;
-            chkRelative.Visible = isAdvanceMode;
-            if (isEnable)
-            {
-                pnlRelativeSvGroup.Visible = userInputTempData.isRelative;
-                chkEnableSvTo.Visible = userInputTempData.isRelative;
-            }
-            else
-            {
-                pnlRelativeSvGroup.Visible = false;
-                chkEnableSvTo.Visible = false;
-            }
-            if (isEnable && !userInputTempData.isSv)
-            {
-                SetTxtSvFromEnabledState(userInputTempData.isSv);
-                SetTxtSvToEnabledState(userInputTempData.isSv);
-                SetBtnSwapSvEnabledState(userInputTempData.isSv);
-                SetBtnSetSvFromEnabledState(userInputTempData.isSv);
-                SetBtnSetSvToEnabledState(userInputTempData.isSv);
-            }
-            else
-            {
-                if (userInputTempData.isRelative)
-                {
-                    chkEnableSv.Enabled = false;
-                    SetTxtSvToEnabledState(isEnable ? userInputTempData.isEnableRelativeEnd : isEnable);
-                    SetBtnSwapSvEnabledState(isEnable ? userInputTempData.isEnableRelativeEnd : isEnable);
-                    SetBtnSetSvToEnabledState(isEnable ? userInputTempData.isEnableRelativeEnd : isEnable);
-                }
-                else
-                {
-                    SetTxtSvToEnabledState(isEnable);
-                    SetBtnSwapSvEnabledState(isEnable);
-                    SetBtnSetSvToEnabledState(isEnable);
-                }
-                SetTxtSvFromEnabledState(isEnable);
-                SetBtnSetSvFromEnabledState(isEnable);
-            }
-            if (isEnable && !userInputTempData.isVolume)
-            {
-                SetTxtVolumeFromEnabledState(userInputTempData.isVolume);
-                SetTxtVolumeToEnabledState(userInputTempData.isVolume);
-                SetBtnSwapVolumeEnabledState(userInputTempData.isVolume);
-                SetBtnSetVolumeFromEnabledState(userInputTempData.isVolume);
-                SetBtnSetVolumeToEnabledState(userInputTempData.isVolume);
-            }
-            else
-            {
-                SetTxtVolumeFromEnabledState(isEnable);
-                SetTxtVolumeToEnabledState(isEnable);
-                SetBtnSwapVolumeEnabledState(isEnable);
-                SetBtnSetVolumeFromEnabledState(isEnable);
-                SetBtnSetVolumeToEnabledState(isEnable);
-            }
-
-        }
-        /// <summary>
-        /// Offset有効化チェックボックス(削除)の有効/無効状態に応じたUI設定処理
-        /// </summary>
-        private void SetChkEnableStartOffset(bool isEnable)
-        {
-            if (isEnable)
-            {
-                txtStartOffset.Enabled = true;
-                txtStartOffset.BackColor = SystemColors.Window;
-                txtStartOffset.ForeColor = SystemColors.WindowText;
-            }
-            else
-            {
-                txtStartOffset.Enabled = false;
-                txtStartOffset.BackColor = SystemColors.WindowFrame;
-                txtStartOffset.ForeColor = SystemColors.WindowFrame;
-            }
         }
         #endregion
         #region イベントハンドラ
@@ -1179,18 +824,14 @@ namespace osu_taiko_Mapping_Helper
                                    (beatmapInfo.version == string.Empty ? "" : "]"));
             }
             userInputTempData.offsetMode = config.offsetMode;
+            tabExecuteType_SelectedIndexChanged(sender, e);
+            tabSetType_SelectedIndexChanged(sender, e);
             switch (config.offsetMode)
             {
                 case 0:
-                    pnlMiliSecondOffset.Visible = false;
-                    pnlMiliSecondStartOffset.Visible = false;
-                    pnlHexaAndDecaOffset.Visible = true;
                     userInputTempData.isOffset = chkEnableHexaOffset.Checked;
                     break;
                 case 1:
-                    pnlMiliSecondOffset.Visible = true;
-                    pnlMiliSecondStartOffset.Visible = true;
-                    pnlHexaAndDecaOffset.Visible = false;
                     userInputTempData.isOffset = chkEnableOffset.Checked;
                     break;
             }
@@ -1353,11 +994,11 @@ namespace osu_taiko_Mapping_Helper
         private void chkEnableSv_CheckedChanged(object? sender, EventArgs e)
         {
             userInputTempData.isSv = chkEnableSv.Checked;
-            SetTxtSvFromEnabledState(userInputTempData.isSv);
-            SetTxtSvToEnabledState(userInputTempData.isSv);
-            SetBtnSwapSvEnabledState(userInputTempData.isSv);
-            SetBtnSetSvFromEnabledState(userInputTempData.isSv);
-            SetBtnSetSvToEnabledState(userInputTempData.isSv);
+            FormUtils.SetTxtSvFromEnabledState(userInputTempData.isSv, userInputTempData, txtSvFrom);
+            FormUtils.SetTxtSvToEnabledState(userInputTempData.isSv, txtSvTo);
+            FormUtils.SetBtnSwapSvEnabledState(userInputTempData.isSv, btnSwapSv);
+            FormUtils.SetBtnSetSvFromEnabledState(userInputTempData.isSv, btnSetSvFrom);
+            FormUtils.SetBtnSetSvToEnabledState(userInputTempData.isSv, btnSetSvTo);
             if (userInputTempData.isSv && config.advanceMode == 1)
             {
                 chkRelative.Visible = true;
@@ -1413,11 +1054,11 @@ namespace osu_taiko_Mapping_Helper
         private void chkEnableVolume_CheckedChanged(object sender, EventArgs e)
         {
             userInputTempData.isVolume = chkEnableVolume.Checked;
-            SetTxtVolumeFromEnabledState(userInputTempData.isVolume);
-            SetTxtVolumeToEnabledState(userInputTempData.isVolume);
-            SetBtnSwapVolumeEnabledState(userInputTempData.isVolume);
-            SetBtnSetVolumeFromEnabledState(userInputTempData.isVolume);
-            SetBtnSetVolumeToEnabledState(userInputTempData.isVolume);
+            FormUtils.SetTxtVolumeFromEnabledState(userInputTempData.isVolume, txtVolumeFrom);
+            FormUtils.SetTxtVolumeToEnabledState(userInputTempData.isVolume, txtVolumeTo);
+            FormUtils.SetBtnSwapVolumeEnabledState(userInputTempData.isVolume, btnSwapVolume);
+            FormUtils.SetBtnSetVolumeFromEnabledState(userInputTempData.isVolume, btnSetVolumeFrom);
+            FormUtils.SetBtnSetVolumeToEnabledState(userInputTempData.isVolume, btnSetVolumeTo);
         }
         private void chkApplyStartObject_CheckedChanged(object sender, EventArgs e)
         {
@@ -1440,15 +1081,15 @@ namespace osu_taiko_Mapping_Helper
             userInputTempData.isRelative = chkRelative.Checked;
             bool isEnable = userInputTempData.isRelative ?
                 userInputTempData.isEnableRelativeEnd : userInputTempData.isSv;
-            SetRelativeEnabledState(userInputTempData.isRelative);
-            SetTxtSvToEnabledState(isEnable);
-            SetBtnSwapSvEnabledState(isEnable);
-            SetBtnSetSvToEnabledState(isEnable);
+            FormUtils.SetRelativeEnabledState(userInputTempData.isRelative, userInputTempData, pnlRelativeSvGroup, chkEnableSvTo, chkEnableSv, rdoArithmetic, rdoGeometric, txtSvFrom, txtSvTo);
+            FormUtils.SetTxtSvToEnabledState(isEnable, txtSvTo);
+            FormUtils.SetBtnSwapSvEnabledState(isEnable, btnSwapSv);
+            FormUtils.SetBtnSetSvToEnabledState(isEnable, btnSetSvTo);
         }
         private void rdoRelativeMultiply_CheckedChanged(object sender, EventArgs e)
         {
             userInputTempData.isRelativeMultiply = rdoRelativeMultiply.Checked;
-            SetRelativeMultiplyEnableState(userInputTempData.isRelativeMultiply);
+            FormUtils.SetRelativeMultiplyEnableState(userInputTempData.isRelativeMultiply, userInputTempData, txtRelativeBaseSv, txtSvFrom, txtSvTo);
         }
         private void txtRelativeBaseSv_TextChanged(object sender, EventArgs e)
         {
@@ -1466,14 +1107,14 @@ namespace osu_taiko_Mapping_Helper
         private void chkEnableSvTo_CheckedChanged(object sender, EventArgs e)
         {
             userInputTempData.isEnableRelativeEnd = chkEnableSvTo.Checked;
-            SetTxtSvToEnabledState(userInputTempData.isEnableRelativeEnd);
-            SetBtnSwapSvEnabledState(userInputTempData.isEnableRelativeEnd);
-            SetBtnSetSvToEnabledState(userInputTempData.isEnableRelativeEnd);
+            FormUtils.SetTxtSvToEnabledState(userInputTempData.isEnableRelativeEnd, txtSvTo);
+            FormUtils.SetBtnSwapSvEnabledState(userInputTempData.isEnableRelativeEnd, btnSwapSv);
+            FormUtils.SetBtnSetSvToEnabledState(userInputTempData.isEnableRelativeEnd, btnSetSvTo);
         }
         private void chkEnableOffset_CheckedChanged(object sender, EventArgs e)
         {
             userInputTempData.isOffset = chkEnableOffset.Checked;
-            SetChkEnableOffset(userInputTempData.isOffset);
+            FormUtils.SetChkEnableOffset(userInputTempData.isOffset, txtOffset);
         }
         private void txtOffset_TextChanged(object sender, EventArgs e)
         {
@@ -1505,11 +1146,51 @@ namespace osu_taiko_Mapping_Helper
             {
                 case 0:
                     // Apply
-                    SetApplyControls(true);
+                    FormUtils.SetApplyControls(true,
+                                               userInputTempData,
+                                               config,
+                                               chkEnableSv,
+                                               chkEnableVolume,
+                                               chkApplyStartObject,
+                                               chkApplyEndObject,
+                                               chkRelative,
+                                               pnlRelativeSvGroup,
+                                               chkEnableSvTo,
+                                               txtSvFrom,
+                                               txtSvTo,
+                                               btnSwapSv,
+                                               btnSetSvFrom,
+                                               btnSetSvTo,
+                                               txtVolumeFrom,
+                                               txtVolumeTo,
+                                               btnSwapVolume,
+                                               btnSetVolumeFrom,
+                                               btnSetVolumeTo);
+                    userInputTempData.isOffset = config.offsetMode == 0 ? chkEnableHexaOffset.Checked : chkEnableOffset.Checked;
                     break;
                 case 1:
                     // Remove
-                    SetApplyControls(false);
+                    FormUtils.SetApplyControls(false,
+                                               userInputTempData,
+                                               config,
+                                               chkEnableSv,
+                                               chkEnableVolume,
+                                               chkApplyStartObject,
+                                               chkApplyEndObject,
+                                               chkRelative,
+                                               pnlRelativeSvGroup,
+                                               chkEnableSvTo,
+                                               txtSvFrom,
+                                               txtSvTo,
+                                               btnSwapSv,
+                                               btnSetSvFrom,
+                                               btnSetSvTo,
+                                               txtVolumeFrom,
+                                               txtVolumeTo,
+                                               btnSwapVolume,
+                                               btnSetVolumeFrom,
+                                               btnSetVolumeTo);
+                    userInputTempData.isOffset = false;
                     break;
                 default:
                     break;
@@ -1861,15 +1542,6 @@ namespace osu_taiko_Mapping_Helper
                 beatmapData = null;
                 userInputData = new();
             }
-        }
-        private void txtStartOffset_TextChanged(object sender, EventArgs e)
-        {
-            userInputTempData.offset = txtStartOffset.Text;
-        }
-        private void chkEnableStartOffset_CheckedChanged(object sender, EventArgs e)
-        {
-            userInputTempData.isOffset = chkEnableStartOffset.Checked;
-            SetChkEnableStartOffset(userInputTempData.isOffset);
         }
         #endregion
         #region utilityタブのイベントハンドラ

@@ -52,6 +52,7 @@
             // SettingForm
             { "LBL_SETTINGS_LANGUAGE", "言語設定" },
             { "LBL_SETTINGS_BACKUP_LIMIT", "バックアップ保持上限" },
+            { "LBL_SETTINGS_OFFSET_TYPE", "オフセットタイプ" },
             { "LBL_SETTINGS_NOTES_POSITION", "ノーツ配置設定" },
             { "LBL_SETTINGS_UNICODE_SUPPORT", "Unicode対応" },
             { "LBL_SETTINGS_SAVE", "保存" },
@@ -111,6 +112,7 @@
             // SettingForm
             { "LBL_SETTINGS_LANGUAGE", "Language" },
             { "LBL_SETTINGS_BACKUP_LIMIT", "Backup Limit" },
+            { "LBL_SETTINGS_OFFSET_TYPE", "Offset Type" },
             { "LBL_SETTINGS_NOTES_POSITION", "Notes Position" },
             { "LBL_SETTINGS_UNICODE_SUPPORT", "Unicode Support" },
             { "LBL_SETTINGS_SAVE", "Save" },
