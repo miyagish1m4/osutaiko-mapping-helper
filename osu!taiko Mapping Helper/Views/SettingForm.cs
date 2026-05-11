@@ -34,6 +34,7 @@ namespace osu_taiko_Mapping_Helper.Views
         {
             Common.SetLabelText(lblLanguage, "LBL_SETTINGS_LANGUAGE");
             Common.SetLabelText(lblMaxBackupCount, "LBL_SETTINGS_BACKUP_LIMIT");
+            Common.SetLabelText(lblOffsetType, "LBL_SETTINGS_OFFSET_TYPE");
             Common.SetLabelText(lblSeparateSetting, "LBL_SETTINGS_NOTES_POSITION");
             Common.SetLabelText(lblUnicodeSupport, "LBL_SETTINGS_UNICODE_SUPPORT");
             Common.SetLabelText(btnSave, "LBL_SETTINGS_SAVE");

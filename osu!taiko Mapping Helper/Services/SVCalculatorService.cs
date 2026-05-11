@@ -111,9 +111,8 @@ namespace osu_taiko_Mapping_Helper.Services
             try
             {
                 double baseSv = 1;
-                int offset = (userInputData.isOffset && userInputData.offsetMode == 1) ? userInputData.offset : 0;
                 // 削除後の適用されるSVと音量を求める
-                var applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time < (userInputData.timingFrom + offset));
+                var applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time < userInputData.timingFrom);
                 if (applyInheritedPoint != null)
                 {
                     baseSv = applyInheritedPoint.sv;
@@ -126,14 +125,14 @@ namespace osu_taiko_Mapping_Helper.Services
                 // 指定範囲内にスライダーがある場合はsliderLengthを調整する
                 for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
                 {
-                    if ((beatmap.hitObjects[i].time >= (userInputData.timingFrom + offset)) &&
+                    if ((beatmap.hitObjects[i].time >= userInputData.timingFrom) &&
                         (beatmap.hitObjects[i].time <= userInputData.timingTo) &&
                         (beatmap.hitObjects[i].noteType == Constants.NoteType.SLIDER))
                     {
                         // 途中に赤線が設置されている場合はbaseSvを1に変更する
                         for (global::System.Int32 j = (beatmap.timingPoints.Count) - (1); j >= 0; j--)
                         {
-                            if ((beatmap.timingPoints[j].time >= (userInputData.timingFrom + offset)) &&
+                            if ((beatmap.timingPoints[j].time >= userInputData.timingFrom) &&
                                 (beatmap.timingPoints[j].time <= beatmap.hitObjects[i].time))
                             {
                                 baseSv = 1;
@@ -151,7 +150,7 @@ namespace osu_taiko_Mapping_Helper.Services
                     {
                         continue;
                     }
-                    if (beatmap.timingPoints[i].time < (userInputData.timingFrom + offset))
+                    if (beatmap.timingPoints[i].time < userInputData.timingFrom)
                     {
                         break;
                     }
@@ -352,26 +351,34 @@ namespace osu_taiko_Mapping_Helper.Services
                         int time;
                         if (userInputData.isOffset)
                         {
-                            switch (userInputData.offsetMode)
+                            if (applyTimingPoint != null &&
+                                beatmap.timingPoints[0].time == beatmap.hitObjects[i].time)
                             {
-                                case 0:
-                                    if (i != 0 && applyTimingPoint != null)
-                                    {
-                                        HitObject? prevHo = (i == 0) ? null : beatmap.hitObjects[i - 1];
-                                        HitObject? nextHo = (i == beatmap.hitObjects.Count - 1) ? null : beatmap.hitObjects[i + 1];
-                                        offset = -(int)GetOffsetTiming(userInputData,
-                                                                       applyTimingPoint,
-                                                                       beatmap.hitObjects[i],
-                                                                       prevHo,
-                                                                       nextHo);
-                                    }
-                                    time = (int)(beatmap.hitObjects[i].rawTime + offset);
-                                    break;
-                                case 1:
-                                    time = beatmap.hitObjects[i].time + (int)offset;
-                                    break;
-                                default:
-                                    throw new Exception();
+                                time = beatmap.hitObjects[i].time;
+                            }
+                            else
+                            {
+                                switch (userInputData.offsetMode)
+                                {
+                                    case 0:
+                                        if (i != 0 && applyTimingPoint != null)
+                                        {
+                                            HitObject? prevHo = (i == 0) ? null : beatmap.hitObjects[i - 1];
+                                            HitObject? nextHo = (i == beatmap.hitObjects.Count - 1) ? null : beatmap.hitObjects[i + 1];
+                                            offset = -(int)GetOffsetTiming(userInputData,
+                                                                           applyTimingPoint,
+                                                                           beatmap.hitObjects[i],
+                                                                           prevHo,
+                                                                           nextHo);
+                                        }
+                                        time = (int)(beatmap.hitObjects[i].rawTime + offset);
+                                        break;
+                                    case 1:
+                                        time = beatmap.hitObjects[i].time + (int)offset;
+                                        break;
+                                    default:
+                                        throw new Exception();
+                                }
                             }
                         }
                         else

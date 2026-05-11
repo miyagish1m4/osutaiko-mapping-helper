@@ -112,7 +112,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             Name = "BGSetterForm";
-            Text = "BGSetterForm";
+            Text = "BG Setter";
             KeyDown += BGSetterForm_KeyDown;
             ((System.ComponentModel.ISupportInitialize)picDisplayBg).EndInit();
             ((System.ComponentModel.ISupportInitialize)picTaikoBar).EndInit();

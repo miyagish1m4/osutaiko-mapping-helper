@@ -1,7 +1,10 @@
-using System.Text;
-using System.Text.RegularExpressions;
 using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
+using OsuParsers.Beatmaps.Objects.Catch;
+using System.Text;
+using System.Text.RegularExpressions;
+using static System.Windows.Forms.LinkLabel;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 
 namespace osu_taiko_Mapping_Helper.Utils.Helper
 {
@@ -23,7 +26,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             var editorList = new List<string>();
             var metadataList = new List<string>();
             var difficultyList = new List<string>();
-            var eventsList = new List<string>();
+            var eventsList = new List<Events>();
             var timingPointList = new List<TimingPoint>();
             var coloursList = new List<string>();
             var uninheritedTimingPointList = new List<TimingPoint>();
@@ -116,13 +119,14 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                                                     ref List<string> editorList,
                                                     ref List<string> metadataList,
                                                     ref List<string> difficultyList,
-                                                    ref List<string> eventsList,
+                                                    ref List<Events> eventList,
                                                     ref List<TimingPoint> timingPointList,
                                                     ref List<string> coloursList,
                                                     ref List<HitObject> hitObjectList,
                                                     ref List<Bookmark> bookmarks)
         {
             int structureCode = Constants.VERSION_CODE;
+            int eventCode = 0;
             try
             {
                 foreach (var line in lines)
@@ -199,7 +203,34 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                             difficultyList.Add(line);
                             break;
                         case Constants.EVENTS_CODE:
-                            eventsList.Add(line);
+                            switch (line)
+                            {
+                                case Constants.BG_AND_VIDEO:
+                                    eventCode = Constants.BG_AND_VIDEO_CODE;
+                                    break;
+                                case Constants.BREAK_PERIODS:
+                                    eventCode = Constants.BREAK_PERIODS_CODE;
+                                    break;
+                                case Constants.STORYBOARD_LAYER_0:
+                                    eventCode = Constants.STORYBOARD_LAYER_0_CODE;
+                                    break;
+                                case Constants.STORYBOARD_LAYER_1:
+                                    eventCode = Constants.STORYBOARD_LAYER_1_CODE;
+                                    break;
+                                case Constants.STORYBOARD_LAYER_2:
+                                    eventCode = Constants.STORYBOARD_LAYER_2_CODE;
+                                    break;
+                                case Constants.STORYBOARD_LAYER_3:
+                                    eventCode = Constants.STORYBOARD_LAYER_3_CODE;
+                                    break;
+                                case Constants.STORYBOARD_LAYER_4:
+                                    eventCode = Constants.STORYBOARD_LAYER_4_CODE;
+                                    break;
+                                case Constants.STORYBOARD_SOUND_SAMPLES:
+                                    eventCode = Constants.STORYBOARD_SOUND_SAMPLES_CODE;
+                                    break;
+                            }
+                            eventList.Add(new Events(line, eventCode));
                             break;
                         case Constants.TIMING_POINTS_CODE:
                             timingPointList.Add(new TimingPoint(line));
@@ -560,7 +591,28 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 file.WriteLine("");
                 file.WriteLine(Constants.EDITOR);
-                beatmap.editor.ForEach(line => file.WriteLine(line));
+                foreach (var edit in beatmap.editor)
+                {
+                    if (edit.StartsWith(Constants.BOOKMARKS) && userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET)
+                    {
+                        string retBookmarkLine = Constants.BOOKMARKS + ": ";
+                        var bookmarks = edit.Substring(11).Split(',');
+                        for (int i = 0; i < bookmarks.Length; i++)
+                        {
+                            var retBookmark = (int.Parse(bookmarks[i]) + userInputUtilityData.offset).ToString();
+                            retBookmarkLine += retBookmark;
+                            if (i < bookmarks.Length - 1)
+                            {
+                                retBookmarkLine += ",";
+                            }
+                        }
+                        file.WriteLine(retBookmarkLine);
+                    }
+                    else
+                    {
+                        file.WriteLine(edit);
+                    }
+                }
                 file.WriteLine("");
                 file.WriteLine(Constants.METADATA);
                 for (int i = 0; i < beatmap.metadata.Count; i++)
@@ -614,25 +666,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 beatmap.difficulty.ForEach(line => file.WriteLine(line));
                 file.WriteLine("");
                 file.WriteLine(Constants.EVENTS);
-                for (global::System.Int32 i = 0; i < beatmap.events.Count; i++)
-                {
-                    file.WriteLine(beatmap.events[i]);
-                    // メタデータ設定ユーティリティが選択されている場合は選択している譜面のBGをコピーする
-                    if (userInputUtilityData?.utilityCode == Constants.UTILITY_SETTING_COPIER &&
-                        userInputUtilityData?.settingCopierCode == Constants.SETTING_COPIER_BG &&
-                        beatmap.events[i].Contains(Constants.BG_AND_VIDEO) &&
-                        beatmapInfo?.background != string.Empty)
-                    {
-                        file.WriteLine(beatmapInfo?.background);
-                        if (beatmap.events[i + 1].Contains(Constants.JPG_EXTENSION) ||
-                            beatmap.events[i + 1].Contains(Constants.JPEG_EXTENSION) ||
-                            beatmap.events[i + 1].Contains(Constants.PNG_EXTENSION) ||
-                            beatmap.events[i + 1].Contains(Constants.WEBP_EXTENSION))
-                        {
-                            i++;
-                        }
-                    }
-                }
+                CreateEnvetsLines(beatmap.events, beatmapInfo, userInputUtilityData, file);
                 file.WriteLine("");
                 file.WriteLine(Constants.TIMING_POINTS);
                 var inheritedPoints = beatmap.timingPoints.Where(tp => !tp.isRedLine).ToList();
@@ -728,174 +762,84 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             return true;
         }
         /// <summary>
-        /// osuファイルを作成する (BGSetter)
+        /// イベントの行を作成する (SVEditor,Utility)
         /// </summary>
-        /// <param name="beatmap">譜面情報</param>
-        /// <param name="beatmapPath">ファイル名</param>
-        /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
-        /// <param name="beatmapInfo">選択している譜面情報</param>
+        /// <param name="events">イベント</param>
+        /// <param name="beatmapInfo">ビートマップ情報</param>
+        /// <param name="userInputUtilityData">ユーザー入力ユーティリティデータ</param>
+        /// <param name="file">StreamWriter</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool ExportToOsuFile(Beatmap beatmap,
-                                             string beatmapPath,
-                                             string[] backgrounds)
+        private static bool CreateEnvetsLines(List<Events> events,
+                                              BeatmapMetadata? beatmapInfo,
+                                              UserInputUtilityData? userInputUtilityData,
+                                              StreamWriter? file)
         {
-            StreamWriter? file = null;
-            try
+            if (file == null)
             {
-                file = new(beatmapPath, false, Encoding.GetEncoding("utf-8"));
-                // 設定されている譜面データをすべて出力する
-                file.WriteLine(beatmap.version);
-                file.WriteLine("");
-                file.WriteLine(Constants.GENERAL);
-                foreach (var line in beatmap.general)
-                {
-                    file.WriteLine(line);
-                }
-                file.WriteLine("");
-                file.WriteLine(Constants.EDITOR);
-                beatmap.editor.ForEach(line => file.WriteLine(line));
-                file.WriteLine("");
-                file.WriteLine(Constants.METADATA);
-                for (int i = 0; i < beatmap.metadata.Count; i++)
-                {
-                    file.WriteLine(beatmap.metadata[i]);
-                }
-                file.WriteLine("");
-                file.WriteLine(Constants.DIFFICULTY);
-                beatmap.difficulty.ForEach(line => file.WriteLine(line));
-                file.WriteLine("");
-                file.WriteLine(Constants.EVENTS);
-                for (global::System.Int32 i = 0; i < beatmap.events.Count; i++)
-                {
-                    if (beatmap.events[i].Contains(Constants.JPG_EXTENSION) ||
-                        beatmap.events[i].Contains(Constants.JPEG_EXTENSION) ||
-                        beatmap.events[i].Contains(Constants.PNG_EXTENSION) ||
-                        beatmap.events[i].Contains(Constants.WEBP_EXTENSION))
-                    {
-                        file.WriteLine(string.Join(",", backgrounds));
-                    }
-                    else
-                    {
-                        file.WriteLine(beatmap.events[i]);
-                    }
-                }
-                file.WriteLine("");
-                file.WriteLine(Constants.TIMING_POINTS);
-                foreach (var timingPoint in beatmap.timingPoints)
-                {
-                    // beatLengthは桁数を指定して求める
-                    string beatLength = (timingPoint.isRedLine ?
-                                        Math.Round(Constants.ONE_MINUTE / timingPoint.bpm, 12, MidpointRounding.AwayFromZero).ToString() :
-                                        Math.Round(-100 / timingPoint.sv, 12, MidpointRounding.AwayFromZero).ToString());
-                    if (beatLength.Contains('.'))
-                    {
-                        // beatLengthが整数だった場合は"0"と"."を削除する
-                        beatLength = beatLength.TrimEnd('0');
-                        beatLength = beatLength.TrimEnd('.');
-                    }
-                    string timingPointLine = timingPoint.time + "," +
-                                             beatLength + "," +
-                                             timingPoint.meter + "," +
-                                             timingPoint.sampleSet + "," +
-                                             timingPoint.sampleIndex + "," +
-                                             timingPoint.volume + "," +
-                                             (timingPoint.isRedLine ? "1" : "0") + "," +
-                                             timingPoint.effect;
-                    file.WriteLine(timingPointLine);
-                }
-                file.WriteLine("");
-                if (beatmap.colours.Count != 0)
-                {
-                    file.WriteLine(Constants.COLOURS);
-                    beatmap.colours.ForEach(line => file.WriteLine(line));
-                }
-                file.WriteLine("");
-                file.WriteLine(Constants.HIT_OBJECTS);
-                for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
-                {
-                    // HitObjectsの1行のデータを作成する
-                    if (beatmap.hitObjects[i].noteType != Constants.NoteType.BARLINE &&
-                        beatmap.hitObjects[i].noteType != Constants.NoteType.BOOKMARK &&
-                        beatmap.hitObjects[i].noteType != Constants.NoteType.SPINNER_END)
-                    {
-                        string hitObjectLine = CreateHitObjectLine(beatmap.hitObjects[i]);
-                        file.WriteLine(hitObjectLine);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
-                Common.WriteExceptionMessage(ex);
                 return false;
             }
-            finally
-            {
-                if (file != null)
-                {
-                    file.Close();
-                }
-            }
-            return true;
-        }
-        /// <summary>
-        /// 前に実行したファイルをコピーする処理
-        /// </summary>
-        /// <param name="path">osuファイルが格納されているフォルダ</param>
-        /// <param name="backupDirectory">バックアップディレクトリ</param>
-        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        internal static bool ExportToPreviousOsuFile(string path,
-                                                     string backupDirectory)
-        {
             try
             {
-                string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + backupDirectory;
-                // バックアップディレクトリが見つからない場合はfalseで返す
-                if (!Directory.Exists(backupPath))
+                for (int i = 0; i < events.Count; i++)
                 {
-                    return false;
+                    if (events[i].isComment)
+                    {
+                        file.WriteLine(events[i].comment);
+                        continue;
+                    }
+                    var line = string.Empty;
+                    switch (events[i].eventCode)
+                    {
+                        case Constants.BG_AND_VIDEO_CODE:
+                            if (events[i].isVideo)
+                            {
+                                var startTime = (userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET) ?
+                                                (events[i].startTime + userInputUtilityData.offset) : events[i].startTime;
+                                line = "Video," + startTime + "," + events[i].fileName;
+                                if (events[i].xOffset != int.MinValue && events[i].yOffset != int.MinValue)
+                                {
+                                    line += "," + events[i].xOffset + "," + events[i].yOffset;
+                                }
+                                file.WriteLine(line);
+                            }
+                            else
+                            {
+                                if (userInputUtilityData?.utilityCode == Constants.UTILITY_SETTING_COPIER &&
+                                    userInputUtilityData?.settingCopierCode == Constants.SETTING_COPIER_BG &&
+                                    beatmapInfo?.background != string.Empty &&
+                                    beatmapInfo?.background != null)
+                                {
+                                    line = beatmapInfo.background;
+                                } else
+                                {
+                                    line = "0," + events[i].startTime + "," + events[i].fileName + "," + events[i].xOffset + "," + events[i].yOffset;
+                                }
+                                file.WriteLine(line);
+                            }
+                            break;
+                        case Constants.BREAK_PERIODS_CODE:
+                            line = "2," + events[i].startTime + "," + events[i].endTime;
+                            file.WriteLine(line);
+                            break;
+                        case Constants.STORYBOARD_LAYER_0_CODE:
+                        case Constants.STORYBOARD_LAYER_1_CODE:
+                        case Constants.STORYBOARD_LAYER_2_CODE:
+                        case Constants.STORYBOARD_LAYER_3_CODE:
+                        case Constants.STORYBOARD_LAYER_4_CODE:
+                        case Constants.STORYBOARD_SOUND_SAMPLES_CODE:
+                            file.WriteLine(events[i].layer);
+                            break;
+                    }
                 }
-                // バックアップファイルを探す
-                string[] files = Directory.GetFiles(backupPath, "*" + Constants.OSU_EXTENSION);
-                // バックアップファイルが見つからない場合はfalseで返す
-                if (files.Length == 0)
-                {
-                    return false;
-                }
-                List<long> fileDate = [];
-                // ファイル名の_を消し、数値にする
-                foreach (var file in files)
-                {
-                    string deletedPath = file.Replace(backupPath + "\\", "");
-                    string deletedExtension = deletedPath.Replace(Constants.OSU_EXTENSION, "");
-                    string deletedUnderScore = deletedExtension.Replace("_", "");
-                    fileDate.Add(Convert.ToInt64(deletedUnderScore));
-                }
-                // 数値を降順にソートする
-                fileDate.Sort();
-                fileDate.Reverse();
-                // 最後の実行で作成されたバックアップファイルを探す
-                long currentDate = Convert.ToInt64(DateTime.Now.ToString("yyyyMMddHHmmssfff"));
-                var targetFile = fileDate.FirstOrDefault(f => f <= currentDate);
-                if (targetFile == 0)
-                {
-                    return false;
-                }
-                string targetFileString = targetFile.ToString("0000_00_00_00_00_00_000");
-                targetFileString = Path.Combine(backupPath, targetFileString + Constants.OSU_EXTENSION);
-                // Songsフォルダにコピーの作成
-                File.Copy(targetFileString, path, true);
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
-                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
-                Common.WriteExceptionMessage(ex);
                 return false;
             }
         }
         /// <summary>
-        /// osuファイルのヒットオブジェクトの行を作成する
+        /// osuファイルのヒットオブジェクトの行を作成する (SVEditor,Utility)
         /// </summary>
         /// <param name="hitObject">ヒットオブジェクトデータ</param>
         /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
@@ -1051,7 +995,176 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             return sb.ToString();
         }
         /// <summary>
-        /// osuファイルのヒットオブジェクトの行を作成する
+        /// osuファイルを作成する (BGSetter)
+        /// </summary>
+        /// <param name="beatmap">譜面情報</param>
+        /// <param name="beatmapPath">ファイル名</param>
+        /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
+        /// <param name="beatmapInfo">選択している譜面情報</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool ExportToOsuFile(Beatmap beatmap,
+                                             string beatmapPath,
+                                             string[] backgrounds)
+        {
+            StreamWriter? file = null;
+            try
+            {
+                file = new(beatmapPath, false, Encoding.GetEncoding("utf-8"));
+                // 設定されている譜面データをすべて出力する
+                file.WriteLine(beatmap.version);
+                file.WriteLine("");
+                file.WriteLine(Constants.GENERAL);
+                foreach (var line in beatmap.general)
+                {
+                    file.WriteLine(line);
+                }
+                file.WriteLine("");
+                file.WriteLine(Constants.EDITOR);
+                beatmap.editor.ForEach(line => file.WriteLine(line));
+                file.WriteLine("");
+                file.WriteLine(Constants.METADATA);
+                for (int i = 0; i < beatmap.metadata.Count; i++)
+                {
+                    file.WriteLine(beatmap.metadata[i]);
+                }
+                file.WriteLine("");
+                file.WriteLine(Constants.DIFFICULTY);
+                beatmap.difficulty.ForEach(line => file.WriteLine(line));
+                file.WriteLine("");
+                file.WriteLine(Constants.EVENTS);
+                CreateEnvetsLines(beatmap.events, backgrounds, file);
+                file.WriteLine("");
+                file.WriteLine(Constants.TIMING_POINTS);
+                foreach (var timingPoint in beatmap.timingPoints)
+                {
+                    // beatLengthは桁数を指定して求める
+                    string beatLength = (timingPoint.isRedLine ?
+                                        Math.Round(Constants.ONE_MINUTE / timingPoint.bpm, 12, MidpointRounding.AwayFromZero).ToString() :
+                                        Math.Round(-100 / timingPoint.sv, 12, MidpointRounding.AwayFromZero).ToString());
+                    if (beatLength.Contains('.'))
+                    {
+                        // beatLengthが整数だった場合は"0"と"."を削除する
+                        beatLength = beatLength.TrimEnd('0');
+                        beatLength = beatLength.TrimEnd('.');
+                    }
+                    string timingPointLine = timingPoint.time + "," +
+                                             beatLength + "," +
+                                             timingPoint.meter + "," +
+                                             timingPoint.sampleSet + "," +
+                                             timingPoint.sampleIndex + "," +
+                                             timingPoint.volume + "," +
+                                             (timingPoint.isRedLine ? "1" : "0") + "," +
+                                             timingPoint.effect;
+                    file.WriteLine(timingPointLine);
+                }
+                file.WriteLine("");
+                if (beatmap.colours.Count != 0)
+                {
+                    file.WriteLine(Constants.COLOURS);
+                    beatmap.colours.ForEach(line => file.WriteLine(line));
+                }
+                file.WriteLine("");
+                file.WriteLine(Constants.HIT_OBJECTS);
+                for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
+                {
+                    // HitObjectsの1行のデータを作成する
+                    if (beatmap.hitObjects[i].noteType != Constants.NoteType.BARLINE &&
+                        beatmap.hitObjects[i].noteType != Constants.NoteType.BOOKMARK &&
+                        beatmap.hitObjects[i].noteType != Constants.NoteType.SPINNER_END)
+                    {
+                        string hitObjectLine = CreateHitObjectLine(beatmap.hitObjects[i]);
+                        file.WriteLine(hitObjectLine);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+            finally
+            {
+                if (file != null)
+                {
+                    file.Close();
+                }
+            }
+            return true;
+        }
+        /// <summary>
+        /// イベントの行を作成する (BGSetter)
+        /// </summary>
+        /// <param name="events">イベント</param>
+        /// <param name="backgrounds">BG情報</param>
+        /// <param name="file">StreamWriter</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        private static bool CreateEnvetsLines(List<Events> events,
+                                              string[] backgrounds,
+                                              StreamWriter? file)
+        {
+            if (file == null)
+            {
+                return false;
+            }
+            try
+            {
+                for (int i = 0; i < events.Count; i++)
+                {
+                    try
+                    {
+                        if (events[i].isComment)
+                        {
+                            file.WriteLine(events[i].comment);
+                            continue;
+                        }
+                        var line = string.Empty;
+                        switch (events[i].eventCode)
+                        {
+                            case Constants.BG_AND_VIDEO_CODE:
+                                if (events[i].isVideo)
+                                {
+                                    line = "Video," + events[i].startTime + "," + events[i].fileName;
+                                    if (events[i].xOffset != int.MinValue && events[i].yOffset != int.MinValue)
+                                    {
+                                        line += "," + events[i].xOffset + "," + events[i].yOffset;
+                                    }
+                                    file.WriteLine(line);
+                                }
+                                else
+                                {
+                                    line = string.Join(",", backgrounds);
+                                    file.WriteLine(line);
+                                }
+                                break;
+                            case Constants.BREAK_PERIODS_CODE:
+                                line = "2," + events[i].startTime + "," + events[i].endTime;
+                                file.WriteLine(line);
+                                break;
+                            case Constants.STORYBOARD_LAYER_0_CODE:
+                            case Constants.STORYBOARD_LAYER_1_CODE:
+                            case Constants.STORYBOARD_LAYER_2_CODE:
+                            case Constants.STORYBOARD_LAYER_3_CODE:
+                            case Constants.STORYBOARD_LAYER_4_CODE:
+                            case Constants.STORYBOARD_SOUND_SAMPLES_CODE:
+                                file.WriteLine(events[i].layer);
+                                break;
+                        }
+                    }
+                    catch
+                    {
+                        file.WriteLine(events[i].comment);
+                    }
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        /// <summary>
+        /// osuファイルのヒットオブジェクトの行を作成する (BGSetter)
         /// </summary>
         /// <param name="hitObject">ヒットオブジェクトデータ</param>
         /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
@@ -1183,6 +1296,62 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         return userInputUtilityData.finisherKatY;
                     }
                 }
+            }
+        }
+        /// <summary>
+        /// 前に実行したファイルをコピーする処理
+        /// </summary>
+        /// <param name="path">osuファイルが格納されているフォルダ</param>
+        /// <param name="backupDirectory">バックアップディレクトリ</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        internal static bool ExportToPreviousOsuFile(string path,
+                                                     string backupDirectory)
+        {
+            try
+            {
+                string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + backupDirectory;
+                // バックアップディレクトリが見つからない場合はfalseで返す
+                if (!Directory.Exists(backupPath))
+                {
+                    return false;
+                }
+                // バックアップファイルを探す
+                string[] files = Directory.GetFiles(backupPath, "*" + Constants.OSU_EXTENSION);
+                // バックアップファイルが見つからない場合はfalseで返す
+                if (files.Length == 0)
+                {
+                    return false;
+                }
+                List<long> fileDate = [];
+                // ファイル名の_を消し、数値にする
+                foreach (var file in files)
+                {
+                    string deletedPath = file.Replace(backupPath + "\\", "");
+                    string deletedExtension = deletedPath.Replace(Constants.OSU_EXTENSION, "");
+                    string deletedUnderScore = deletedExtension.Replace("_", "");
+                    fileDate.Add(Convert.ToInt64(deletedUnderScore));
+                }
+                // 数値を降順にソートする
+                fileDate.Sort();
+                fileDate.Reverse();
+                // 最後の実行で作成されたバックアップファイルを探す
+                long currentDate = Convert.ToInt64(DateTime.Now.ToString("yyyyMMddHHmmssfff"));
+                var targetFile = fileDate.FirstOrDefault(f => f <= currentDate);
+                if (targetFile == 0)
+                {
+                    return false;
+                }
+                string targetFileString = targetFile.ToString("0000_00_00_00_00_00_000");
+                targetFileString = Path.Combine(backupPath, targetFileString + Constants.OSU_EXTENSION);
+                // Songsフォルダにコピーの作成
+                File.Copy(targetFileString, path, true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
+                Common.WriteExceptionMessage(ex);
+                return false;
             }
         }
         /// <summary>

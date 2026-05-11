@@ -49,7 +49,7 @@
             txtPisitionX = new TextBox();
             chkUnicodeSupport = new CheckBox();
             lblUnicodeSupport = new Label();
-            label2 = new Label();
+            lblOffsetType = new Label();
             rdoHexaAndDuoOffset = new RadioButton();
             rdoMiliSecondOffset = new RadioButton();
             panel1 = new Panel();
@@ -311,17 +311,17 @@
             lblUnicodeSupport.Text = "Unicode対応";
             lblUnicodeSupport.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // label2
+            // lblOffsetType
             // 
-            label2.Anchor = AnchorStyles.Bottom;
-            label2.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            label2.ForeColor = Color.White;
-            label2.Location = new Point(12, 160);
-            label2.Name = "label2";
-            label2.Size = new Size(256, 25);
-            label2.TabIndex = 23;
-            label2.Text = "Unicode対応";
-            label2.TextAlign = ContentAlignment.MiddleLeft;
+            lblOffsetType.Anchor = AnchorStyles.Bottom;
+            lblOffsetType.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            lblOffsetType.ForeColor = Color.White;
+            lblOffsetType.Location = new Point(12, 160);
+            lblOffsetType.Name = "lblOffsetType";
+            lblOffsetType.Size = new Size(256, 25);
+            lblOffsetType.TabIndex = 23;
+            lblOffsetType.Text = "Unicode対応";
+            lblOffsetType.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // rdoHexaAndDuoOffset
             // 
@@ -365,7 +365,7 @@
             ClientSize = new Size(466, 552);
             Controls.Add(rdoMiliSecondOffset);
             Controls.Add(rdoHexaAndDuoOffset);
-            Controls.Add(label2);
+            Controls.Add(lblOffsetType);
             Controls.Add(chkUnicodeSupport);
             Controls.Add(lblUnicodeSupport);
             Controls.Add(lblSeparateSetting);
@@ -413,7 +413,7 @@
         private Label lblPisitionX;
         private CheckBox chkUnicodeSupport;
         private Label lblUnicodeSupport;
-        private Label label2;
+        private Label lblOffsetType;
         private RadioButton rdoHexaAndDuoOffset;
         private RadioButton rdoMiliSecondOffset;
         private Panel panel1;

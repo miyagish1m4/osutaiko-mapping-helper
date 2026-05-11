@@ -60,6 +60,22 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const string DIFFICULTY = "[Difficulty]";
         internal const string EVENTS = "[Events]";
         internal const string BG_AND_VIDEO = "//Background and Video events";
+        internal const string BREAK_PERIODS = "//Break Periods";
+        internal const string STORYBOARD_LAYER_0 = "//Storyboard Layer 0 (Background)";
+        internal const string STORYBOARD_LAYER_1 = "//Storyboard Layer 1 (Fail)";
+        internal const string STORYBOARD_LAYER_2 = "//Storyboard Layer 2 (Pass)";
+        internal const string STORYBOARD_LAYER_3 = "//Storyboard Layer 3 (Foreground)";
+        internal const string STORYBOARD_LAYER_4 = "//Storyboard Layer 4 (Overlay)";
+        internal const string STORYBOARD_SOUND_SAMPLES = "//Storyboard Sound Samples";
+        internal const int COMMENT_CODE = -1;
+        internal const int BG_AND_VIDEO_CODE = 0;
+        internal const int BREAK_PERIODS_CODE = 1;
+        internal const int STORYBOARD_LAYER_0_CODE = 2;
+        internal const int STORYBOARD_LAYER_1_CODE = 3;
+        internal const int STORYBOARD_LAYER_2_CODE = 4;
+        internal const int STORYBOARD_LAYER_3_CODE = 5;
+        internal const int STORYBOARD_LAYER_4_CODE = 6;
+        internal const int STORYBOARD_SOUND_SAMPLES_CODE = 7;
         internal const string TIMING_POINTS = "[TimingPoints]";
         internal const string COLOURS = "[Colours]";
         internal const string HIT_OBJECTS = "[HitObjects]";
@@ -80,6 +96,12 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const string CREATOR = "Creator:";
         internal const string SOURCE = "Source:";
         internal const string TAGS = "Tags:";
+        #endregion
+        #region メニューコード
+        internal const int MENU_SV_EDITOR = 0;
+        internal const int MENU_UTILITY = 1;
+        internal const int MENU_TIMING_PROPERTY = 2;
+        internal const int MENU_BG_SETTER = 3;
         #endregion
         #region セットコード
         internal const int SET_TIMING = 0;

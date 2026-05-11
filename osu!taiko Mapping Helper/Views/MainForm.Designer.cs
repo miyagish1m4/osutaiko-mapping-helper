@@ -69,6 +69,10 @@ namespace osu_taiko_Mapping_Helper
             picSpecificNormalSpinner = new PictureBox();
             tabExecuteType = new TabControl();
             tabApplyPage = new TabPage();
+            pnlHexaAndDecaOffset = new Panel();
+            chkEnableHexaOffset = new CheckBox();
+            label1 = new Label();
+            chkEnableDuoOffset = new CheckBox();
             chkEnableKiai = new CheckBox();
             tabSetType = new TabControl();
             tabHitObjectsPage = new TabPage();
@@ -84,10 +88,6 @@ namespace osu_taiko_Mapping_Helper
             tabGreenLine = new TabPage();
             pnlMiliSecondOffset = new Panel();
             tabRemovePage = new TabPage();
-            pnlMiliSecondStartOffset = new Panel();
-            chkEnableStartOffset = new CheckBox();
-            txtStartOffset = new TextBox();
-            lblMiliSecondRemove = new Label();
             chkApplyEndObject = new CheckBox();
             chkApplyStartObject = new CheckBox();
             lblCalculationType = new Label();
@@ -139,10 +139,6 @@ namespace osu_taiko_Mapping_Helper
             txtResnapTimingFrom = new TextBox();
             txtResnapTimingTo = new TextBox();
             btnBackup = new Button();
-            pnlHexaAndDecaOffset = new Panel();
-            chkEnableDuoOffset = new CheckBox();
-            label1 = new Label();
-            chkEnableHexaOffset = new CheckBox();
             pnlBeatmapInfoGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picDisplayBg).BeginInit();
             pnlCalcurationTypeGroup.SuspendLayout();
@@ -155,18 +151,17 @@ namespace osu_taiko_Mapping_Helper
             ((System.ComponentModel.ISupportInitialize)picSpecificNormalSpinner).BeginInit();
             tabExecuteType.SuspendLayout();
             tabApplyPage.SuspendLayout();
+            pnlHexaAndDecaOffset.SuspendLayout();
             tabSetType.SuspendLayout();
             tabHitObjectsPage.SuspendLayout();
             pnlSpecificGroup.SuspendLayout();
             tabBeatSnap.SuspendLayout();
             pnlMiliSecondOffset.SuspendLayout();
             tabRemovePage.SuspendLayout();
-            pnlMiliSecondStartOffset.SuspendLayout();
             pnlRelativeSvGroup.SuspendLayout();
             menuStrip1.SuspendLayout();
             pnlGroupSvEditor.SuspendLayout();
             pnlGroupUtility.SuspendLayout();
-            pnlHexaAndDecaOffset.SuspendLayout();
             SuspendLayout();
             // 
             // pnlBeatmapInfoGroup
@@ -626,6 +621,55 @@ namespace osu_taiko_Mapping_Helper
             tabApplyPage.TabIndex = 0;
             tabApplyPage.Text = "適用";
             // 
+            // pnlHexaAndDecaOffset
+            // 
+            pnlHexaAndDecaOffset.Controls.Add(chkEnableHexaOffset);
+            pnlHexaAndDecaOffset.Controls.Add(label1);
+            pnlHexaAndDecaOffset.Controls.Add(chkEnableDuoOffset);
+            pnlHexaAndDecaOffset.Location = new Point(131, 5);
+            pnlHexaAndDecaOffset.Name = "pnlHexaAndDecaOffset";
+            pnlHexaAndDecaOffset.Size = new Size(246, 39);
+            pnlHexaAndDecaOffset.TabIndex = 6;
+            // 
+            // chkEnableHexaOffset
+            // 
+            chkEnableHexaOffset.AutoSize = true;
+            chkEnableHexaOffset.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            chkEnableHexaOffset.ForeColor = Color.White;
+            chkEnableHexaOffset.Location = new Point(18, 9);
+            chkEnableHexaOffset.Name = "chkEnableHexaOffset";
+            chkEnableHexaOffset.Size = new Size(95, 21);
+            chkEnableHexaOffset.TabIndex = 16;
+            chkEnableHexaOffset.TabStop = false;
+            chkEnableHexaOffset.Text = "-1/16 Offset";
+            chkEnableHexaOffset.UseVisualStyleBackColor = true;
+            chkEnableHexaOffset.CheckedChanged += chkEnableHexaOffset_CheckedChanged;
+            // 
+            // label1
+            // 
+            label1.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            label1.ForeColor = Color.White;
+            label1.Location = new Point(117, 9);
+            label1.Name = "label1";
+            label1.Size = new Size(8, 21);
+            label1.TabIndex = 15;
+            label1.Text = "(";
+            label1.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // chkEnableDuoOffset
+            // 
+            chkEnableDuoOffset.AutoSize = true;
+            chkEnableDuoOffset.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            chkEnableDuoOffset.ForeColor = Color.White;
+            chkEnableDuoOffset.Location = new Point(126, 9);
+            chkEnableDuoOffset.Name = "chkEnableDuoOffset";
+            chkEnableDuoOffset.Size = new Size(117, 21);
+            chkEnableDuoOffset.TabIndex = 2;
+            chkEnableDuoOffset.TabStop = false;
+            chkEnableDuoOffset.Text = "-1/12 inclusive )";
+            chkEnableDuoOffset.UseVisualStyleBackColor = true;
+            chkEnableDuoOffset.CheckedChanged += chkEnableDuoOffset_CheckedChanged;
+            // 
             // chkEnableKiai
             // 
             chkEnableKiai.AutoSize = true;
@@ -830,7 +874,6 @@ namespace osu_taiko_Mapping_Helper
             tabRemovePage.BackColor = Color.FromArgb(0, 64, 64);
             tabRemovePage.BorderStyle = BorderStyle.FixedSingle;
             tabRemovePage.Controls.Add(btnRemove);
-            tabRemovePage.Controls.Add(pnlMiliSecondStartOffset);
             tabRemovePage.ForeColor = Color.DarkCyan;
             tabRemovePage.Location = new Point(4, 44);
             tabRemovePage.Name = "tabRemovePage";
@@ -838,54 +881,6 @@ namespace osu_taiko_Mapping_Helper
             tabRemovePage.Size = new Size(385, 289);
             tabRemovePage.TabIndex = 1;
             tabRemovePage.Text = "削除";
-            // 
-            // pnlMiliSecondStartOffset
-            // 
-            pnlMiliSecondStartOffset.Controls.Add(chkEnableStartOffset);
-            pnlMiliSecondStartOffset.Controls.Add(txtStartOffset);
-            pnlMiliSecondStartOffset.Controls.Add(lblMiliSecondRemove);
-            pnlMiliSecondStartOffset.Location = new Point(131, 5);
-            pnlMiliSecondStartOffset.Name = "pnlMiliSecondStartOffset";
-            pnlMiliSecondStartOffset.Size = new Size(246, 39);
-            pnlMiliSecondStartOffset.TabIndex = 20;
-            // 
-            // chkEnableStartOffset
-            // 
-            chkEnableStartOffset.AutoSize = true;
-            chkEnableStartOffset.Checked = true;
-            chkEnableStartOffset.CheckState = CheckState.Checked;
-            chkEnableStartOffset.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            chkEnableStartOffset.ForeColor = Color.White;
-            chkEnableStartOffset.Location = new Point(61, 9);
-            chkEnableStartOffset.Name = "chkEnableStartOffset";
-            chkEnableStartOffset.Size = new Size(112, 21);
-            chkEnableStartOffset.TabIndex = 0;
-            chkEnableStartOffset.TabStop = false;
-            chkEnableStartOffset.Text = "始点のオフセット";
-            chkEnableStartOffset.UseVisualStyleBackColor = true;
-            chkEnableStartOffset.CheckedChanged += chkEnableStartOffset_CheckedChanged;
-            // 
-            // txtStartOffset
-            // 
-            txtStartOffset.BackColor = SystemColors.Window;
-            txtStartOffset.BorderStyle = BorderStyle.FixedSingle;
-            txtStartOffset.Location = new Point(172, 6);
-            txtStartOffset.Name = "txtStartOffset";
-            txtStartOffset.Size = new Size(40, 27);
-            txtStartOffset.TabIndex = 1;
-            txtStartOffset.TabStop = false;
-            txtStartOffset.TextChanged += txtStartOffset_TextChanged;
-            // 
-            // lblMiliSecondRemove
-            // 
-            lblMiliSecondRemove.AutoSize = true;
-            lblMiliSecondRemove.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
-            lblMiliSecondRemove.ForeColor = Color.White;
-            lblMiliSecondRemove.Location = new Point(217, 11);
-            lblMiliSecondRemove.Name = "lblMiliSecondRemove";
-            lblMiliSecondRemove.Size = new Size(23, 15);
-            lblMiliSecondRemove.TabIndex = 9;
-            lblMiliSecondRemove.Text = "ms";
             // 
             // chkApplyEndObject
             // 
@@ -1628,55 +1623,6 @@ namespace osu_taiko_Mapping_Helper
             btnBackup.UseVisualStyleBackColor = false;
             btnBackup.Click += btnBackup_Click;
             // 
-            // pnlHexaAndDecaOffset
-            // 
-            pnlHexaAndDecaOffset.Controls.Add(chkEnableHexaOffset);
-            pnlHexaAndDecaOffset.Controls.Add(label1);
-            pnlHexaAndDecaOffset.Controls.Add(chkEnableDuoOffset);
-            pnlHexaAndDecaOffset.Location = new Point(131, 5);
-            pnlHexaAndDecaOffset.Name = "pnlHexaAndDecaOffset";
-            pnlHexaAndDecaOffset.Size = new Size(246, 39);
-            pnlHexaAndDecaOffset.TabIndex = 6;
-            // 
-            // chkEnableDuoOffset
-            // 
-            chkEnableDuoOffset.AutoSize = true;
-            chkEnableDuoOffset.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            chkEnableDuoOffset.ForeColor = Color.White;
-            chkEnableDuoOffset.Location = new Point(126, 9);
-            chkEnableDuoOffset.Name = "chkEnableDuoOffset";
-            chkEnableDuoOffset.Size = new Size(117, 21);
-            chkEnableDuoOffset.TabIndex = 2;
-            chkEnableDuoOffset.TabStop = false;
-            chkEnableDuoOffset.Text = "-1/12 inclusive )";
-            chkEnableDuoOffset.UseVisualStyleBackColor = true;
-            chkEnableDuoOffset.CheckedChanged += chkEnableDuoOffset_CheckedChanged;
-            // 
-            // label1
-            // 
-            label1.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            label1.ForeColor = Color.White;
-            label1.Location = new Point(117, 9);
-            label1.Name = "label1";
-            label1.Size = new Size(8, 21);
-            label1.TabIndex = 15;
-            label1.Text = "(";
-            label1.TextAlign = ContentAlignment.MiddleRight;
-            // 
-            // chkEnableHexaOffset
-            // 
-            chkEnableHexaOffset.AutoSize = true;
-            chkEnableHexaOffset.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            chkEnableHexaOffset.ForeColor = Color.White;
-            chkEnableHexaOffset.Location = new Point(18, 9);
-            chkEnableHexaOffset.Name = "chkEnableHexaOffset";
-            chkEnableHexaOffset.Size = new Size(95, 21);
-            chkEnableHexaOffset.TabIndex = 16;
-            chkEnableHexaOffset.TabStop = false;
-            chkEnableHexaOffset.Text = "-1/16 Offset";
-            chkEnableHexaOffset.UseVisualStyleBackColor = true;
-            chkEnableHexaOffset.CheckedChanged += chkEnableHexaOffset_CheckedChanged;
-            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1711,6 +1657,8 @@ namespace osu_taiko_Mapping_Helper
             tabExecuteType.ResumeLayout(false);
             tabApplyPage.ResumeLayout(false);
             tabApplyPage.PerformLayout();
+            pnlHexaAndDecaOffset.ResumeLayout(false);
+            pnlHexaAndDecaOffset.PerformLayout();
             tabSetType.ResumeLayout(false);
             tabHitObjectsPage.ResumeLayout(false);
             tabHitObjectsPage.PerformLayout();
@@ -1721,8 +1669,6 @@ namespace osu_taiko_Mapping_Helper
             pnlMiliSecondOffset.ResumeLayout(false);
             pnlMiliSecondOffset.PerformLayout();
             tabRemovePage.ResumeLayout(false);
-            pnlMiliSecondStartOffset.ResumeLayout(false);
-            pnlMiliSecondStartOffset.PerformLayout();
             pnlRelativeSvGroup.ResumeLayout(false);
             pnlRelativeSvGroup.PerformLayout();
             menuStrip1.ResumeLayout(false);
@@ -1731,8 +1677,6 @@ namespace osu_taiko_Mapping_Helper
             pnlGroupSvEditor.PerformLayout();
             pnlGroupUtility.ResumeLayout(false);
             pnlGroupUtility.PerformLayout();
-            pnlHexaAndDecaOffset.ResumeLayout(false);
-            pnlHexaAndDecaOffset.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -1783,8 +1727,6 @@ namespace osu_taiko_Mapping_Helper
         private Label lblCalculationType;
         private Button btnSetTimingFrom;
         private Button btnSetTimingTo;
-        private CheckBox chkEnableStartOffset;
-        private TextBox txtStartOffset;
         private CheckBox chkApplyStartObject;
         private CheckBox chkApplyEndObject;
         private RadioButton rdoOnlyOffNotes;
@@ -1844,8 +1786,6 @@ namespace osu_taiko_Mapping_Helper
         private Label lblBeatSnaps;
         private ToolStripMenuItem bGSetterToolStripMenuItem;
         private Panel pnlMiliSecondOffset;
-        private Panel pnlMiliSecondStartOffset;
-        private Label lblMiliSecondRemove;
         private Panel pnlHexaAndDecaOffset;
         private CheckBox chkEnableDuoOffset;
         private Label label1;
