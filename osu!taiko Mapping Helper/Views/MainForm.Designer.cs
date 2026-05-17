@@ -73,7 +73,6 @@ namespace osu_taiko_Mapping_Helper
             chkEnableHexaOffset = new CheckBox();
             label1 = new Label();
             chkEnableDuoOffset = new CheckBox();
-            chkEnableKiai = new CheckBox();
             tabSetType = new TabControl();
             tabHitObjectsPage = new TabPage();
             rdoOnlyOffNotes = new RadioButton();
@@ -609,7 +608,6 @@ namespace osu_taiko_Mapping_Helper
             tabApplyPage.BorderStyle = BorderStyle.FixedSingle;
             tabApplyPage.Controls.Add(pnlHexaAndDecaOffset);
             tabApplyPage.Controls.Add(btnApply);
-            tabApplyPage.Controls.Add(chkEnableKiai);
             tabApplyPage.Controls.Add(tabSetType);
             tabApplyPage.Controls.Add(pnlMiliSecondOffset);
             tabApplyPage.ForeColor = Color.DarkCyan;
@@ -669,20 +667,6 @@ namespace osu_taiko_Mapping_Helper
             chkEnableDuoOffset.Text = "-1/12 inclusive )";
             chkEnableDuoOffset.UseVisualStyleBackColor = true;
             chkEnableDuoOffset.CheckedChanged += chkEnableDuoOffset_CheckedChanged;
-            // 
-            // chkEnableKiai
-            // 
-            chkEnableKiai.AutoSize = true;
-            chkEnableKiai.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            chkEnableKiai.ForeColor = Color.White;
-            chkEnableKiai.Location = new Point(16, 14);
-            chkEnableKiai.Name = "chkEnableKiai";
-            chkEnableKiai.Size = new Size(47, 21);
-            chkEnableKiai.TabIndex = 1;
-            chkEnableKiai.TabStop = false;
-            chkEnableKiai.Text = "kiai";
-            chkEnableKiai.UseVisualStyleBackColor = true;
-            chkEnableKiai.CheckedChanged += chkEnableKiai_CheckedChanged;
             // 
             // tabSetType
             // 
@@ -1656,7 +1640,6 @@ namespace osu_taiko_Mapping_Helper
             ((System.ComponentModel.ISupportInitialize)picSpecificNormalSpinner).EndInit();
             tabExecuteType.ResumeLayout(false);
             tabApplyPage.ResumeLayout(false);
-            tabApplyPage.PerformLayout();
             pnlHexaAndDecaOffset.ResumeLayout(false);
             pnlHexaAndDecaOffset.PerformLayout();
             tabSetType.ResumeLayout(false);
@@ -1744,7 +1727,6 @@ namespace osu_taiko_Mapping_Helper
         private TextBox txtRelativeBaseSv;
         private Button btnViewSetting;
         private CheckBox chkEnableSvTo;
-        private CheckBox chkEnableKiai;
         private Button btnSetSvTo;
         private Button btnSetSvFrom;
         private Button btnSetVolumeTo;
