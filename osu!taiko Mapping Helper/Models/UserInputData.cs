@@ -38,8 +38,6 @@ namespace osu_taiko_Mapping_Helper.Models
         internal int offset { set; get; }
         // 1/12offset有効化設定
         internal bool isDuoOffset { set; get; }
-        // kiai有効化設定
-        internal bool isKiai { set; get; }
         // 相対速度オプション
         // -1 : 無効
         // 0  : 乗算

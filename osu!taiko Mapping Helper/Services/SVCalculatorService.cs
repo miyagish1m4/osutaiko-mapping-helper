@@ -2,7 +2,6 @@
 using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Utils;
 using osu_taiko_Mapping_Helper.Utils.Helper;
-using static System.Windows.Forms.Design.AxImporter;
 
 namespace osu_taiko_Mapping_Helper.Services
 {
@@ -209,6 +208,13 @@ namespace osu_taiko_Mapping_Helper.Services
                 {
                     throw new Exception();
                 }
+                if (userInputData.isVolume)
+                {
+                    if (!ApplyVolumeOnTimingPoints(userInputData, beatmap, ref outTimingPoints))
+                    {
+                        throw new Exception();
+                    }
+                }
                 // ユーザーが指定した範囲外のスライダーの長さの調整
                 if (!AdjustSliderLengthAfterExecute(userInputData, beatmap, outTimingPoints, Constants.EXECUTE_APPLY))
                 {
@@ -290,7 +296,7 @@ namespace osu_taiko_Mapping_Helper.Services
                     var applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= beatmap.hitObjects[i].svApplyTime) ??
                                               throw new Exception();
                     var applyInheritedPointIndex = beatmap.timingPoints.FindLastIndex(tp => tp.time <= beatmap.hitObjects[i].svApplyTime);
-                    int effect = userInputData.isKiai ? 1 : applyInheritedPoint.effect;
+                    int effect = applyInheritedPoint.effect;
                     // オブジェクトコードを比較し、一致するものがある場合に緑線の追加を行う
                     if ((beatmap.hitObjects[i].hitObjectCode & userInputData.setObjectOption.setObjectsCode) != 0)
                     {
@@ -496,7 +502,7 @@ namespace osu_taiko_Mapping_Helper.Services
                                                             applyInheritedPoint.sampleIndex,
                                                             applyInheritedPoint.volume,
                                                             false,
-                                                            userInputData.isKiai ? 1 : effect));
+                                                            effect));
                         foreach (var ipIndex in applyInheritedPointIndexes)
                         {
                             if ((beatmap.timingPoints[ipIndex].time > beatmap.hitObjects[i - 1].time) &&
@@ -635,7 +641,7 @@ namespace osu_taiko_Mapping_Helper.Services
                                                         beatmap.timingPoints[i].sampleIndex,
                                                         volume,
                                                         false,
-                                                        userInputData.isKiai ? 1 : beatmap.timingPoints[i].effect));
+                                                        beatmap.timingPoints[i].effect));
                     removeList.Add(i);
                 }
                 // 削除をする際に順番が変にならないようにソートする
@@ -716,6 +722,8 @@ namespace osu_taiko_Mapping_Helper.Services
                         continue;
                     }
                     var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => (tp.time == beatmap.hitObjects[i].time) && tp.isRedLine);
+                    // 直前のTimingPointのインデックスを算出する
+                    var applyTimingPointIndex = beatmap.timingPoints.FindLastIndex(tp => (tp.time == beatmap.hitObjects[i].time) && tp.isRedLine);
                     double sv = 1;
                     int volume = 100;
                     TimingPoint? applyOutputInheritedPoint = new();
@@ -808,7 +816,7 @@ namespace osu_taiko_Mapping_Helper.Services
                                                                 applyTimingPoint.sampleIndex,
                                                                 volume,
                                                                 false,
-                                                                userInputData.isKiai ? 1 : applyTimingPoint.effect));
+                                                                applyTimingPoint.effect));
                         }
                     }
                     else
@@ -831,6 +839,65 @@ namespace osu_taiko_Mapping_Helper.Services
                     }
 
                 }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+        /// <summary>
+        /// 赤線にVolume適用する
+        /// </summary>
+        /// <param name="userInputData">ユーザー入力値</param>
+        /// <param name="beatmap">譜面情報</param>
+        /// <param name="outTimingPoints">適用する緑線の格納先</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        private static bool ApplyVolumeOnTimingPoints(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
+        {
+            List<TimingPoint> timingPointsBuff = [];
+            List<int> removeList = [];
+            try
+            {
+                for (int i = 0; i < beatmap.timingPoints.Count; i++)
+                {
+                    if (beatmap.timingPoints[i].time < userInputData.timingFrom)
+                    {
+                        continue;
+                    }
+                    if (beatmap.timingPoints[i].time > userInputData.timingTo)
+                    {
+                        break;
+                    }
+                    var applyInheritedPoint = outTimingPoints.LastOrDefault(tp => tp.time == beatmap.timingPoints[i].time && !tp.isRedLine);
+                    if (applyInheritedPoint == null)
+                    {
+                        applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time == beatmap.timingPoints[i].time && !tp.isRedLine);
+                        if (applyInheritedPoint == null)
+                        {
+                            return false;
+                        }
+                    }
+                    timingPointsBuff.Add(new TimingPoint(beatmap.timingPoints[i].time,
+                                                         beatmap.timingPoints[i].bpm,
+                                                         beatmap.timingPoints[i].sv,
+                                                         beatmap.timingPoints[i].barLength,
+                                                         beatmap.timingPoints[i].meter,
+                                                         beatmap.timingPoints[i].sampleSet,
+                                                         beatmap.timingPoints[i].sampleIndex,
+                                                         applyInheritedPoint.volume,
+                                                         beatmap.timingPoints[i].isRedLine,
+                                                         beatmap.timingPoints[i].effect));
+                    removeList.Add(i);
+                }
+                // 前から削除を行うと要素を詰めてしまうため、後ろから削除を行う
+                for (global::System.Int32 i = (removeList.Count) - (1); i >= 0; i--)
+                {
+                    beatmap.timingPoints.RemoveAt(removeList[i]);
+                }
+                outTimingPoints.AddRange(timingPointsBuff);
                 return true;
             }
             catch (Exception ex)
@@ -1036,7 +1103,7 @@ namespace osu_taiko_Mapping_Helper.Services
                                                             applyInheritedPoint.sampleIndex,
                                                             volume,
                                                             false,
-                                                            userInputData.isKiai ? 1 : applyInheritedPoint.effect));
+                                                            applyInheritedPoint.effect));
                         currentTiming = redLineList[i].time + beatSnapTiming * (j + 1);
                         if (i != redLineList.Count - 1)
                         {
@@ -1062,6 +1129,13 @@ namespace osu_taiko_Mapping_Helper.Services
                                 break;
                             }
                         }
+                    }
+                }
+                if (userInputData.isVolume)
+                {
+                    if (!ApplyVolumeOnTimingPoints(userInputData, beatmap, ref outTimingPoints))
+                    {
+                        throw new Exception();
                     }
                 }
                 // 元から設定されている緑線の削除
@@ -1177,8 +1251,7 @@ namespace osu_taiko_Mapping_Helper.Services
                     double intervalTri = Constants.ONE_MINUTE / timingPoint.bpm / Constants.TRI_SNAP;
 
                     bool isOddAdjacent = (prevHitObject != null && prevHitObject.time >= hitObject.time - intervalTri - Constants.MILLISECOND_TOLERANCE && prevHitObject.snap == Constants.DUO_SNAP)
-                                       || (nextHitObject != null && nextHitObject.time <= hitObject.time + intervalTri + Constants.MILLISECOND_TOLERANCE && nextHitObject.snap == Constants.DUO_SNAP);
-
+                                      || (nextHitObject != null && nextHitObject.time <= hitObject.time + intervalTri + Constants.MILLISECOND_TOLERANCE && nextHitObject.snap == Constants.DUO_SNAP);
                     if (isOddAdjacent)
                     {
                         return duoOffset;
