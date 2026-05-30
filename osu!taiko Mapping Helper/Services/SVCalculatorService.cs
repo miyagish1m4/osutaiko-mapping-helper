@@ -242,7 +242,8 @@ namespace osu_taiko_Mapping_Helper.Services
             double svPerMs = 0;
             double volumePerMs = 0;
             bool isIgnoreObject = false;
-            int offset = (userInputData.isOffset && userInputData.offsetMode == 1) ? userInputData.offset : 0;
+            double offset = (userInputData.isOffset && userInputData.offsetMode == 1) ? userInputData.offset : 0;
+            bool isFirstNotes = false;
             List<int> removeList = [];
             try
             {
@@ -292,10 +293,50 @@ namespace osu_taiko_Mapping_Helper.Services
                     {
                         continue;
                     }
-                    // 直前のTimingPointを探す
+                    // 直前の緑線を探す
                     var applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= beatmap.hitObjects[i].svApplyTime) ??
                                               throw new Exception();
                     var applyInheritedPointIndex = beatmap.timingPoints.FindLastIndex(tp => tp.time <= beatmap.hitObjects[i].svApplyTime);
+                    // 直前の赤線を探す
+                    var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= beatmap.hitObjects[i].svApplyTime) && tp.isRedLine);
+                    //////
+                    int time;
+                    if (userInputData.isOffset)
+                    {
+                        if (applyTimingPoint != null &&
+                            beatmap.timingPoints[0].time == beatmap.hitObjects[i].time)
+                        {
+                            time = beatmap.hitObjects[i].time;
+                        }
+                        else
+                        {
+                            switch (userInputData.offsetMode)
+                            {
+                                case 0:
+                                    if (i != 0 && applyTimingPoint != null)
+                                    {
+                                        HitObject? prevHo = (i == 0) ? null : beatmap.hitObjects[i - 1];
+                                        HitObject? nextHo = (i == beatmap.hitObjects.Count - 1) ? null : beatmap.hitObjects[i + 1];
+                                        offset = -GetOffsetTiming(userInputData,
+                                                                       applyTimingPoint,
+                                                                       beatmap.hitObjects[i],
+                                                                       prevHo,
+                                                                       nextHo);
+                                    }
+                                    time = (int)(beatmap.hitObjects[i].rawTime + offset);
+                                    break;
+                                case 1:
+                                    time = beatmap.hitObjects[i].time + (int)offset;
+                                    break;
+                                default:
+                                    throw new Exception();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        time = beatmap.hitObjects[i].time;
+                    }
                     int effect = applyInheritedPoint.effect;
                     // オブジェクトコードを比較し、一致するものがある場合に緑線の追加を行う
                     if ((beatmap.hitObjects[i].hitObjectCode & userInputData.setObjectOption.setObjectsCode) != 0)
@@ -333,9 +374,7 @@ namespace osu_taiko_Mapping_Helper.Services
                             }
 
                         }
-                        // 直前の赤線を探す
-                        var applyTimingPoint = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= beatmap.hitObjects[i].svApplyTime) && tp.isRedLine);
-                        if ((userInputData.timingFrom + offset <= applyInheritedPoint?.time) &&
+                        if (((int)(BeatmapHelper.GetRawTiming(beatmap.timingPoints, userInputData.timingFrom) + offset) <= applyInheritedPoint?.time) &&
                             !applyInheritedPoint.isRedLine)
                         {
                             if (i == 0)
@@ -352,44 +391,6 @@ namespace osu_taiko_Mapping_Helper.Services
                                     removeList.AddRange(applyInheritedPointIndexes);
                                 }
                             }
-                        }
-                        //////
-                        int time;
-                        if (userInputData.isOffset)
-                        {
-                            if (applyTimingPoint != null &&
-                                beatmap.timingPoints[0].time == beatmap.hitObjects[i].time)
-                            {
-                                time = beatmap.hitObjects[i].time;
-                            }
-                            else
-                            {
-                                switch (userInputData.offsetMode)
-                                {
-                                    case 0:
-                                        if (i != 0 && applyTimingPoint != null)
-                                        {
-                                            HitObject? prevHo = (i == 0) ? null : beatmap.hitObjects[i - 1];
-                                            HitObject? nextHo = (i == beatmap.hitObjects.Count - 1) ? null : beatmap.hitObjects[i + 1];
-                                            offset = -(int)GetOffsetTiming(userInputData,
-                                                                           applyTimingPoint,
-                                                                           beatmap.hitObjects[i],
-                                                                           prevHo,
-                                                                           nextHo);
-                                        }
-                                        time = (int)(beatmap.hitObjects[i].rawTime + offset);
-                                        break;
-                                    case 1:
-                                        time = beatmap.hitObjects[i].time + (int)offset;
-                                        break;
-                                    default:
-                                        throw new Exception();
-                                }
-                            }
-                        }
-                        else
-                        {
-                            time = beatmap.hitObjects[i].time;
                         }
                         if (userInputData.isSv)
                         {
@@ -442,6 +443,7 @@ namespace osu_taiko_Mapping_Helper.Services
                                                             false,
                                                             effect));
                         isIgnoreObject = false;
+                        isFirstNotes = true;
                     }
                     else
                     {
@@ -459,6 +461,11 @@ namespace osu_taiko_Mapping_Helper.Services
                         if (applyInheritedPoint == null)
                         {
                             throw new Exception();
+                        }
+                        if (!isFirstNotes && applyInheritedPoint.time < BeatmapHelper.GetRawTiming(beatmap.timingPoints, userInputData.timingFrom) + offset)
+                        {
+                            isIgnoreObject = true;
+                            continue;
                         }
                         // 直前のTimingPointのインデックスを算出する
                         var applyInheritedPointIndexes = beatmap.timingPoints.Select((tp, index) => new { tp, index })
@@ -493,7 +500,7 @@ namespace osu_taiko_Mapping_Helper.Services
                             isIgnoreObject = true;
                         }
                         // 直前のTimingPointの情報を元に緑線を作成する
-                        outTimingPoints.Add(new TimingPoint(beatmap.hitObjects[i].time + offset,
+                        outTimingPoints.Add(new TimingPoint(beatmap.hitObjects[i].time + (int)offset,
                                                             applyInheritedPoint.bpm,
                                                             applyInheritedPoint.sv,
                                                             applyInheritedPoint.barLength,
@@ -512,6 +519,7 @@ namespace osu_taiko_Mapping_Helper.Services
                                 removeList.Add(ipIndex);
                             }
                         }
+                        isFirstNotes = true;
                     }
                 }
                 // 削除をする際に順番が変にならないようにソートする
@@ -936,7 +944,7 @@ namespace osu_taiko_Mapping_Helper.Services
 
                 if (timingPointBeforeTimingFrom == null)
                 {
-                    throw new Exception("");
+                    return true;
                 }
                 for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
                 {

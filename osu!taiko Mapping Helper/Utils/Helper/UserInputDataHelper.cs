@@ -153,11 +153,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 else if (userInputTempData.setObjectOption.isOnlyBookmarks)
                 {
-                    if (userInputTempData.setObjectOption.isOnBarlines)
+                    if (userInputTempData.setObjectOption.isOnBookmarks)
                     {
                         userInputData.setObjectOption.setObjectsCode = 0x00000800;
                     }
-                    else if (userInputTempData.setObjectOption.isOffBarlines)
+                    else if (userInputTempData.setObjectOption.isOffBookmarks)
                     {
                         userInputData.setObjectOption.setObjectsCode = 0x00000400;
                     }
@@ -397,12 +397,12 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     Common.ShowMessageDialog("E_V-T-10");
                     return false;
                 }
-                if ((retVolumeFrom < 0) || (retVolumeFrom > 100) ||
-                    (retVolumeTo < 0) || (retVolumeTo > 100))
+                if ((retVolumeFrom < 5) || (retVolumeFrom > 100) ||
+                    (retVolumeTo < 5) || (retVolumeTo > 100))
                 {
                     retVolumeFrom = -1;
                     retVolumeTo = -1;
-                    //Volumeが0から100の範囲で指定されていない
+                    //Volumeが5から100の範囲で指定されていない
                     Common.ShowMessageDialog("E_V-C-6");
                     return false;
                 }
