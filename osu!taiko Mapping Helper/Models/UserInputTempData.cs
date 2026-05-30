@@ -51,8 +51,6 @@ namespace osu_taiko_Mapping_Helper.Models
         internal string relativeSumSvTo { set; get; } = string.Empty;
         // 相対速度オプションで終点のSV有効化設定
         internal bool isEnableRelativeEnd { set; get; } = false;
-        // kiai有効化設定
-        internal bool isKiai { set; get; } = false;
         // オフセットモード
         // 0 : 1/16
         // 1 : ms指定

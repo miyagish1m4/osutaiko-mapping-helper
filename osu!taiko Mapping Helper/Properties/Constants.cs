@@ -7,7 +7,7 @@ namespace osu_taiko_Mapping_Helper.Properties
     {
         #region ファイル名
         internal const string APP_NAME = "osu!Taiko Mapping Helper";
-        internal const string APP_VERSION = "1.1.0-beta";
+        internal const string APP_VERSION = "1.1.1-beta";
         #endregion
         #region 言語設定
         internal static readonly string[] LANGUAGES = ["English",
@@ -59,6 +59,28 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const string METADATA = "[Metadata]";
         internal const string DIFFICULTY = "[Difficulty]";
         internal const string EVENTS = "[Events]";
+        internal const string TIMING_POINTS = "[TimingPoints]";
+        internal const string COLOURS = "[Colours]";
+        internal const string HIT_OBJECTS = "[HitObjects]";
+        internal const int VERSION_CODE = 0;
+        internal const int GENERAL_CODE = 1;
+        internal const int EDITOR_CODE = 2;
+        internal const int METADATA_CODE = 3;
+        internal const int DIFFICULTY_CODE = 4;
+        internal const int EVENTS_CODE = 5;
+        internal const int TIMING_POINTS_CODE = 6;
+        internal const int COLOURS_CODE = 7;
+        internal const int HIT_OBJECTS_CODE = 8;
+        // Metadataセクションの項目
+        internal const string BOOKMARKS = "Bookmarks";
+        internal const string TITLE = "Title:";
+        internal const string TITLE_UNICODE = "TitleUnicode:";
+        internal const string ARTIST = "Artist:";
+        internal const string ARTIST_UNICODE = "ArtistUnicode:";
+        internal const string CREATOR = "Creator:";
+        internal const string SOURCE = "Source:";
+        internal const string TAGS = "Tags:";
+        // Eventsセクションのサブセクション
         internal const string BG_AND_VIDEO = "//Background and Video events";
         internal const string BREAK_PERIODS = "//Break Periods";
         internal const string STORYBOARD_LAYER_0 = "//Storyboard Layer 0 (Background)";
@@ -76,26 +98,6 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const int STORYBOARD_LAYER_3_CODE = 5;
         internal const int STORYBOARD_LAYER_4_CODE = 6;
         internal const int STORYBOARD_SOUND_SAMPLES_CODE = 7;
-        internal const string TIMING_POINTS = "[TimingPoints]";
-        internal const string COLOURS = "[Colours]";
-        internal const string HIT_OBJECTS = "[HitObjects]";
-        internal const int VERSION_CODE = 0;
-        internal const int GENERAL_CODE = 1;
-        internal const int EDITOR_CODE = 2;
-        internal const int METADATA_CODE = 3;
-        internal const int DIFFICULTY_CODE = 4;
-        internal const int EVENTS_CODE = 5;
-        internal const int TIMING_POINTS_CODE = 6;
-        internal const int COLOURS_CODE = 7;
-        internal const int HIT_OBJECTS_CODE = 8;
-        internal const string BOOKMARKS = "Bookmarks";
-        internal const string TITLE = "Title:";
-        internal const string TITLE_UNICODE = "TitleUnicode:";
-        internal const string ARTIST = "Artist:";
-        internal const string ARTIST_UNICODE = "ArtistUnicode:";
-        internal const string CREATOR = "Creator:";
-        internal const string SOURCE = "Source:";
-        internal const string TAGS = "Tags:";
         #endregion
         #region メニューコード
         internal const int MENU_SV_EDITOR = 0;

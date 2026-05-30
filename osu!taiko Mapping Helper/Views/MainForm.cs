@@ -41,6 +41,7 @@ namespace osu_taiko_Mapping_Helper
         public MainForm()
         {
             InitializeComponent();
+            // GithubUtils.CheckUpdate(Constants.APP_VERSION);
             Thread getMemoryDataThread = new(UpdateMemoryData) { IsBackground = true };
             getMemoryDataThread.Start();
             UpdateBeatmapInfo();
@@ -700,7 +701,7 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(btnApplySettingCopier, "LBL_UTILITY_APPLY");
             Common.SetLabelText(btnApplyResnap, "LBL_UTILITY_APPLY");
         }
-        #endregion
+#endregion
         #region イベントハンドラ
         #region 共通機能のイベントハンドラ
         private void osu_taiko_Mapping_Helper_Load(object sender, EventArgs e)
@@ -1135,10 +1136,6 @@ namespace osu_taiko_Mapping_Helper
             {
                 chkEnableHexaOffset.Checked = true;
             }
-        }
-        private void chkEnableKiai_CheckedChanged(object sender, EventArgs e)
-        {
-            userInputTempData.isKiai = chkEnableKiai.Checked;
         }
         private void tabExecuteType_SelectedIndexChanged(object sender, EventArgs e)
         {

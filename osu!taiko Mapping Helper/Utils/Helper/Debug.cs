@@ -225,7 +225,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                                          userInputData.volumeFrom + "," +
                                          userInputData.volumeTo + "," +
                                          userInputData.calculationCode + "," +
-                                         userInputData.isKiai + "," +
                                          userInputData.relativeCode + "," +
                                          userInputData.relativeBaseSv + "," +
                                          userInputData.isOffset + "," +

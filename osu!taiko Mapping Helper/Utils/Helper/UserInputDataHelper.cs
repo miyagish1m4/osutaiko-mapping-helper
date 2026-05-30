@@ -99,25 +99,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
         }
         /// <summary>
-        /// kiai設定を設定する関数
-        /// </summary>
-        /// <param name="userInputTempData">入力値(一時保存用)</param>
-        /// <param name="userInputData">入力値</param>
-        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool SetKiaiOption(UserInputTempData userInputTempData,
-                                          ref UserInputData userInputData)
-        {
-            try
-            {
-                userInputData.isKiai = userInputTempData.isKiai;
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        /// <summary>
         /// 適用設定を設定する関数
         /// </summary>
         /// <param name="userInputTempData">入力値(一時保存用)</param>
@@ -172,11 +153,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 }
                 else if (userInputTempData.setObjectOption.isOnlyBookmarks)
                 {
-                    if (userInputTempData.setObjectOption.isOnBarlines)
+                    if (userInputTempData.setObjectOption.isOnBookmarks)
                     {
                         userInputData.setObjectOption.setObjectsCode = 0x00000800;
                     }
-                    else if (userInputTempData.setObjectOption.isOffBarlines)
+                    else if (userInputTempData.setObjectOption.isOffBookmarks)
                     {
                         userInputData.setObjectOption.setObjectsCode = 0x00000400;
                     }
@@ -416,12 +397,12 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     Common.ShowMessageDialog("E_V-T-10");
                     return false;
                 }
-                if ((retVolumeFrom < 0) || (retVolumeFrom > 100) ||
-                    (retVolumeTo < 0) || (retVolumeTo > 100))
+                if ((retVolumeFrom < 5) || (retVolumeFrom > 100) ||
+                    (retVolumeTo < 5) || (retVolumeTo > 100))
                 {
                     retVolumeFrom = -1;
                     retVolumeTo = -1;
-                    //Volumeが0から100の範囲で指定されていない
+                    //Volumeが5から100の範囲で指定されていない
                     Common.ShowMessageDialog("E_V-C-6");
                     return false;
                 }
@@ -587,10 +568,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         if (!ValidateBeatSnap(userInputTempData, ref userInputData))
                         {
                             throw new Exception("BeatSnap間隔の取得に失敗しました。");
-                        }
-                        if (!SetKiaiOption(userInputTempData, ref userInputData))
-                        {
-                            throw new Exception("Kiai設定の取得に失敗しました。");
                         }
                         break;
                     case Properties.Constants.EXECUTE_REMOVE:
