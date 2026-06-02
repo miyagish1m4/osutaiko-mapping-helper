@@ -38,6 +38,7 @@ namespace osu_taiko_Mapping_Helper.Views
             Common.SetLabelText(lblSeparateSetting, "LBL_SETTINGS_NOTES_POSITION");
             Common.SetLabelText(lblUnicodeSupport, "LBL_SETTINGS_UNICODE_SUPPORT");
             Common.SetLabelText(btnSave, "LBL_SETTINGS_SAVE");
+            Common.SetLabelText(lblSeparateSettingGuide, "LBL_SETTINGS_NOTES_POSITION_GUIDE");
         }
         /// <summary>
         /// コントロール初期化設定

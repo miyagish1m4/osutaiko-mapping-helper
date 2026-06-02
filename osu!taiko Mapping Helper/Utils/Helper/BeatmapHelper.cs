@@ -491,7 +491,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         }
                         // どちらにも該当しない場合は1/16とみなし、ヒットオブジェクトのsnapに1/16を設定し、設定されているtimingをrawTimeとする
                         beatmap.hitObjects[j].snap = Constants.HEXA_SNAP;
-                        beatmap.hitObjects[j].rawTime = timingPoints[i].time;
+                        beatmap.hitObjects[j].rawTime = beatmap.hitObjects[j].time;
                     }
                 }
 #if DEBUG

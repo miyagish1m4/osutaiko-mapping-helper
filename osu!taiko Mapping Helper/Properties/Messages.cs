@@ -26,6 +26,7 @@ namespace osu_taiko_Mapping_Helper.Properties
             { "E_V-EM-7", "基準SVを指定してください。" },
             { "E_V-EM-8", "ビートスナップ間隔を指定してください。" },
             { "E_V-EM-9", "オフセットを指定してください。" },
+            { "E_V-EM-10", "見た目BPMを指定してください。" },
             { "E_V-C-1", "バックアップ保持上限は1～100の範囲で指定してください。" },
             { "E_V-C-2", "ノーツのx座標は0～512の範囲で指定してください。" },
             { "E_V-C-3", "ノーツのy座標は0～384の範囲で指定してください。" },
@@ -48,6 +49,8 @@ namespace osu_taiko_Mapping_Helper.Properties
             { "E_V-T-14", "ビートスナップ間隔は自然数を指定してください。" },
             { "E_V-T-15", "オフセットは数値で指定してください。" },
             { "E_V-T-16", "オフセットは整数で指定してください。" },
+            { "E_V-T-17", "見た目BPMは数値で指定してください。" },
+            { "E_V-T-18", "見た目BPMは正の値で指定してください。" },
         };
         // ダイアログメッセージ
         internal static readonly Dictionary<string, string> DialogMessagesEn = new()
@@ -69,6 +72,7 @@ namespace osu_taiko_Mapping_Helper.Properties
             { "E_V-EM-7", "Please specify the base SV." },
             { "E_V-EM-8", "Please specify the beat snap divisor." },
             { "E_V-EM-9", "Please specify the offset." },
+            { "E_V-EM-10", "Please specify the scroll speed(BPM)." },
             { "E_V-C-1", "Please specify the backup limit between 1 and 100." },
             { "E_V-C-2", "Please specify the note X position between 0 and 512." },
             { "E_V-C-3", "Please specify the note Y position between 0 and 384." },
@@ -90,7 +94,10 @@ namespace osu_taiko_Mapping_Helper.Properties
             { "E_V-T-13", "Please specify the beat snap divisor as a number." },
             { "E_V-T-14", "Please specify the beat snap divisor as a natural number." },
             { "E_V-T-15", "Please specify the offset as a number." },
-            { "E_V-T-16", "Please specify the offset as a integer." }        };
+            { "E_V-T-16", "Please specify the offset as a integer." },
+            { "E_V-T-17", "Please specify the scroll speed(BPM) as a number." },
+            { "E_V-T-18", "Please specify the scroll speed(BPM) as a positive value." }
+        };
         // ログメッセージ
         internal static readonly Dictionary<string, string> LogMessages = new()
         {

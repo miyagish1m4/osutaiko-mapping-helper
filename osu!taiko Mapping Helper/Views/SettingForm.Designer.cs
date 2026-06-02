@@ -53,6 +53,7 @@
             rdoHexaAndDuoOffset = new RadioButton();
             rdoMiliSecondOffset = new RadioButton();
             panel1 = new Panel();
+            lblSeparateSettingGuide = new Label();
             pnlNotesKind.SuspendLayout();
             grpSeparateSetting.SuspendLayout();
             SuspendLayout();
@@ -358,11 +359,22 @@
             panel1.Size = new Size(186, 72);
             panel1.TabIndex = 26;
             // 
+            // lblSeparateSettingGuide
+            // 
+            lblSeparateSettingGuide.Font = new Font("Yu Gothic UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            lblSeparateSettingGuide.ForeColor = Color.DarkGray;
+            lblSeparateSettingGuide.Location = new Point(12, 273);
+            lblSeparateSettingGuide.Name = "lblSeparateSettingGuide";
+            lblSeparateSettingGuide.Size = new Size(203, 25);
+            lblSeparateSettingGuide.TabIndex = 27;
+            lblSeparateSettingGuide.Text = "ノーツ配置設定";
+            // 
             // SettingForm
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.FromArgb(0, 64, 64);
             ClientSize = new Size(466, 552);
+            Controls.Add(lblSeparateSettingGuide);
             Controls.Add(rdoMiliSecondOffset);
             Controls.Add(rdoHexaAndDuoOffset);
             Controls.Add(lblOffsetType);
@@ -417,5 +429,7 @@
         private RadioButton rdoHexaAndDuoOffset;
         private RadioButton rdoMiliSecondOffset;
         private Panel panel1;
+        private Label label2;
+        private Label lblSeparateSettingGuide;
     }
 }

@@ -25,6 +25,8 @@
         internal bool isRedLine { set; get; }
         // エフェクト(kiai有無,小節線有無 等)
         internal int effect { set; get; }
+        // 削除フラグ
+        internal bool isDelete { set; get; }
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -59,6 +61,7 @@
             this.volume = volume;
             this.isRedLine = isRedLine;
             this.effect = effect;
+            this.isDelete = false;
         }
         /// <summary>
         /// コンストラクタ
@@ -92,10 +95,11 @@
                 isRedLine = false;
                 sv = -100 / double.Parse(buff[1]);
             }
-
+            this.isDelete = false;
         }
         internal TimingPoint()
         {
+            this.isDelete = false;
         }
     }
 }

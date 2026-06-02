@@ -365,10 +365,12 @@ namespace osu_taiko_Mapping_Helper.Utils
         internal static void SetApplyControls(bool isEnable,
                                               UserInputTempData userInputTempData,
                                               Config config,
+                                              int tabSetTypeIndex,
                                               CheckBox chkEnableSv,
                                               CheckBox chkEnableVolume,
                                               CheckBox chkApplyStartObject,
                                               CheckBox chkApplyEndObject,
+                                              CheckBox chkApplyRedLines,
                                               CheckBox chkRelative,
                                               Panel pnlRelativeSvGroup,
                                               CheckBox chkEnableSvTo,
@@ -384,11 +386,12 @@ namespace osu_taiko_Mapping_Helper.Utils
                                               Button btnSetVolumeTo)
         {
             bool isAdvanceMode = (config.advanceMode == 1 && isEnable);
-            chkEnableSv.Enabled = isEnable;
+            chkEnableSv.Enabled = isEnable && (tabSetTypeIndex != 3);
             chkEnableVolume.Enabled = isEnable;
-            chkApplyStartObject.Enabled = isEnable;
-            chkApplyEndObject.Enabled = isEnable;
-            chkRelative.Visible = isAdvanceMode;
+            chkApplyRedLines.Visible = userInputTempData.isVolume && isEnable;
+            //chkApplyStartObject.Enabled = isEnable;
+            //chkApplyEndObject.Enabled = isEnable;
+            chkRelative.Visible = isAdvanceMode && (tabSetTypeIndex != 3) && chkEnableSv.Checked;
             if (isEnable)
             {
                 pnlRelativeSvGroup.Visible = userInputTempData.isRelative;
@@ -399,7 +402,7 @@ namespace osu_taiko_Mapping_Helper.Utils
                 pnlRelativeSvGroup.Visible = false;
                 chkEnableSvTo.Visible = false;
             }
-            if (isEnable && !userInputTempData.isSv)
+            if ((isEnable && !userInputTempData.isSv) && (tabSetTypeIndex != 3))
             {
                 SetTxtSvFromEnabledState(userInputTempData.isSv, userInputTempData, txtSvFrom);
                 SetTxtSvToEnabledState(userInputTempData.isSv, txtSvTo);
@@ -418,12 +421,12 @@ namespace osu_taiko_Mapping_Helper.Utils
                 }
                 else
                 {
-                    SetTxtSvToEnabledState(isEnable, txtSvTo);
-                    SetBtnSwapSvEnabledState(isEnable, btnSwapSv);
-                    SetBtnSetSvToEnabledState(isEnable, btnSetSvTo);
+                    SetTxtSvToEnabledState(isEnable && (tabSetTypeIndex != 3), txtSvTo);
+                    SetBtnSwapSvEnabledState(isEnable && (tabSetTypeIndex != 3), btnSwapSv);
+                    SetBtnSetSvToEnabledState(isEnable && (tabSetTypeIndex != 3), btnSetSvTo);
                 }
-                SetTxtSvFromEnabledState(isEnable, userInputTempData, txtSvFrom);
-                SetBtnSetSvFromEnabledState(isEnable, btnSetSvFrom);
+                SetTxtSvFromEnabledState(isEnable && (tabSetTypeIndex != 3), userInputTempData, txtSvFrom);
+                SetBtnSetSvFromEnabledState(isEnable && (tabSetTypeIndex != 3), btnSetSvFrom);
             }
             if (isEnable && !userInputTempData.isVolume)
             {
@@ -442,6 +445,50 @@ namespace osu_taiko_Mapping_Helper.Utils
                 SetBtnSetVolumeToEnabledState(isEnable, btnSetVolumeTo);
             }
 
+        }
+        internal static void SetApplyContols(bool isEnable,
+                                             CheckBox chkEnableSv,
+                                             TextBox txtSvFrom,
+                                             TextBox txtSvTo,
+                                             Button btnSetSvFrom,
+                                             Button btnSetSvTo,
+                                             Button btnSwapSv,
+                                             CheckBox chkRelative,
+                                             CheckBox chkEnableSvTo)
+        {
+            chkEnableSv.Enabled = isEnable;
+            txtSvFrom.Enabled = isEnable && chkEnableSv.Checked;
+            txtSvTo.Enabled = (isEnable || (chkRelative.Checked && chkEnableSvTo.Checked)) && chkEnableSv.Checked ;
+            btnSetSvFrom.Enabled = isEnable && chkEnableSv.Checked;
+            btnSetSvTo.Enabled = isEnable && chkEnableSv.Checked;
+            btnSwapSv.Enabled = isEnable && chkEnableSv.Checked;
+            if (isEnable && chkEnableSv.Checked)
+            {
+                txtSvFrom.ForeColor = SystemColors.WindowText;
+                txtSvFrom.BackColor = SystemColors.Window;
+                txtSvTo.ForeColor = SystemColors.WindowText;
+                txtSvTo.BackColor = SystemColors.Window;
+                btnSetSvFrom.ForeColor = SystemColors.Control;
+                btnSetSvFrom.FlatAppearance.BorderColor = Color.Cyan;
+                btnSetSvTo.ForeColor = SystemColors.Control;
+                btnSetSvTo.FlatAppearance.BorderColor = Color.Cyan;
+                btnSwapSv.ForeColor = SystemColors.Control;
+                btnSwapSv.FlatAppearance.BorderColor = Color.Cyan;
+            }
+            else
+            {
+                txtSvFrom.ForeColor = SystemColors.WindowFrame;
+                txtSvFrom.BackColor = SystemColors.WindowFrame;
+                txtSvTo.ForeColor = SystemColors.WindowFrame;
+                txtSvTo.BackColor = SystemColors.WindowFrame;
+                btnSetSvFrom.FlatAppearance.BorderColor = SystemColors.WindowFrame;
+                btnSetSvFrom.ForeColor = SystemColors.WindowFrame;
+                btnSetSvTo.ForeColor = SystemColors.WindowFrame;
+                btnSetSvTo.FlatAppearance.BorderColor = SystemColors.WindowFrame;
+                btnSwapSv.ForeColor = SystemColors.WindowFrame;
+                btnSwapSv.FlatAppearance.BorderColor = SystemColors.WindowFrame;
+            }
+            //chkEnableSv.Checked = isEnable;
         }
         #endregion
         #region SettingsForm

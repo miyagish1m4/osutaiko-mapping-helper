@@ -28,6 +28,9 @@ namespace osu_taiko_Mapping_Helper.Models
         internal int volumeFrom { set; get; }
         // 音量(終了)
         internal int volumeTo { set; get; }
+        // 赤線適用設定
+        internal bool shouldApplyRedlines { set; get; }
+
         // オフセットモード
         // 0 : 1/16
         // 1 : ms指定
@@ -45,23 +48,14 @@ namespace osu_taiko_Mapping_Helper.Models
         internal int relativeCode { set; get; }
         // 相対速度オプションで"乗算"選択時の基準SV
         internal double relativeBaseSv { set; get; }
-        internal SetOption setOption = new();
+        // 対象オブジェクト設定
+        internal int applySetCode { set; get; }
         internal SetObjectOption setObjectOption = new();
         internal SetBeatSnapOption setBeatSnapOption = new();
         //作成日時
         internal DateTime createDate { set; get; }
         // 更新日時
         // internal DateTime updateDate { set; get; }
-        // 対象オブジェクト設定
-        internal struct SetOption
-        {
-            // オブジェクト
-            internal bool isSetObjects { set; get; }
-            // ビートスナップ
-            internal bool isSetBeatSnap { set; get; }
-            // 緑線
-            internal bool isSetGreenLine { set; get; }
-        }
         internal struct SetObjectOption
         {
             // 設定対象オブジェクトコード
@@ -90,6 +84,8 @@ namespace osu_taiko_Mapping_Helper.Models
             // ビートスナップ間隔
             internal int beatSnap { set; get; }
         }
+        internal double bpm { set; get; }
+
         #endregion
         /// <summary>
         /// コンストラクタ

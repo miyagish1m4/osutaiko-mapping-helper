@@ -33,6 +33,8 @@ namespace osu_taiko_Mapping_Helper.Models
         internal bool isEnableFrom { set; get; } = true;
         // 終点有効化設定
         internal bool isEnableTo { set; get; } = true;
+        // 赤線適用設定
+        internal bool isEnableRedLines { set; get; } = true;
         // 相対速度変化オプション有効化設定
         internal bool isRelative { set; get; } = false;
         // 相対速度オプションで"乗算"選択時のフラグ
@@ -72,6 +74,8 @@ namespace osu_taiko_Mapping_Helper.Models
             internal bool isSetBeatSnap { set; get; } = false;
             // 緑線
             internal bool isSetGreenLine { set; get; } = false;
+            // 赤線
+            internal bool isSetRedLine { set; get; } = false;
             public SetOption()
             {
             }
@@ -122,6 +126,8 @@ namespace osu_taiko_Mapping_Helper.Models
             {
             }
         }
+
+        internal string bpm { set; get; } = string.Empty;
         #endregion
         /// <summary>
         /// コンストラクタ

@@ -7,7 +7,7 @@ namespace osu_taiko_Mapping_Helper.Properties
     {
         #region ファイル名
         internal const string APP_NAME = "osu!Taiko Mapping Helper";
-        internal const string APP_VERSION = "1.1.1-beta";
+        internal const string APP_VERSION = "1.2.0-beta";
         #endregion
         #region 言語設定
         internal static readonly string[] LANGUAGES = ["English",
@@ -174,6 +174,13 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const int ONE_MINUTE = 60000;
         internal const int ONE_SECOND = 1000;
         #endregion
+        #region ジャンプステートメントコード
+        internal const int STATE_BREAK = -1;
+        internal const int STATE_NONE = 0;
+        internal const int STATE_CONTINUE = 1;
+        #endregion
+
+        internal const int TAB_MAX_ITEM_SIZE = 384;
 
 
         internal const double BASE_SLIDER_MULTIPLIER = 1.4;
