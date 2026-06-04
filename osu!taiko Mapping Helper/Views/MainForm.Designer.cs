@@ -285,7 +285,7 @@ namespace osu_taiko_Mapping_Helper
             lblTiming.AutoSize = true;
             lblTiming.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
             lblTiming.ForeColor = Color.White;
-            lblTiming.Location = new Point(24, 10);
+            lblTiming.Location = new Point(22, 10);
             lblTiming.Name = "lblTiming";
             lblTiming.Size = new Size(56, 20);
             lblTiming.TabIndex = 12;
@@ -352,7 +352,7 @@ namespace osu_taiko_Mapping_Helper
             pnlCalcurationTypeGroup.BorderStyle = BorderStyle.Fixed3D;
             pnlCalcurationTypeGroup.Controls.Add(rdoArithmetic);
             pnlCalcurationTypeGroup.Controls.Add(rdoGeometric);
-            pnlCalcurationTypeGroup.Location = new Point(9, 224);
+            pnlCalcurationTypeGroup.Location = new Point(9, 215);
             pnlCalcurationTypeGroup.Name = "pnlCalcurationTypeGroup";
             pnlCalcurationTypeGroup.Size = new Size(113, 66);
             pnlCalcurationTypeGroup.TabIndex = 9;
@@ -1018,7 +1018,7 @@ namespace osu_taiko_Mapping_Helper
             lblCalculationType.AutoSize = true;
             lblCalculationType.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblCalculationType.ForeColor = Color.White;
-            lblCalculationType.Location = new Point(12, 201);
+            lblCalculationType.Location = new Point(12, 192);
             lblCalculationType.Name = "lblCalculationType";
             lblCalculationType.Size = new Size(69, 20);
             lblCalculationType.TabIndex = 2;
@@ -1067,7 +1067,7 @@ namespace osu_taiko_Mapping_Helper
             pnlRelativeSvGroup.Controls.Add(lblRelativeBaseSv);
             pnlRelativeSvGroup.Controls.Add(rdoRelativeMultiply);
             pnlRelativeSvGroup.Controls.Add(rdoRelativeSum);
-            pnlRelativeSvGroup.Location = new Point(131, 224);
+            pnlRelativeSvGroup.Location = new Point(131, 215);
             pnlRelativeSvGroup.Name = "pnlRelativeSvGroup";
             pnlRelativeSvGroup.Size = new Size(140, 76);
             pnlRelativeSvGroup.TabIndex = 11;
@@ -1128,7 +1128,7 @@ namespace osu_taiko_Mapping_Helper
             chkRelative.AutoSize = true;
             chkRelative.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkRelative.ForeColor = Color.White;
-            chkRelative.Location = new Point(134, 200);
+            chkRelative.Location = new Point(134, 191);
             chkRelative.Name = "chkRelative";
             chkRelative.Size = new Size(118, 24);
             chkRelative.TabIndex = 13;
@@ -1158,7 +1158,7 @@ namespace osu_taiko_Mapping_Helper
             chkEnableSvTo.AutoSize = true;
             chkEnableSvTo.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkEnableSvTo.ForeColor = Color.White;
-            chkEnableSvTo.Location = new Point(277, 228);
+            chkEnableSvTo.Location = new Point(277, 219);
             chkEnableSvTo.Name = "chkEnableSvTo";
             chkEnableSvTo.Size = new Size(96, 19);
             chkEnableSvTo.TabIndex = 15;
@@ -1322,17 +1322,19 @@ namespace osu_taiko_Mapping_Helper
             // 
             // chkApplyRedLines
             // 
-            chkApplyRedLines.AutoSize = true;
+            chkApplyRedLines.CheckAlign = ContentAlignment.TopLeft;
             chkApplyRedLines.Checked = true;
             chkApplyRedLines.CheckState = CheckState.Checked;
-            chkApplyRedLines.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            chkApplyRedLines.Font = new Font("Yu Gothic UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkApplyRedLines.ForeColor = Color.White;
-            chkApplyRedLines.Location = new Point(88, 181);
+            chkApplyRedLines.ImageAlign = ContentAlignment.TopLeft;
+            chkApplyRedLines.Location = new Point(9, 140);
             chkApplyRedLines.Name = "chkApplyRedLines";
-            chkApplyRedLines.Size = new Size(134, 19);
+            chkApplyRedLines.Size = new Size(79, 39);
             chkApplyRedLines.TabIndex = 20;
             chkApplyRedLines.TabStop = false;
             chkApplyRedLines.Text = "ê‘ê¸Ç…VolumeÇìKóp";
+            chkApplyRedLines.TextAlign = ContentAlignment.TopLeft;
             chkApplyRedLines.UseVisualStyleBackColor = true;
             chkApplyRedLines.CheckedChanged += chkApplyRedLines_CheckedChanged;
             // 
@@ -1505,7 +1507,7 @@ namespace osu_taiko_Mapping_Helper
             cmbSettingCopier.Font = new Font("Yu Gothic UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 128);
             cmbSettingCopier.FormattingEnabled = true;
             cmbSettingCopier.IntegralHeight = false;
-            cmbSettingCopier.Items.AddRange(new object[] { "Metadata", "BG Position", "Preview", "Timing Points" });
+            cmbSettingCopier.Items.AddRange(new object[] { "Metadata", "BG", "Preview", "Timing Points" });
             cmbSettingCopier.Location = new Point(12, 464);
             cmbSettingCopier.Name = "cmbSettingCopier";
             cmbSettingCopier.Size = new Size(287, 29);

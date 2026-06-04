@@ -213,7 +213,8 @@ namespace osu_taiko_Mapping_Helper.Services
                     int time = i == 0 ? beatmap.hitObjects[i].time : GetOffsetTiming(i, greenLineIndex, redLineIndex, out offset);
                     int effect = GetEffect(i, greenLineIndex, offset);
                     var greenLineIndexes = beatmap.timingPoints.Select((tp, index) => new { tp, index }).
-                                                                Where(x => (x.tp.time <= beatmap.hitObjects[i].svApplyTime && x.tp.time > (beatmap.hitObjects.SafeGetIndex(i - 1)?.time ?? int.MinValue)) && !x.tp.isRedLine).
+                                                                Where(x => isFirstNotes ? (x.tp.time <= beatmap.hitObjects[i].svApplyTime && x.tp.time > (beatmap.hitObjects.SafeGetIndex(i - 1)?.time ?? int.MinValue) && !x.tp.isRedLine) :
+                                                                           (x.tp.time >= (int)time && x.tp.time <= beatmap.hitObjects[i].time && !x.tp.isRedLine)).
                                                                 Select(x => x.index).
                                                                 ToList();
                     // 削除対象となる緑線のdeleteFlagを有効にする
