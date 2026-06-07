@@ -675,23 +675,14 @@ namespace osu_taiko_Mapping_Helper
                         throw new Exception();
                     }
                 }
-                switch (setCode)
+                control.Text = setCode switch
                 {
-                    case Constants.SET_TIMING:
-                        control.Text = Common.ConvertFormatTiming(currentTime);
-                        break;
-                    case Constants.SET_SV:
-                        control.Text = UserInputDataHelper.SetCurrentSv(beatmapData, currentTime);
-                        break;
-                    case Constants.SET_VOLUME:
-                        control.Text = UserInputDataHelper.SetCurrentVolume(beatmapData, currentTime);
-                        break;
-                    case Constants.SET_BPM:
-                        control.Text = UserInputDataHelper.SetCurrentBpm(beatmapData, currentTime);
-                        break;
-                    default:
-                        throw new Exception();
-                }
+                    Constants.SET_TIMING => Common.ConvertFormatTiming(currentTime),
+                    Constants.SET_SV => UserInputDataHelper.SetCurrentSv(beatmapData, currentTime),
+                    Constants.SET_VOLUME => UserInputDataHelper.SetCurrentVolume(beatmapData, currentTime),
+                    Constants.SET_BPM => UserInputDataHelper.SetCurrentBpm(beatmapData, currentTime),
+                    _ => throw new Exception(),
+                };
             }
             catch
             {

@@ -35,6 +35,8 @@ namespace osu_taiko_Mapping_Helper.Views
             Common.SetLabelText(lblLanguage, "LBL_SETTINGS_LANGUAGE");
             Common.SetLabelText(lblMaxBackupCount, "LBL_SETTINGS_BACKUP_LIMIT");
             Common.SetLabelText(lblOffsetType, "LBL_SETTINGS_OFFSET_TYPE");
+            Common.SetLabelText(rdoHexaAndDuoOffset, "LBL_SETTINGS_HEXA_AND_DUO_OFFSET");
+            Common.SetLabelText(rdoMilliSecondOffset, "LBL_SETTINGS_MILLISECOND");
             Common.SetLabelText(lblSeparateSetting, "LBL_SETTINGS_NOTES_POSITION");
             Common.SetLabelText(lblUnicodeSupport, "LBL_SETTINGS_UNICODE_SUPPORT");
             Common.SetLabelText(btnSave, "LBL_SETTINGS_SAVE");
@@ -72,11 +74,11 @@ namespace osu_taiko_Mapping_Helper.Views
             {
                 case 0:
                     rdoHexaAndDuoOffset.Checked = true;
-                    rdoMiliSecondOffset.Checked = false;
+                    rdoMilliSecondOffset.Checked = false;
                     break;
                 case 1:
                     rdoHexaAndDuoOffset.Checked = false;
-                    rdoMiliSecondOffset.Checked = true;
+                    rdoMilliSecondOffset.Checked = true;
                     break;
             }
         }
@@ -208,7 +210,7 @@ namespace osu_taiko_Mapping_Helper.Views
         }
         private void rdoMiliSecondOffset_CheckedChanged(object sender, EventArgs e)
         {
-            if (rdoMiliSecondOffset.Checked)
+            if (rdoMilliSecondOffset.Checked)
             {
                 offsetMode = 1;
             }

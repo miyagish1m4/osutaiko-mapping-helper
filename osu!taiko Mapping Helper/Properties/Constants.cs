@@ -186,23 +186,16 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const double BASE_SLIDER_MULTIPLIER = 1.4;
         internal static string ConvertNoteType(NoteType noteType)
         {
-            switch (noteType)
+            return noteType switch
             {
-                case NoteType.BARLINE:
-                    return "Barline";
-                case NoteType.BOOKMARK:
-                    return "Bookmark";
-                case NoteType.CIRCLE:
-                    return "Circle";
-                case NoteType.SLIDER:
-                    return "Slider";
-                case NoteType.SPINNER:
-                    return "Spinner";
-                case NoteType.SPINNER_END:
-                    return "SpinnerEnd";
-                default:
-                    return "Unknown";
-            }
+                NoteType.BARLINE => "Barline",
+                NoteType.BOOKMARK => "Bookmark",
+                NoteType.CIRCLE => "Circle",
+                NoteType.SLIDER => "Slider",
+                NoteType.SPINNER => "Spinner",
+                NoteType.SPINNER_END => "SpinnerEnd",
+                _ => "Unknown",
+            };
         }
         // ヒットオブジェクトの種類
         internal enum NoteType

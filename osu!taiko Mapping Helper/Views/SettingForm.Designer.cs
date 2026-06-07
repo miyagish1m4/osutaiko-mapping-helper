@@ -51,7 +51,7 @@
             lblUnicodeSupport = new Label();
             lblOffsetType = new Label();
             rdoHexaAndDuoOffset = new RadioButton();
-            rdoMiliSecondOffset = new RadioButton();
+            rdoMilliSecondOffset = new RadioButton();
             panel1 = new Panel();
             lblSeparateSettingGuide = new Label();
             pnlNotesKind.SuspendLayout();
@@ -338,19 +338,19 @@
             rdoHexaAndDuoOffset.UseVisualStyleBackColor = true;
             rdoHexaAndDuoOffset.CheckedChanged += rdoHexaAndDuoOffset_CheckedChanged;
             // 
-            // rdoMiliSecondOffset
+            // rdoMilliSecondOffset
             // 
-            rdoMiliSecondOffset.AutoSize = true;
-            rdoMiliSecondOffset.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            rdoMiliSecondOffset.ForeColor = Color.White;
-            rdoMiliSecondOffset.Location = new Point(273, 190);
-            rdoMiliSecondOffset.Name = "rdoMiliSecondOffset";
-            rdoMiliSecondOffset.Size = new Size(88, 24);
-            rdoMiliSecondOffset.TabIndex = 25;
-            rdoMiliSecondOffset.TabStop = true;
-            rdoMiliSecondOffset.Text = "ms offset";
-            rdoMiliSecondOffset.UseVisualStyleBackColor = true;
-            rdoMiliSecondOffset.CheckedChanged += rdoMiliSecondOffset_CheckedChanged;
+            rdoMilliSecondOffset.AutoSize = true;
+            rdoMilliSecondOffset.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            rdoMilliSecondOffset.ForeColor = Color.White;
+            rdoMilliSecondOffset.Location = new Point(273, 190);
+            rdoMilliSecondOffset.Name = "rdoMilliSecondOffset";
+            rdoMilliSecondOffset.Size = new Size(88, 24);
+            rdoMilliSecondOffset.TabIndex = 25;
+            rdoMilliSecondOffset.TabStop = true;
+            rdoMilliSecondOffset.Text = "ms offset";
+            rdoMilliSecondOffset.UseVisualStyleBackColor = true;
+            rdoMilliSecondOffset.CheckedChanged += rdoMiliSecondOffset_CheckedChanged;
             // 
             // panel1
             // 
@@ -375,7 +375,7 @@
             BackColor = Color.FromArgb(0, 64, 64);
             ClientSize = new Size(466, 552);
             Controls.Add(lblSeparateSettingGuide);
-            Controls.Add(rdoMiliSecondOffset);
+            Controls.Add(rdoMilliSecondOffset);
             Controls.Add(rdoHexaAndDuoOffset);
             Controls.Add(lblOffsetType);
             Controls.Add(chkUnicodeSupport);
@@ -427,7 +427,7 @@
         private Label lblUnicodeSupport;
         private Label lblOffsetType;
         private RadioButton rdoHexaAndDuoOffset;
-        private RadioButton rdoMiliSecondOffset;
+        private RadioButton rdoMilliSecondOffset;
         private Panel panel1;
         private Label label2;
         private Label lblSeparateSettingGuide;

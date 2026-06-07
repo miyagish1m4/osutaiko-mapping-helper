@@ -225,7 +225,7 @@ namespace osu_taiko_Mapping_Helper.Services
                             beatmap.timingPoints[redLineIndex].bpm :
                             (beatmap.timingPoints.LastOrDefault(tp => (tp.time <= time) && tp.isRedLine)?.bpm ?? 120);
                         double sv = CalculateSv(i, greenLineIndex, svPerMs) *
-                            (userInputData.relativeCode == Constants.RELATIVE_DISABLE ? (baseBpm / bpm) : 1);
+                            ((userInputData.relativeCode == Constants.RELATIVE_DISABLE && userInputData.isSv) ? (baseBpm / bpm) : 1);
                         int volume = CalculateVolume(i, greenLineIndex, volumePerMs);
                         if (beatmap.hitObjects[i].noteType == Constants.NoteType.SLIDER)
                         {
@@ -252,7 +252,7 @@ namespace osu_taiko_Mapping_Helper.Services
                         if (CheckKiai(greenLineIndex))
                         {
                             beatmap.timingPoints[greenLineIndex].sv = CalculateSv(i, greenLineIndex, svPerMs) *
-                            (userInputData.relativeCode == Constants.RELATIVE_DISABLE ? (baseBpm / beatmap.timingPoints[redLineIndex].bpm) : 1);
+                            ((userInputData.relativeCode == Constants.RELATIVE_DISABLE && userInputData.isSv) ? (baseBpm / beatmap.timingPoints[redLineIndex].bpm) : 1);
                             beatmap.timingPoints[greenLineIndex].volume = volume;
                         }
                         isIgnoreObject = false;
@@ -342,7 +342,7 @@ namespace osu_taiko_Mapping_Helper.Services
                         if ((beatmap.hitObjects[i].hitObjectCode & userInputData.setObjectOption.setObjectsCode) != 0)
                         {
                             double sv = CalculateSv(i, greenLineIndex, svPerMs) *
-                                (userInputData.relativeCode == Constants.RELATIVE_DISABLE ? (baseBpm / beatmap.timingPoints[redLineIndex].bpm) : 1);
+                                ((userInputData.relativeCode == Constants.RELATIVE_DISABLE && userInputData.isSv) ? (baseBpm / beatmap.timingPoints[redLineIndex].bpm) : 1);
                             int volume = CalculateVolume(i, greenLineIndex, volumePerMs);
                             outTimingPoints.Add(new TimingPoint(beatmap.hitObjects[i].time,
                                                                 0,
@@ -397,7 +397,7 @@ namespace osu_taiko_Mapping_Helper.Services
                 currentTiming += timingOffset;
                 for (int i = 0; i < redLineIndexes.Count; i++)
                 {
-                    int loopCode = GetLoopCode(redLineIndexes[i], true);
+                    int loopCode = GetLoopCode(redLineIndexes[i], true, true);
                     if (loopCode == Constants.STATE_CONTINUE) continue;
                     if (loopCode == Constants.STATE_BREAK) break;
                     for (int j = 0; ; j++)
@@ -407,8 +407,8 @@ namespace osu_taiko_Mapping_Helper.Services
                         if (loopCode == Constants.STATE_BREAK) break;
                         // 直前の緑線のIndexを探す
                         var greenLineIndex = beatmap.timingPoints.FindLastIndex(tp => tp.time <= currentTiming);
-                        double sv = CalculateSv(j, greenLineIndex, svPerMs) *
-                            (userInputData.relativeCode == Constants.RELATIVE_DISABLE ? (baseBpm / beatmap.timingPoints[redLineIndexes[i]].bpm) : 1);
+                        double sv = CalculateSv(currentTiming, svPerMs) *
+                            ((userInputData.relativeCode == Constants.RELATIVE_DISABLE && userInputData.isSv) ? (baseBpm / beatmap.timingPoints[redLineIndexes[i]].bpm) : 1);
                         int volume = CalculateVolume(currentTiming, volumePerMs);
                         outTimingPoints.Add(new TimingPoint
                         {
@@ -462,7 +462,7 @@ namespace osu_taiko_Mapping_Helper.Services
                     if (loopCode == Constants.STATE_BREAK) break;
                     var redLineIndex = beatmap.timingPoints.FindLastIndex(tp => (tp.time <= beatmap.timingPoints[i].time) && tp.isRedLine);
                     beatmap.timingPoints[i].sv = CalculateSv(i, svPerMs) *
-                        (userInputData.relativeCode == Constants.RELATIVE_DISABLE ? (baseBpm / beatmap.timingPoints[redLineIndex].bpm) : 1);
+                        ((userInputData.relativeCode == Constants.RELATIVE_DISABLE && userInputData.isSv) ? (baseBpm / beatmap.timingPoints[redLineIndex].bpm) : 1);
                     beatmap.timingPoints[i].volume = CalculateVolume(i, volumePerMs);
                 }
                 return true;
@@ -487,7 +487,8 @@ namespace osu_taiko_Mapping_Helper.Services
                 List<int> greenLineIndexes = [];
                 for (int i = 0; i < redLineList.Count; i++)
                 {
-                    int loopCode = GetLoopCode(i, true);
+                    var redLineIndex = beatmap.timingPoints.FindLastIndex(tp => tp.time == redLineList[i].time && tp.isRedLine);
+                    int loopCode = GetLoopCode(redLineIndex, true);
                     if (loopCode == Constants.STATE_CONTINUE) continue;
                     if (loopCode == Constants.STATE_BREAK) break;
                     // 直前の緑線のIndexを探す
@@ -551,7 +552,7 @@ namespace osu_taiko_Mapping_Helper.Services
                     var applyInheritedPoint = outTimingPoints.LastOrDefault(tp => tp.time == beatmap.timingPoints[i].time && !tp.isRedLine);
                     if (applyInheritedPoint == null)
                     {
-                        applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time == beatmap.timingPoints[i].time && !tp.isRedLine);
+                        applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= beatmap.timingPoints[i].time && !tp.isRedLine);
                         if (applyInheritedPoint == null) return false;
                     }
                     beatmap.timingPoints[i].volume = applyInheritedPoint.volume;
@@ -614,21 +615,25 @@ namespace osu_taiko_Mapping_Helper.Services
         /// <exception cref="ArgumentException">計算コードが不正</exception>
         private static double GetSvPerMs()
         {
-            switch (userInputData.calculationCode)
+            int deltaTiming = userInputData.timingTo - userInputData.timingFrom;
+            if (deltaTiming == 0) return 0L;
+            return userInputData.calculationCode switch
             {
-                case Constants.CALCULATION_ARITHMETIC:
-                    return (userInputData.svTo - userInputData.svFrom) / (userInputData.timingTo - userInputData.timingFrom);
-                case Constants.CALCULATION_GEOMETRIC:
-                    return Math.Pow(userInputData.svTo / userInputData.svFrom, 1.0 / (userInputData.timingTo - userInputData.timingFrom));
-                default:
-                    throw new ArgumentException("Invalid calculation code");
-            }
+                Constants.CALCULATION_ARITHMETIC => (userInputData.svTo - userInputData.svFrom) / (userInputData.timingTo - userInputData.timingFrom),
+                Constants.CALCULATION_GEOMETRIC => Math.Pow(userInputData.svTo / userInputData.svFrom, 1.0 / (userInputData.timingTo - userInputData.timingFrom)),
+                _ => throw new ArgumentException("Invalid calculation code"),
+            };
         }
         /// <summary>
         /// 1msあたりのVolumeを計算する
         /// </summary>
         /// <returns>1msあたりのVolumeを返す</returns>
-        private static double GetVolumePerMs() => (double)(userInputData.volumeTo - userInputData.volumeFrom) / (double)(userInputData.timingTo - userInputData.timingFrom);
+        private static double GetVolumePerMs()
+        {
+            int deltaTiming = userInputData.timingTo - userInputData.timingFrom;
+            if (deltaTiming == 0) return 0L;
+            return (double)(userInputData.volumeTo - userInputData.volumeFrom) / (double)(userInputData.timingTo - userInputData.timingFrom);
+        }
         /// <summary>
         /// 算出した1msあたりのSVを元に、指定されたタイミングのSVを計算する
         /// </summary>
@@ -642,29 +647,19 @@ namespace osu_taiko_Mapping_Helper.Services
             double baseSv = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.sv ?? 1.0;
             if (userInputData.isSv)
             {
-                double currentSv;
-                switch (userInputData.calculationCode)
+                var currentSv = userInputData.calculationCode switch
                 {
-                    case Constants.CALCULATION_ARITHMETIC:
-                        currentSv = userInputData.svFrom + (svPerMs * (beatmap.hitObjects[hitObjectIndex].time - userInputData.timingFrom));
-                        break;
-                    case Constants.CALCULATION_GEOMETRIC:
-                        currentSv = userInputData.svFrom * Math.Pow(svPerMs, (double)(beatmap.hitObjects[hitObjectIndex].time - userInputData.timingFrom));
-                        break;
-                    default:
-                        throw new ArgumentException("Invalid calculation code");
-                }
-                switch (userInputData.relativeCode)
+                    Constants.CALCULATION_ARITHMETIC => userInputData.svFrom + (svPerMs * (beatmap.hitObjects[hitObjectIndex].time - userInputData.timingFrom)),
+                    Constants.CALCULATION_GEOMETRIC => userInputData.svFrom * Math.Pow(svPerMs, (double)(beatmap.hitObjects[hitObjectIndex].time - userInputData.timingFrom)),
+                    _ => throw new ArgumentException("Invalid calculation code"),
+                };
+                return userInputData.relativeCode switch
                 {
-                    case Constants.RELATIVE_DISABLE:
-                        return currentSv;
-                    case Constants.RELATIVE_MULTIPLY:
-                        return (baseSv - userInputData.relativeBaseSv) * currentSv + userInputData.relativeBaseSv;
-                    case Constants.RELATIVE_SUM:
-                        return baseSv + currentSv;
-                    default:
-                        throw new ArgumentException("Invalid relative code");
-                }
+                    Constants.RELATIVE_DISABLE => currentSv,
+                    Constants.RELATIVE_MULTIPLY => (baseSv - userInputData.relativeBaseSv) * currentSv + userInputData.relativeBaseSv,
+                    Constants.RELATIVE_SUM => baseSv + currentSv,
+                    _ => throw new ArgumentException("Invalid relative code"),
+                };
             }
             return baseSv;
         }
@@ -680,29 +675,47 @@ namespace osu_taiko_Mapping_Helper.Services
             double baseSv = beatmap.timingPoints.LastOrDefault(tp => tp.time <= beatmap.timingPoints[timingPointIndex].time)?.sv ?? 1.0;
             if (userInputData.isSv)
             {
-                double currentSv;
-                switch (userInputData.calculationCode)
+                var currentSv = userInputData.calculationCode switch
                 {
-                    case Constants.CALCULATION_ARITHMETIC:
-                        currentSv = userInputData.svFrom + (svPerMs * (beatmap.timingPoints[timingPointIndex].time - userInputData.timingFrom));
-                        break;
-                    case Constants.CALCULATION_GEOMETRIC:
-                        currentSv = userInputData.svFrom * Math.Pow(svPerMs, (double)(beatmap.timingPoints[timingPointIndex].time - userInputData.timingFrom));
-                        break;
-                    default:
-                        throw new ArgumentException("Invalid calculation code");
-                }
-                switch (userInputData.relativeCode)
+                    Constants.CALCULATION_ARITHMETIC => userInputData.svFrom + (svPerMs * (beatmap.timingPoints[timingPointIndex].time - userInputData.timingFrom)),
+                    Constants.CALCULATION_GEOMETRIC => userInputData.svFrom * Math.Pow(svPerMs, (double)(beatmap.timingPoints[timingPointIndex].time - userInputData.timingFrom)),
+                    _ => throw new ArgumentException("Invalid calculation code"),
+                };
+                return userInputData.relativeCode switch
                 {
-                    case Constants.RELATIVE_DISABLE:
-                        return currentSv;
-                    case Constants.RELATIVE_MULTIPLY:
-                        return (baseSv - userInputData.relativeBaseSv) * currentSv + userInputData.relativeBaseSv;
-                    case Constants.RELATIVE_SUM:
-                        return baseSv + currentSv;
-                    default:
-                        throw new ArgumentException("Invalid relative code");
-                }
+                    Constants.RELATIVE_DISABLE => currentSv,
+                    Constants.RELATIVE_MULTIPLY => (baseSv - userInputData.relativeBaseSv) * currentSv + userInputData.relativeBaseSv,
+                    Constants.RELATIVE_SUM => baseSv + currentSv,
+                    _ => throw new ArgumentException("Invalid relative code"),
+                };
+            }
+            return baseSv;
+        }
+        /// <summary>
+        /// 算出した1msあたりのSVを元に、指定されたタイミングのSVを計算する
+        /// </summary>
+        /// <param name="currentTiming">現地点のタイミング</param>
+        /// <param name="svPerMs">1msあたりのSV</param>
+        /// <returns>算出したSV</returns>
+        /// <exception cref="ArgumentException">計算コードが不正</exception>
+        private static double CalculateSv(double currentTiming, double svPerMs)
+        {
+            double baseSv = beatmap.timingPoints.LastOrDefault(tp => tp.time <= currentTiming)?.sv ?? 1.0;
+            if (userInputData.isSv)
+            {
+                var currentSv = userInputData.calculationCode switch
+                {
+                    Constants.CALCULATION_ARITHMETIC => userInputData.svFrom + (svPerMs * (currentTiming - userInputData.timingFrom)),
+                    Constants.CALCULATION_GEOMETRIC => userInputData.svFrom * Math.Pow(svPerMs, (double)(currentTiming - userInputData.timingFrom)),
+                    _ => throw new ArgumentException("Invalid calculation code"),
+                };
+                return userInputData.relativeCode switch
+                {
+                    Constants.RELATIVE_DISABLE => currentSv,
+                    Constants.RELATIVE_MULTIPLY => (baseSv - userInputData.relativeBaseSv) * currentSv + userInputData.relativeBaseSv,
+                    Constants.RELATIVE_SUM => baseSv + currentSv,
+                    _ => throw new ArgumentException("Invalid relative code"),
+                };
             }
             return baseSv;
         }
@@ -752,8 +765,8 @@ namespace osu_taiko_Mapping_Helper.Services
             {
                 return (int)(userInputData.volumeFrom + (volumePerMs * (currentTiming - userInputData.timingFrom)) + 0.5);
             }
-            
-            return beatmap.timingPoints.LastOrDefault(tp => tp.time < currentTiming)?.volume ?? 100;
+
+            return beatmap.timingPoints.LastOrDefault(tp => tp.time <= currentTiming)?.volume ?? 100;
         }
         /// <summary>
         /// オフセット取得処理 (1/16(1/12)オフセット時)
@@ -775,24 +788,12 @@ namespace osu_taiko_Mapping_Helper.Services
 
                     bool isOddAdjacent = (prevHitObject != null && prevHitObject.time >= beatmap.hitObjects[hitObjectIndex].time - intervalTri - Constants.MILLISECOND_TOLERANCE && prevHitObject.snap == Constants.DUO_SNAP)
                                       || (nextHitObject != null && nextHitObject.time <= beatmap.hitObjects[hitObjectIndex].time + intervalTri + Constants.MILLISECOND_TOLERANCE && nextHitObject.snap == Constants.DUO_SNAP);
-                    if (isOddAdjacent)
-                    {
-                        return duoOffset;
-                    }
-                    else
-                    {
-                        return hexaOffset;
-                    }
+                    if (isOddAdjacent) return duoOffset;
+                    return hexaOffset;
                 }
-                else
-                {
-                    return duoOffset;
-                }
+                return duoOffset;
             }
-            else
-            {
-                return hexaOffset;
-            }
+            return hexaOffset;
         }
         /// <summary>
         /// オフセット適用後のタイミング取得処理
@@ -811,24 +812,18 @@ namespace osu_taiko_Mapping_Helper.Services
                 {
                     return beatmap.hitObjects[hitObjectIndex].time;
                 }
-                else
+                switch (userInputData.offsetMode)
                 {
-                    switch (userInputData.offsetMode)
-                    {
-                        case 0:
-                            offset = -GetOffsetTiming(hitObjectIndex, redLineIndex);
-                            return (int)(beatmap.hitObjects[hitObjectIndex].rawTime + offset);
-                        case 1:
-                            return beatmap.hitObjects[hitObjectIndex].time + (int)offset;
-                        default:
-                            throw new Exception();
-                    }
+                    case 0:
+                        offset = -GetOffsetTiming(hitObjectIndex, redLineIndex);
+                        return (int)(beatmap.hitObjects[hitObjectIndex].rawTime + offset);
+                    case 1:
+                        return beatmap.hitObjects[hitObjectIndex].time + (int)offset;
+                    default:
+                        throw new Exception();
                 }
             }
-            else
-            {
-                return beatmap.hitObjects[hitObjectIndex].time;
-            }
+            return beatmap.hitObjects[hitObjectIndex].time;
         }
         /// <summary>
         /// エフェクト取得処理
@@ -851,14 +846,8 @@ namespace osu_taiko_Mapping_Helper.Services
                     }
                     else
                     {
-                        if ((beatmap.timingPoints[greenLineIndex].effect & 1) == (tp.effect & 1))
-                        {
-                            return beatmap.timingPoints[greenLineIndex].effect;
-                        }
-                        else
-                        {
-                            return tp.effect;
-                        }
+                        if ((beatmap.timingPoints[greenLineIndex].effect & 1) == (tp.effect & 1)) return beatmap.timingPoints[greenLineIndex].effect;
+                        return tp.effect;
                     }
 
                 }
@@ -926,25 +915,13 @@ namespace osu_taiko_Mapping_Helper.Services
             if (offset == 0)
             {
                 applyOutputInheritedPoint = outTimingPoints.LastOrDefault(tp => (tp.time == beatmap.hitObjects[hitObjectIndex].time) && !tp.isRedLine);
-                // ノーツと同じタイミングに緑線がない場合
-                if (applyOutputInheritedPoint == null)
-                {
-                    // 緑線設定フラグを有効にする
-                    return true;
-                }
-                // ある場合は(同じタイミングに赤線,緑線,ノーツがある)
-                else
-                {
-                    // 何もしない
-                    return false;
-                }
+                // ノーツと同じタイミングに緑線がない場合は緑線設定フラグを有効にする
+                if (applyOutputInheritedPoint == null) return true;
+                // ある場合は (同じタイミングに赤線,緑線,ノーツがある) 緑線設定フラグを無効にする
+                return false;
             }
-            // オフセット値が0以外の場合
-            else
-            {
-                // 緑線設定フラグを有効にする
-                return true;
-            }
+            // オフセット値が0以外の場合は緑線設定フラグを有効にする
+            return true;
         }
         #endregion
         #region 削除処理
@@ -960,17 +937,23 @@ namespace osu_taiko_Mapping_Helper.Services
             try
             {
                 SetClasses(userInputData, beatmap);
-                for (int i = 0; i < beatmap.timingPoints.Count; i++)
+                try
                 {
-                    if (beatmap.timingPoints[i].isRedLine) continue;
-                    int loopCode = GetLoopCode(i, true);
-                    if (loopCode == Constants.STATE_CONTINUE) continue;
-                    if (loopCode == Constants.STATE_BREAK) break;
-                    if ((beatmap.timingPoints[i].time == userInputData.timingFrom && !userInputData.setObjectOption.isTimingStart) ||
-                        (beatmap.timingPoints[i].time == userInputData.timingTo && !userInputData.setObjectOption.isTimingEnd)) continue;
-                    beatmap.timingPoints[i].isDelete = true;
+                    for (int i = 0; i < beatmap.timingPoints.Count; i++)
+                    {
+                        if (beatmap.timingPoints[i].isRedLine) continue;
+                        int loopCode = GetLoopCode(i, true);
+                        if (loopCode == Constants.STATE_CONTINUE) continue;
+                        if (loopCode == Constants.STATE_BREAK) break;
+                        if ((beatmap.timingPoints[i].time == userInputData.timingFrom && !userInputData.setObjectOption.isTimingStart) ||
+                            (beatmap.timingPoints[i].time == userInputData.timingTo && !userInputData.setObjectOption.isTimingEnd)) continue;
+                        beatmap.timingPoints[i].isDelete = true;
+                    }
                 }
-                if (!SetDeleteFlags()) throw new Exception("Failed to set delete flags.");
+                catch
+                {
+                    throw new Exception("Failed to remove green lines.");
+                }
                 // ユーザーが指定した範囲外のスライダーの長さの調整
                 if (!AdjustSliderLengthAfterExecute(beatmap.timingPoints, Constants.EXECUTE_REMOVE)) throw new Exception("Failed to adjust slider length.");
                 if (!DeleteTimingPoints()) throw new Exception("Failed to delete timing points.");
@@ -1005,14 +988,17 @@ namespace osu_taiko_Mapping_Helper.Services
         /// <param name="index">インデックス</param>
         /// <param name="isTimingPoints">タイミングポイントフラグ</param>
         /// <returns>-1 ; break<br/>0 : 続行<br/>1 : continue</returns>
-        private static int GetLoopCode(int index, bool isTimingPoints = false)
+        private static int GetLoopCode(int index, bool isTimingPoints = false, bool isBeatSnap = false)
         {
             if (isTimingPoints)
             {
                 // ユーザーが入力した始点より後ろの場合は処理を抜ける
                 if (beatmap.timingPoints[index].time > userInputData.timingTo) return Constants.STATE_BREAK;
-                // ユーザーが入力した始点より前の場合は何も処理をしない
-                if (beatmap.timingPoints[index].time < userInputData.timingFrom) return Constants.STATE_CONTINUE;
+                if (!isBeatSnap)
+                {
+                    // ユーザーが入力した始点より前の場合は何も処理をしない
+                    if (beatmap.timingPoints[index].time < userInputData.timingFrom) return Constants.STATE_CONTINUE;
+                }
             }
             else
             {
