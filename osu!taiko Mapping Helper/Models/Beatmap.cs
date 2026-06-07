@@ -61,5 +61,18 @@
             this.hitObjects = hitObject;
             this.bookmarks = bookmarks;
         }
+        internal Beatmap()
+        {
+            this.version = string.Empty;
+            this.general = new List<string>();
+            this.editor = new List<string>();
+            this.metadata = new List<string>();
+            this.difficulty = new List<string>();
+            this.events = new List<Events>();
+            this.timingPoints = new List<TimingPoint>();
+            this.colours = new List<string>();
+            this.hitObjects = new List<HitObject>();
+            this.bookmarks = new List<Bookmark>();
+        }
     }
 }

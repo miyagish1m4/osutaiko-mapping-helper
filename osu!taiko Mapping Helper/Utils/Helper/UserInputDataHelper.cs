@@ -109,11 +109,13 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         {
             try
             {
-                userInputData.setOption.isSetObjects = userInputTempData.setOption.isSetObjects;
-                userInputData.setOption.isSetBeatSnap = userInputTempData.setOption.isSetBeatSnap;
-                userInputData.setOption.isSetGreenLine = userInputTempData.setOption.isSetGreenLine;
+                if (userInputTempData.setOption.isSetObjects) userInputData.applySetCode = 0x00000001;
+                if (userInputTempData.setOption.isSetBeatSnap) userInputData.applySetCode = 0x00000002;
+                if (userInputTempData.setOption.isSetGreenLine) userInputData.applySetCode = 0x00000004;
+                if (userInputTempData.setOption.isSetRedLine) userInputData.applySetCode = 0x00000008;
                 userInputData.setObjectOption.isTimingStart = userInputTempData.isEnableFrom;
                 userInputData.setObjectOption.isTimingEnd = userInputTempData.isEnableTo;
+                userInputData.shouldApplyRedlines = userInputTempData.isEnableRedLines;
                 return true;
             }
             catch
@@ -483,7 +485,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         {
             try
             {
-                if (!userInputData.setOption.isSetBeatSnap)
+                if ((userInputData.applySetCode & 0x00000002) == 0)
                 {
                     return true;
                 }
@@ -507,6 +509,50 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     return false;
                 }
                 userInputData.setBeatSnapOption.beatSnap = retBeatSnap;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+        /// <summary>
+        /// BPMのバリデーションチェックをする関数
+        /// </summary>
+        /// <param name="userInputTempData">入力値(一時保存用)</param>
+        /// <param name="userInputData">入力値</param>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        private static bool ValidateBpm(UserInputTempData userInputTempData,
+                                        ref UserInputData userInputData)
+        {
+            try
+            {
+                if ((userInputData.applySetCode & 0x00000008) == 0)
+                {
+                    return true;
+                }
+                double retBpm = -1;
+                if (userInputTempData.bpm == string.Empty)
+                {
+                    //見た目BPMが指定されていない
+                    Common.ShowMessageDialog("E_V-EM-10");
+                    return false;
+                }
+                if (!System.Text.RegularExpressions.Regex.IsMatch(userInputTempData.bpm, @"^[-+]?[0-9]*\.?[0-9]+$"))
+                {
+                    //見た目BPMが数値で指定されていない
+                    Common.ShowMessageDialog("E_V-T-17");
+                    return false;
+                }
+                if (!double.TryParse(userInputTempData.bpm, out retBpm) || retBpm <= 0)
+                {
+                    //見た目BPMが正の数で指定されていない
+                    Common.ShowMessageDialog("E_V-T-18");
+                    return false;
+                }
+                userInputData.bpm = retBpm;
                 return true;
             }
             catch (Exception ex)
@@ -569,8 +615,15 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         {
                             throw new Exception("BeatSnap間隔の取得に失敗しました。");
                         }
+                        if (!ValidateBpm(userInputTempData, ref userInputData))
+                        {
+                            throw new Exception("見た目BPMの取得に失敗しました。");
+                        }
                         break;
                     case Properties.Constants.EXECUTE_REMOVE:
+                        userInputData.shouldApplyRedlines = false;
+                        userInputData.setObjectOption.isTimingStart = userInputTempData.isEnableFrom;
+                        userInputData.setObjectOption.isTimingEnd = userInputTempData.isEnableTo;
                         break;
                     default:
                         throw new Exception("不明な実行コードが指定されました。");
@@ -647,6 +700,37 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     throw new Exception();
                 }
                 return retVolume.ToString();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+        /// <summary>
+        /// 現地点のBPMを取得する関数
+        /// </summary>
+        /// <param name="beatmap">譜面情報</param>
+        /// <param name="currentTime">タイミング</param>
+        /// <returns>BPMの値</returns>
+        internal static string SetCurrentBpm(Beatmap? beatmap,
+                                                int currentTime)
+        {
+            TimingPoint timingPointBuff = new();
+            double retBpm = 0;
+            try
+            {
+                if (beatmap == null)
+                {
+                    throw new Exception();
+                }
+                // 現在のタイミングのBPMを取得する
+                retBpm = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= currentTime) && tp.isRedLine )?.bpm ?? -1;
+                retBpm = Math.Round(retBpm, 6, MidpointRounding.AwayFromZero);
+                if (retBpm == -1)
+                {
+                    throw new Exception();
+                }
+                return retBpm.ToString();
             }
             catch
             {

@@ -229,10 +229,6 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                                          userInputData.relativeBaseSv + "," +
                                          userInputData.isOffset + "," +
                                          userInputData.offset + "," +
-                                         userInputData.setOption.isSetObjects + "," +
-                                         userInputData.setOption.isSetBeatSnap + "," +
-                                         userInputData.setOption.isSetGreenLine + "," +
-                                         userInputData.setObjectOption.setObjectsCode + "," +
                                          //userInputData.setObjectOption.isKiaiStart + "," +
                                          //userInputData.setObjectOption.isKiaiEnd + "," +
                                          userInputData.setObjectOption.isTimingStart + "," +

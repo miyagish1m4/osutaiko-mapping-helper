@@ -83,8 +83,16 @@ namespace osu_taiko_Mapping_Helper
             rdoOnlyBookMark = new RadioButton();
             rdoOnlySpecificHitObject = new RadioButton();
             tabBeatSnap = new TabPage();
+            lblBeatSnapsGuide = new Label();
             lblBeatSnaps = new Label();
             tabGreenLine = new TabPage();
+            lblGreenLineGuide = new Label();
+            tabRedLine = new TabPage();
+            btnSetCurrentBpm = new Button();
+            txtBpm = new Label();
+            lblScrollSpeed = new Label();
+            txtScrollSpeed = new TextBox();
+            lblRedLineGuide = new Label();
             pnlMiliSecondOffset = new Panel();
             tabRemovePage = new TabPage();
             chkApplyEndObject = new CheckBox();
@@ -110,6 +118,7 @@ namespace osu_taiko_Mapping_Helper
             timingPropertyToolStripMenuItem = new ToolStripMenuItem();
             bGSetterToolStripMenuItem = new ToolStripMenuItem();
             pnlGroupSvEditor = new Panel();
+            chkApplyRedLines = new CheckBox();
             pnlGroupUtility = new Panel();
             label8 = new Label();
             txtTimingOffset = new TextBox();
@@ -155,6 +164,8 @@ namespace osu_taiko_Mapping_Helper
             tabHitObjectsPage.SuspendLayout();
             pnlSpecificGroup.SuspendLayout();
             tabBeatSnap.SuspendLayout();
+            tabGreenLine.SuspendLayout();
+            tabRedLine.SuspendLayout();
             pnlMiliSecondOffset.SuspendLayout();
             tabRemovePage.SuspendLayout();
             pnlRelativeSvGroup.SuspendLayout();
@@ -274,7 +285,7 @@ namespace osu_taiko_Mapping_Helper
             lblTiming.AutoSize = true;
             lblTiming.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold);
             lblTiming.ForeColor = Color.White;
-            lblTiming.Location = new Point(24, 10);
+            lblTiming.Location = new Point(22, 10);
             lblTiming.Name = "lblTiming";
             lblTiming.Size = new Size(56, 20);
             lblTiming.TabIndex = 12;
@@ -341,7 +352,7 @@ namespace osu_taiko_Mapping_Helper
             pnlCalcurationTypeGroup.BorderStyle = BorderStyle.Fixed3D;
             pnlCalcurationTypeGroup.Controls.Add(rdoArithmetic);
             pnlCalcurationTypeGroup.Controls.Add(rdoGeometric);
-            pnlCalcurationTypeGroup.Location = new Point(9, 212);
+            pnlCalcurationTypeGroup.Location = new Point(9, 215);
             pnlCalcurationTypeGroup.Name = "pnlCalcurationTypeGroup";
             pnlCalcurationTypeGroup.Size = new Size(113, 66);
             pnlCalcurationTypeGroup.TabIndex = 9;
@@ -470,7 +481,7 @@ namespace osu_taiko_Mapping_Helper
             // 
             txtBeatSnap.BackColor = SystemColors.Window;
             txtBeatSnap.BorderStyle = BorderStyle.FixedSingle;
-            txtBeatSnap.Location = new Point(131, 14);
+            txtBeatSnap.Location = new Point(131, 8);
             txtBeatSnap.Name = "txtBeatSnap";
             txtBeatSnap.Size = new Size(40, 25);
             txtBeatSnap.TabIndex = 2;
@@ -481,7 +492,7 @@ namespace osu_taiko_Mapping_Helper
             // 
             lblBeatSnap.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblBeatSnap.ForeColor = Color.White;
-            lblBeatSnap.Location = new Point(114, 17);
+            lblBeatSnap.Location = new Point(114, 12);
             lblBeatSnap.Name = "lblBeatSnap";
             lblBeatSnap.Size = new Size(17, 20);
             lblBeatSnap.TabIndex = 1;
@@ -673,14 +684,15 @@ namespace osu_taiko_Mapping_Helper
             tabSetType.Controls.Add(tabHitObjectsPage);
             tabSetType.Controls.Add(tabBeatSnap);
             tabSetType.Controls.Add(tabGreenLine);
+            tabSetType.Controls.Add(tabRedLine);
             tabSetType.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabSetType.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
             tabSetType.ImeMode = ImeMode.NoControl;
-            tabSetType.ItemSize = new Size(126, 40);
-            tabSetType.Location = new Point(0, 50);
+            tabSetType.ItemSize = new Size(96, 40);
+            tabSetType.Location = new Point(-2, 50);
             tabSetType.Name = "tabSetType";
             tabSetType.SelectedIndex = 0;
-            tabSetType.Size = new Size(383, 168);
+            tabSetType.Size = new Size(387, 168);
             tabSetType.SizeMode = TabSizeMode.Fixed;
             tabSetType.TabIndex = 2;
             tabSetType.TabStop = false;
@@ -711,7 +723,7 @@ namespace osu_taiko_Mapping_Helper
             tabHitObjectsPage.Name = "tabHitObjectsPage";
             tabHitObjectsPage.Padding = new Padding(3);
             tabHitObjectsPage.RightToLeft = RightToLeft.No;
-            tabHitObjectsPage.Size = new Size(375, 120);
+            tabHitObjectsPage.Size = new Size(379, 120);
             tabHitObjectsPage.TabIndex = 0;
             tabHitObjectsPage.Text = "Objectsのみ";
             // 
@@ -806,6 +818,7 @@ namespace osu_taiko_Mapping_Helper
             // 
             tabBeatSnap.BackColor = Color.FromArgb(0, 64, 64);
             tabBeatSnap.BorderStyle = BorderStyle.FixedSingle;
+            tabBeatSnap.Controls.Add(lblBeatSnapsGuide);
             tabBeatSnap.Controls.Add(lblBeatSnaps);
             tabBeatSnap.Controls.Add(lblBeatSnap);
             tabBeatSnap.Controls.Add(txtBeatSnap);
@@ -815,16 +828,27 @@ namespace osu_taiko_Mapping_Helper
             tabBeatSnap.Name = "tabBeatSnap";
             tabBeatSnap.Padding = new Padding(3);
             tabBeatSnap.RightToLeft = RightToLeft.No;
-            tabBeatSnap.Size = new Size(375, 120);
+            tabBeatSnap.Size = new Size(379, 120);
             tabBeatSnap.TabIndex = 1;
-            tabBeatSnap.Text = "BeatSnap";
+            tabBeatSnap.Text = "BeatSnaps";
+            // 
+            // lblBeatSnapsGuide
+            // 
+            lblBeatSnapsGuide.AutoSize = true;
+            lblBeatSnapsGuide.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
+            lblBeatSnapsGuide.ForeColor = Color.DarkGray;
+            lblBeatSnapsGuide.Location = new Point(11, 39);
+            lblBeatSnapsGuide.Name = "lblBeatSnapsGuide";
+            lblBeatSnapsGuide.Size = new Size(100, 15);
+            lblBeatSnapsGuide.TabIndex = 4;
+            lblBeatSnapsGuide.Text = "Beat Snap Divisor";
             // 
             // lblBeatSnaps
             // 
             lblBeatSnaps.AutoSize = true;
             lblBeatSnaps.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
             lblBeatSnaps.ForeColor = Color.White;
-            lblBeatSnaps.Location = new Point(11, 18);
+            lblBeatSnaps.Location = new Point(11, 13);
             lblBeatSnaps.Name = "lblBeatSnaps";
             lblBeatSnaps.Size = new Size(100, 15);
             lblBeatSnaps.TabIndex = 3;
@@ -834,14 +858,105 @@ namespace osu_taiko_Mapping_Helper
             // 
             tabGreenLine.BackColor = Color.FromArgb(0, 64, 64);
             tabGreenLine.BorderStyle = BorderStyle.FixedSingle;
+            tabGreenLine.Controls.Add(lblGreenLineGuide);
             tabGreenLine.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
             tabGreenLine.ImeMode = ImeMode.NoControl;
             tabGreenLine.Location = new Point(4, 44);
             tabGreenLine.Name = "tabGreenLine";
             tabGreenLine.Padding = new Padding(3);
-            tabGreenLine.Size = new Size(375, 120);
+            tabGreenLine.Size = new Size(379, 120);
             tabGreenLine.TabIndex = 2;
-            tabGreenLine.Text = "Inherited Point";
+            tabGreenLine.Text = "GreenLines";
+            // 
+            // lblGreenLineGuide
+            // 
+            lblGreenLineGuide.AutoSize = true;
+            lblGreenLineGuide.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
+            lblGreenLineGuide.ForeColor = Color.DarkGray;
+            lblGreenLineGuide.Location = new Point(11, 13);
+            lblGreenLineGuide.Name = "lblGreenLineGuide";
+            lblGreenLineGuide.Size = new Size(100, 15);
+            lblGreenLineGuide.TabIndex = 5;
+            lblGreenLineGuide.Text = "Beat Snap Divisor";
+            // 
+            // tabRedLine
+            // 
+            tabRedLine.AllowDrop = true;
+            tabRedLine.BackColor = Color.FromArgb(0, 64, 64);
+            tabRedLine.BorderStyle = BorderStyle.FixedSingle;
+            tabRedLine.Controls.Add(btnSetCurrentBpm);
+            tabRedLine.Controls.Add(txtBpm);
+            tabRedLine.Controls.Add(lblScrollSpeed);
+            tabRedLine.Controls.Add(txtScrollSpeed);
+            tabRedLine.Controls.Add(lblRedLineGuide);
+            tabRedLine.Location = new Point(4, 44);
+            tabRedLine.Name = "tabRedLine";
+            tabRedLine.Size = new Size(379, 120);
+            tabRedLine.TabIndex = 3;
+            tabRedLine.Text = "RedLines";
+            // 
+            // btnSetCurrentBpm
+            // 
+            btnSetCurrentBpm.FlatAppearance.BorderColor = Color.Cyan;
+            btnSetCurrentBpm.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            btnSetCurrentBpm.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            btnSetCurrentBpm.FlatStyle = FlatStyle.Flat;
+            btnSetCurrentBpm.Font = new Font("Yu Gothic UI", 8.25F, FontStyle.Bold);
+            btnSetCurrentBpm.ForeColor = SystemColors.Control;
+            btnSetCurrentBpm.ImageAlign = ContentAlignment.TopCenter;
+            btnSetCurrentBpm.Location = new Point(163, 32);
+            btnSetCurrentBpm.Name = "btnSetCurrentBpm";
+            btnSetCurrentBpm.Size = new Size(119, 24);
+            btnSetCurrentBpm.TabIndex = 20;
+            btnSetCurrentBpm.TabStop = false;
+            btnSetCurrentBpm.Text = "Set Current BPM";
+            btnSetCurrentBpm.UseVisualStyleBackColor = true;
+            btnSetCurrentBpm.Click += btnSetCurrentBpm_Click;
+            // 
+            // txtBpm
+            // 
+            txtBpm.AutoSize = true;
+            txtBpm.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
+            txtBpm.ForeColor = Color.White;
+            txtBpm.Location = new Point(285, 12);
+            txtBpm.Name = "txtBpm";
+            txtBpm.Size = new Size(32, 15);
+            txtBpm.TabIndex = 9;
+            txtBpm.Text = "BPM";
+            // 
+            // lblScrollSpeed
+            // 
+            lblScrollSpeed.AutoSize = true;
+            lblScrollSpeed.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
+            lblScrollSpeed.ForeColor = Color.White;
+            lblScrollSpeed.Location = new Point(11, 13);
+            lblScrollSpeed.Name = "lblScrollSpeed";
+            lblScrollSpeed.Size = new Size(90, 15);
+            lblScrollSpeed.TabIndex = 8;
+            lblScrollSpeed.Text = "見た目BPM設定";
+            // 
+            // txtScrollSpeed
+            // 
+            txtScrollSpeed.BackColor = SystemColors.Window;
+            txtScrollSpeed.BorderStyle = BorderStyle.FixedSingle;
+            txtScrollSpeed.Location = new Point(163, 8);
+            txtScrollSpeed.Name = "txtScrollSpeed";
+            txtScrollSpeed.Size = new Size(120, 25);
+            txtScrollSpeed.TabIndex = 7;
+            txtScrollSpeed.TabStop = false;
+            txtScrollSpeed.TextAlign = HorizontalAlignment.Center;
+            txtScrollSpeed.TextChanged += txtScrollSpeed_TextChanged;
+            // 
+            // lblRedLineGuide
+            // 
+            lblRedLineGuide.AutoSize = true;
+            lblRedLineGuide.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold);
+            lblRedLineGuide.ForeColor = Color.DarkGray;
+            lblRedLineGuide.Location = new Point(11, 65);
+            lblRedLineGuide.Name = "lblRedLineGuide";
+            lblRedLineGuide.Size = new Size(100, 15);
+            lblRedLineGuide.TabIndex = 6;
+            lblRedLineGuide.Text = "Beat Snap Divisor";
             // 
             // pnlMiliSecondOffset
             // 
@@ -871,11 +986,11 @@ namespace osu_taiko_Mapping_Helper
             chkApplyEndObject.AutoSize = true;
             chkApplyEndObject.Checked = true;
             chkApplyEndObject.CheckState = CheckState.Checked;
-            chkApplyEndObject.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            chkApplyEndObject.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkApplyEndObject.ForeColor = Color.White;
             chkApplyEndObject.Location = new Point(271, 161);
             chkApplyEndObject.Name = "chkApplyEndObject";
-            chkApplyEndObject.Size = new Size(89, 21);
+            chkApplyEndObject.Size = new Size(84, 19);
             chkApplyEndObject.TabIndex = 2;
             chkApplyEndObject.TabStop = false;
             chkApplyEndObject.Text = "終点に適用";
@@ -887,11 +1002,11 @@ namespace osu_taiko_Mapping_Helper
             chkApplyStartObject.AutoSize = true;
             chkApplyStartObject.Checked = true;
             chkApplyStartObject.CheckState = CheckState.Checked;
-            chkApplyStartObject.Font = new Font("Yu Gothic UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            chkApplyStartObject.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkApplyStartObject.ForeColor = Color.White;
             chkApplyStartObject.Location = new Point(88, 161);
             chkApplyStartObject.Name = "chkApplyStartObject";
-            chkApplyStartObject.Size = new Size(89, 21);
+            chkApplyStartObject.Size = new Size(84, 19);
             chkApplyStartObject.TabIndex = 3;
             chkApplyStartObject.TabStop = false;
             chkApplyStartObject.Text = "始点に適用";
@@ -903,7 +1018,7 @@ namespace osu_taiko_Mapping_Helper
             lblCalculationType.AutoSize = true;
             lblCalculationType.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblCalculationType.ForeColor = Color.White;
-            lblCalculationType.Location = new Point(12, 189);
+            lblCalculationType.Location = new Point(12, 192);
             lblCalculationType.Name = "lblCalculationType";
             lblCalculationType.Size = new Size(69, 20);
             lblCalculationType.TabIndex = 2;
@@ -952,7 +1067,7 @@ namespace osu_taiko_Mapping_Helper
             pnlRelativeSvGroup.Controls.Add(lblRelativeBaseSv);
             pnlRelativeSvGroup.Controls.Add(rdoRelativeMultiply);
             pnlRelativeSvGroup.Controls.Add(rdoRelativeSum);
-            pnlRelativeSvGroup.Location = new Point(131, 212);
+            pnlRelativeSvGroup.Location = new Point(131, 215);
             pnlRelativeSvGroup.Name = "pnlRelativeSvGroup";
             pnlRelativeSvGroup.Size = new Size(140, 76);
             pnlRelativeSvGroup.TabIndex = 11;
@@ -1013,7 +1128,7 @@ namespace osu_taiko_Mapping_Helper
             chkRelative.AutoSize = true;
             chkRelative.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkRelative.ForeColor = Color.White;
-            chkRelative.Location = new Point(134, 188);
+            chkRelative.Location = new Point(134, 191);
             chkRelative.Name = "chkRelative";
             chkRelative.Size = new Size(118, 24);
             chkRelative.TabIndex = 13;
@@ -1043,7 +1158,7 @@ namespace osu_taiko_Mapping_Helper
             chkEnableSvTo.AutoSize = true;
             chkEnableSvTo.Font = new Font("Yu Gothic UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkEnableSvTo.ForeColor = Color.White;
-            chkEnableSvTo.Location = new Point(277, 216);
+            chkEnableSvTo.Location = new Point(277, 219);
             chkEnableSvTo.Name = "chkEnableSvTo";
             chkEnableSvTo.Size = new Size(96, 19);
             chkEnableSvTo.TabIndex = 15;
@@ -1172,6 +1287,7 @@ namespace osu_taiko_Mapping_Helper
             // 
             // pnlGroupSvEditor
             // 
+            pnlGroupSvEditor.Controls.Add(chkApplyRedLines);
             pnlGroupSvEditor.Controls.Add(btnSetVolumeTo);
             pnlGroupSvEditor.Controls.Add(btnSetVolumeFrom);
             pnlGroupSvEditor.Controls.Add(btnSetSvTo);
@@ -1203,6 +1319,24 @@ namespace osu_taiko_Mapping_Helper
             pnlGroupSvEditor.Size = new Size(400, 649);
             pnlGroupSvEditor.TabIndex = 21;
             pnlGroupSvEditor.Visible = false;
+            // 
+            // chkApplyRedLines
+            // 
+            chkApplyRedLines.CheckAlign = ContentAlignment.TopLeft;
+            chkApplyRedLines.Checked = true;
+            chkApplyRedLines.CheckState = CheckState.Checked;
+            chkApplyRedLines.Font = new Font("Yu Gothic UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            chkApplyRedLines.ForeColor = Color.White;
+            chkApplyRedLines.ImageAlign = ContentAlignment.TopLeft;
+            chkApplyRedLines.Location = new Point(9, 140);
+            chkApplyRedLines.Name = "chkApplyRedLines";
+            chkApplyRedLines.Size = new Size(79, 39);
+            chkApplyRedLines.TabIndex = 20;
+            chkApplyRedLines.TabStop = false;
+            chkApplyRedLines.Text = "赤線にVolumeを適用";
+            chkApplyRedLines.TextAlign = ContentAlignment.TopLeft;
+            chkApplyRedLines.UseVisualStyleBackColor = true;
+            chkApplyRedLines.CheckedChanged += chkApplyRedLines_CheckedChanged;
             // 
             // pnlGroupUtility
             // 
@@ -1373,7 +1507,7 @@ namespace osu_taiko_Mapping_Helper
             cmbSettingCopier.Font = new Font("Yu Gothic UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 128);
             cmbSettingCopier.FormattingEnabled = true;
             cmbSettingCopier.IntegralHeight = false;
-            cmbSettingCopier.Items.AddRange(new object[] { "Metadata", "BG Position", "Preview", "Timing Points" });
+            cmbSettingCopier.Items.AddRange(new object[] { "Metadata", "BG", "Preview", "Timing Points" });
             cmbSettingCopier.Location = new Point(12, 464);
             cmbSettingCopier.Name = "cmbSettingCopier";
             cmbSettingCopier.Size = new Size(287, 29);
@@ -1649,6 +1783,10 @@ namespace osu_taiko_Mapping_Helper
             pnlSpecificGroup.PerformLayout();
             tabBeatSnap.ResumeLayout(false);
             tabBeatSnap.PerformLayout();
+            tabGreenLine.ResumeLayout(false);
+            tabGreenLine.PerformLayout();
+            tabRedLine.ResumeLayout(false);
+            tabRedLine.PerformLayout();
             pnlMiliSecondOffset.ResumeLayout(false);
             pnlMiliSecondOffset.PerformLayout();
             tabRemovePage.ResumeLayout(false);
@@ -1772,5 +1910,14 @@ namespace osu_taiko_Mapping_Helper
         private CheckBox chkEnableDuoOffset;
         private Label label1;
         private CheckBox chkEnableHexaOffset;
+        private TabPage tabRedLine;
+        private Label lblBeatSnapsGuide;
+        private Label lblGreenLineGuide;
+        private Label lblRedLineGuide;
+        private TextBox txtScrollSpeed;
+        private Label txtBpm;
+        private Label lblScrollSpeed;
+        private Button btnSetCurrentBpm;
+        private CheckBox chkApplyRedLines;
     }
 }

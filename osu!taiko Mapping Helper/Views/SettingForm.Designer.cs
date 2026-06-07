@@ -51,8 +51,9 @@
             lblUnicodeSupport = new Label();
             lblOffsetType = new Label();
             rdoHexaAndDuoOffset = new RadioButton();
-            rdoMiliSecondOffset = new RadioButton();
+            rdoMilliSecondOffset = new RadioButton();
             panel1 = new Panel();
+            lblSeparateSettingGuide = new Label();
             pnlNotesKind.SuspendLayout();
             grpSeparateSetting.SuspendLayout();
             SuspendLayout();
@@ -337,19 +338,19 @@
             rdoHexaAndDuoOffset.UseVisualStyleBackColor = true;
             rdoHexaAndDuoOffset.CheckedChanged += rdoHexaAndDuoOffset_CheckedChanged;
             // 
-            // rdoMiliSecondOffset
+            // rdoMilliSecondOffset
             // 
-            rdoMiliSecondOffset.AutoSize = true;
-            rdoMiliSecondOffset.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            rdoMiliSecondOffset.ForeColor = Color.White;
-            rdoMiliSecondOffset.Location = new Point(273, 190);
-            rdoMiliSecondOffset.Name = "rdoMiliSecondOffset";
-            rdoMiliSecondOffset.Size = new Size(88, 24);
-            rdoMiliSecondOffset.TabIndex = 25;
-            rdoMiliSecondOffset.TabStop = true;
-            rdoMiliSecondOffset.Text = "ms offset";
-            rdoMiliSecondOffset.UseVisualStyleBackColor = true;
-            rdoMiliSecondOffset.CheckedChanged += rdoMiliSecondOffset_CheckedChanged;
+            rdoMilliSecondOffset.AutoSize = true;
+            rdoMilliSecondOffset.Font = new Font("Yu Gothic UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            rdoMilliSecondOffset.ForeColor = Color.White;
+            rdoMilliSecondOffset.Location = new Point(273, 190);
+            rdoMilliSecondOffset.Name = "rdoMilliSecondOffset";
+            rdoMilliSecondOffset.Size = new Size(88, 24);
+            rdoMilliSecondOffset.TabIndex = 25;
+            rdoMilliSecondOffset.TabStop = true;
+            rdoMilliSecondOffset.Text = "ms offset";
+            rdoMilliSecondOffset.UseVisualStyleBackColor = true;
+            rdoMilliSecondOffset.CheckedChanged += rdoMiliSecondOffset_CheckedChanged;
             // 
             // panel1
             // 
@@ -358,12 +359,23 @@
             panel1.Size = new Size(186, 72);
             panel1.TabIndex = 26;
             // 
+            // lblSeparateSettingGuide
+            // 
+            lblSeparateSettingGuide.Font = new Font("Yu Gothic UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            lblSeparateSettingGuide.ForeColor = Color.DarkGray;
+            lblSeparateSettingGuide.Location = new Point(12, 273);
+            lblSeparateSettingGuide.Name = "lblSeparateSettingGuide";
+            lblSeparateSettingGuide.Size = new Size(203, 25);
+            lblSeparateSettingGuide.TabIndex = 27;
+            lblSeparateSettingGuide.Text = "ノーツ配置設定";
+            // 
             // SettingForm
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.FromArgb(0, 64, 64);
             ClientSize = new Size(466, 552);
-            Controls.Add(rdoMiliSecondOffset);
+            Controls.Add(lblSeparateSettingGuide);
+            Controls.Add(rdoMilliSecondOffset);
             Controls.Add(rdoHexaAndDuoOffset);
             Controls.Add(lblOffsetType);
             Controls.Add(chkUnicodeSupport);
@@ -415,7 +427,9 @@
         private Label lblUnicodeSupport;
         private Label lblOffsetType;
         private RadioButton rdoHexaAndDuoOffset;
-        private RadioButton rdoMiliSecondOffset;
+        private RadioButton rdoMilliSecondOffset;
         private Panel panel1;
+        private Label label2;
+        private Label lblSeparateSettingGuide;
     }
 }

@@ -232,6 +232,8 @@ namespace osu_taiko_Mapping_Helper
             picSpecificFinisherSlider.Image = Properties.Resources.slider;
             pnlGroupSvEditor.Visible = true;
             pnlGroupUtility.Visible = false;
+            chkApplyStartObject.Checked = true;
+            chkApplyEndObject.Checked = true;
             picSpecificNormalDong.Visible = false;
             picSpecificFinisherDong.Visible = false;
             picSpecificNormalKa.Visible = false;
@@ -245,31 +247,45 @@ namespace osu_taiko_Mapping_Helper
             lblSpecificGridLine2.Visible = false;
             rdoAllHitObjects.Checked = true;
             userInputTempData.offsetMode = config.offsetMode;
+            tabSetType.Controls.Clear();
             switch (config.offsetMode)
             {
                 case 0:
                     pnlMiliSecondOffset.Visible = false;
                     pnlHexaAndDecaOffset.Visible = true;
                     userInputTempData.isOffset = chkEnableHexaOffset.Checked;
+                    tabSetType.Controls.Add(tabHitObjectsPage);
+                    tabSetType.Controls.Add(tabBeatSnap);
                     break;
                 case 1:
                     pnlMiliSecondOffset.Visible = true;
                     pnlHexaAndDecaOffset.Visible = false;
                     userInputTempData.isOffset = chkEnableOffset.Checked;
+                    tabSetType.Controls.Add(tabHitObjectsPage);
+                    tabSetType.Controls.Add(tabBeatSnap);
+                    tabSetType.Controls.Add(tabGreenLine);
+                    tabSetType.Controls.Add(tabRedLine);
                     break;
             }
+            menuStrip1.Items.Clear();
+            tabSetType.Controls.Clear();
             if (config.advanceMode == 1)
             {
                 chkRelative.Visible = true;
-                menuStrip1.Items.Clear();
                 menuStrip1.Items.AddRange([sVEditorToolStripMenuItem, utilityToolStripMenuItem, timingPropertyToolStripMenuItem, bGSetterToolStripMenuItem]);
+                tabSetType.Controls.Add(tabHitObjectsPage);
+                tabSetType.Controls.Add(tabBeatSnap);
+                tabSetType.Controls.Add(tabGreenLine);
+                tabSetType.Controls.Add(tabRedLine);
             }
             else
             {
                 chkRelative.Visible = false;
-                menuStrip1.Items.Clear();
                 menuStrip1.Items.AddRange([sVEditorToolStripMenuItem, utilityToolStripMenuItem, bGSetterToolStripMenuItem]);
+                tabSetType.Controls.Add(tabHitObjectsPage);
+                tabSetType.Controls.Add(tabBeatSnap);
             }
+            tabSetType.ItemSize = new Size(Constants.TAB_MAX_ITEM_SIZE / tabSetType.Controls.Count, tabSetType.ItemSize.Height);
         }
         /// <summary>
         /// 処理項目タブが"Objectsのみ"の時のコントロールの初期化処理
@@ -287,6 +303,7 @@ namespace osu_taiko_Mapping_Helper
                     pnlMiliSecondOffset.Visible = true;
                     break;
             }
+            chkRelative.Visible = config.advanceMode == 1 && chkEnableSv.Checked;
             rdoAllHitObjects.Checked = userInputTempData.setObjectOption.isAllHitObjects;
             rdoOnlyBarline.Checked = userInputTempData.setObjectOption.isOnlyBarlines;
             rdoOnlyBookMark.Checked = userInputTempData.setObjectOption.isOnlyBookmarks;
@@ -298,6 +315,15 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(chkEnableOffset, "LBL_APPLY_OFFSET");
             Common.SetLabelText(chkEnableHexaOffset, "LBL_APPLY_HEXA_OFFSET");
             Common.SetLabelText(chkEnableDuoOffset, "LBL_APPLY_DUO_OFFSET");
+            FormUtils.SetApplyContols(true,
+                                      chkEnableSv,
+                                      txtSvFrom,
+                                      txtSvTo,
+                                      btnSetSvFrom,
+                                      btnSetSvTo,
+                                      btnSwapSv,
+                                      chkRelative,
+                                      chkEnableSvTo);
         }
         /// <summary>
         /// 処理項目タブが"ビートスナップ間隔"の時のコントロールの初期化処理
@@ -310,6 +336,16 @@ namespace osu_taiko_Mapping_Helper
             txtOffset.Enabled = false;
             txtOffset.BackColor = SystemColors.WindowFrame;
             txtOffset.ForeColor = txtSvFrom.BackColor;
+            chkRelative.Visible = config.advanceMode == 1 && chkEnableSv.Checked;
+            FormUtils.SetApplyContols(true,
+                                      chkEnableSv,
+                                      txtSvFrom,
+                                      txtSvTo,
+                                      btnSetSvFrom,
+                                      btnSetSvTo,
+                                      btnSwapSv,
+                                      chkRelative,
+                                      chkEnableSvTo);
         }
         /// <summary>
         /// 処理項目タブが"緑線"の時のコントロールの初期化処理
@@ -322,6 +358,40 @@ namespace osu_taiko_Mapping_Helper
             txtOffset.Enabled = false;
             txtOffset.BackColor = SystemColors.WindowFrame;
             txtOffset.ForeColor = txtSvFrom.BackColor;
+            chkRelative.Visible = config.advanceMode == 1 && chkEnableSv.Checked;
+            FormUtils.SetApplyContols(true,
+                                      chkEnableSv,
+                                      txtSvFrom,
+                                      txtSvTo,
+                                      btnSetSvFrom,
+                                      btnSetSvTo,
+                                      btnSwapSv,
+                                      chkRelative,
+                                      chkEnableSvTo);
+        }
+        /// <summary>
+        /// 処理項目タブが"赤線"の時のコントロールの初期化処理
+        /// </summary>
+        private void InitializeRedLineControls()
+        {
+            pnlHexaAndDecaOffset.Visible = false;
+            pnlMiliSecondOffset.Visible = false;
+            chkEnableOffset.Enabled = false;
+            txtOffset.Enabled = false;
+            txtOffset.BackColor = SystemColors.WindowFrame;
+            txtOffset.ForeColor = txtSvFrom.BackColor;
+            chkRelative.Visible = false;
+            chkRelative.Checked = false;
+            FormUtils.SetApplyContols(false,
+                                      chkEnableSv,
+                                      txtSvFrom,
+                                      txtSvTo,
+                                      btnSetSvFrom,
+                                      btnSetSvTo,
+                                      btnSwapSv,
+                                      chkRelative,
+                                      chkEnableSvTo);
+
         }
         /// <summary>
         /// メイン処理(SV Editor)
@@ -605,20 +675,14 @@ namespace osu_taiko_Mapping_Helper
                         throw new Exception();
                     }
                 }
-                switch (setCode)
+                control.Text = setCode switch
                 {
-                    case Constants.SET_TIMING:
-                        control.Text = Common.ConvertFormatTiming(currentTime);
-                        break;
-                    case Constants.SET_SV:
-                        control.Text = UserInputDataHelper.SetCurrentSv(beatmapData, currentTime);
-                        break;
-                    case Constants.SET_VOLUME:
-                        control.Text = UserInputDataHelper.SetCurrentVolume(beatmapData, currentTime);
-                        break;
-                    default:
-                        throw new Exception();
-                }
+                    Constants.SET_TIMING => Common.ConvertFormatTiming(currentTime),
+                    Constants.SET_SV => UserInputDataHelper.SetCurrentSv(beatmapData, currentTime),
+                    Constants.SET_VOLUME => UserInputDataHelper.SetCurrentVolume(beatmapData, currentTime),
+                    Constants.SET_BPM => UserInputDataHelper.SetCurrentBpm(beatmapData, currentTime),
+                    _ => throw new Exception(),
+                };
             }
             catch
             {
@@ -650,6 +714,7 @@ namespace osu_taiko_Mapping_Helper
             // MainForm(SVEditor)
             Common.SetLabelText(chkApplyStartObject, "LBL_APPLY_TIMING_FROM");
             Common.SetLabelText(chkApplyEndObject, "LBL_APPLY_TIMING_TO");
+            Common.SetLabelText(chkApplyRedLines, "LBL_APPLY_REDLINES");
             Common.SetLabelText(lblCalculationType, "LBL_SV_CALCULATION");
             Common.SetLabelText(rdoArithmetic, "LBL_LINEAR");
             Common.SetLabelText(rdoGeometric, "LBL_GEOMETRIC");
@@ -666,7 +731,11 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(btnApply, "LBL_EXECUTE");
             Common.SetLabelText(tabHitObjectsPage, "LBL_APPLY_TAB_OBJECTS");
             Common.SetLabelText(tabBeatSnap, "LBL_APPLY_TAB_BEATSNAPS");
-            Common.SetLabelText(tabGreenLine, "LBL_APPLY_TAB_INHERITED_POINTS");
+            Common.SetLabelText(lblBeatSnapsGuide, "LBL_APPLY_TAB_BEATSNAPS_GUIDE");
+            Common.SetLabelText(tabGreenLine, "LBL_APPLY_TAB_GREENLINES");
+            Common.SetLabelText(lblGreenLineGuide, "LBL_APPLY_TAB_GREENLINES_GUIDE");
+            Common.SetLabelText(tabRedLine, "LBL_APPLY_TAB_REDLINES");
+            Common.SetLabelText(lblRedLineGuide, "LBL_APPLY_TAB_REDLINES_GUIDE");
             Common.SetLabelText(rdoAllHitObjects, "LBL_OBJECTS_ALL_HITOBJECTS");
             Common.SetLabelText(rdoOnlyBarline, "LBL_OBJECTS_BARLINES");
             Common.SetLabelText(rdoOnlyBookMark, "LBL_OBJECTS_BOOKMARKS");
@@ -685,6 +754,7 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(lblSpecificFinisher, "LBL_OBJECTS_FINISHER");
             Common.SetLabelText(lblBeatSnaps, "LBL_BEATSNAPS_DIVISOR");
             Common.SetLabelText(chkEnableOffset, "LBL_APPLY_OFFSET");
+            Common.SetLabelText(lblScrollSpeed, "LBL_REDLINES_SCROLL_SPEED");
             Common.SetLabelText(btnRemove, "LBL_EXECUTE");
             // MainForm(Utility)
             Common.SetLabelText(lblOffsetShifter, "LBL_OFFSET_SHIFTER");
@@ -701,7 +771,7 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(btnApplySettingCopier, "LBL_UTILITY_APPLY");
             Common.SetLabelText(btnApplyResnap, "LBL_UTILITY_APPLY");
         }
-#endregion
+        #endregion
         #region イベントハンドラ
         #region 共通機能のイベントハンドラ
         private void osu_taiko_Mapping_Helper_Load(object sender, EventArgs e)
@@ -836,19 +906,26 @@ namespace osu_taiko_Mapping_Helper
                     userInputTempData.isOffset = chkEnableOffset.Checked;
                     break;
             }
+            menuStrip1.Items.Clear();
+            tabSetType.Controls.Clear();
             if (config.advanceMode == 1)
             {
                 chkRelative.Visible = true;
-                menuStrip1.Items.Clear();
                 menuStrip1.Items.AddRange([sVEditorToolStripMenuItem, utilityToolStripMenuItem, timingPropertyToolStripMenuItem, bGSetterToolStripMenuItem]);
+                tabSetType.Controls.Add(tabHitObjectsPage);
+                tabSetType.Controls.Add(tabBeatSnap);
+                tabSetType.Controls.Add(tabGreenLine);
+                tabSetType.Controls.Add(tabRedLine);
             }
             else
             {
                 chkRelative.Checked = false;
                 chkRelative.Visible = false;
-                menuStrip1.Items.Clear();
                 menuStrip1.Items.AddRange([sVEditorToolStripMenuItem, utilityToolStripMenuItem, bGSetterToolStripMenuItem]);
+                tabSetType.Controls.Add(tabHitObjectsPage);
+                tabSetType.Controls.Add(tabBeatSnap);
             }
+            tabSetType.ItemSize = new Size(Constants.TAB_MAX_ITEM_SIZE / tabSetType.Controls.Count, tabSetType.ItemSize.Height);
             preUnicodeSupport = config.unicodeSupport;
         }
         private void sVEditorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1055,6 +1132,7 @@ namespace osu_taiko_Mapping_Helper
         private void chkEnableVolume_CheckedChanged(object sender, EventArgs e)
         {
             userInputTempData.isVolume = chkEnableVolume.Checked;
+            chkApplyRedLines.Visible = userInputTempData.isVolume && (tabExecuteType.SelectedIndex == 0);
             FormUtils.SetTxtVolumeFromEnabledState(userInputTempData.isVolume, txtVolumeFrom);
             FormUtils.SetTxtVolumeToEnabledState(userInputTempData.isVolume, txtVolumeTo);
             FormUtils.SetBtnSwapVolumeEnabledState(userInputTempData.isVolume, btnSwapVolume);
@@ -1068,6 +1146,10 @@ namespace osu_taiko_Mapping_Helper
         private void chkApplyEndObject_CheckedChanged(object sender, EventArgs e)
         {
             userInputTempData.isEnableTo = chkApplyEndObject.Checked;
+        }
+        private void chkApplyRedLines_CheckedChanged(object sender, EventArgs e)
+        {
+            userInputTempData.isEnableRedLines = chkApplyRedLines.Checked;
         }
         private void rdoArithmetic_CheckedChanged(object sender, EventArgs e)
         {
@@ -1146,10 +1228,12 @@ namespace osu_taiko_Mapping_Helper
                     FormUtils.SetApplyControls(true,
                                                userInputTempData,
                                                config,
+                                               tabSetType.SelectedIndex,
                                                chkEnableSv,
                                                chkEnableVolume,
                                                chkApplyStartObject,
                                                chkApplyEndObject,
+                                               chkApplyRedLines,
                                                chkRelative,
                                                pnlRelativeSvGroup,
                                                chkEnableSvTo,
@@ -1170,10 +1254,12 @@ namespace osu_taiko_Mapping_Helper
                     FormUtils.SetApplyControls(false,
                                                userInputTempData,
                                                config,
+                                               tabSetType.SelectedIndex,
                                                chkEnableSv,
                                                chkEnableVolume,
                                                chkApplyStartObject,
                                                chkApplyEndObject,
+                                               chkApplyRedLines,
                                                chkRelative,
                                                pnlRelativeSvGroup,
                                                chkEnableSvTo,
@@ -1309,6 +1395,7 @@ namespace osu_taiko_Mapping_Helper
                     userInputTempData.setOption.isSetObjects = true;
                     userInputTempData.setOption.isSetBeatSnap = false;
                     userInputTempData.setOption.isSetGreenLine = false;
+                    userInputTempData.setOption.isSetRedLine = false;
                     InitializeHitObjectsControls();
                     break;
                 case 1:
@@ -1316,6 +1403,7 @@ namespace osu_taiko_Mapping_Helper
                     userInputTempData.setOption.isSetObjects = false;
                     userInputTempData.setOption.isSetBeatSnap = true;
                     userInputTempData.setOption.isSetGreenLine = false;
+                    userInputTempData.setOption.isSetRedLine = false;
                     InitializeBeatSnapControls();
                     break;
                 case 2:
@@ -1323,7 +1411,15 @@ namespace osu_taiko_Mapping_Helper
                     userInputTempData.setOption.isSetObjects = false;
                     userInputTempData.setOption.isSetBeatSnap = false;
                     userInputTempData.setOption.isSetGreenLine = true;
+                    userInputTempData.setOption.isSetRedLine = false;
                     InitializeGreenLineControls();
+                    break;
+                case 3:
+                    userInputTempData.setOption.isSetObjects = false;
+                    userInputTempData.setOption.isSetBeatSnap = false;
+                    userInputTempData.setOption.isSetGreenLine = false;
+                    userInputTempData.setOption.isSetRedLine = true;
+                    InitializeRedLineControls();
                     break;
                 default:
                     break;
@@ -1508,6 +1604,14 @@ namespace osu_taiko_Mapping_Helper
         {
             userInputTempData.setBeatSnapOption.beatSnap = txtBeatSnap.Text;
         }
+        private void txtScrollSpeed_TextChanged(object sender, EventArgs e)
+        {
+            userInputTempData.bpm = txtScrollSpeed.Text;
+        }
+        private void btnSetCurrentBpm_Click(object sender, EventArgs e)
+        {
+            SetCurrentTimeInfo(txtScrollSpeed, Constants.SET_BPM);
+        }
         private void btnRemove_Click(object sender, EventArgs e)
         {
             try
@@ -1669,5 +1773,6 @@ namespace osu_taiko_Mapping_Helper
         }
         #endregion
         #endregion
+
     }
 }
