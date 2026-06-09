@@ -9,7 +9,6 @@ It reads the current beatmap information from a running osu! client and edits `.
 
 For the main features and usage instructions, see the following user guides.
 
-- [User Guide (Japanese)](https://calmeel.github.io/osutaiko-mapping-helper/index.html)
 - [User Guide (English)](https://calmeel.github.io/osutaiko-mapping-helper/index.en.html)
 
 ## Requirements
