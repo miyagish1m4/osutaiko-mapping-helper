@@ -970,17 +970,6 @@ namespace osu_taiko_Mapping_Helper.Services
                 ClearClasses();
             }
         }
-        private static bool SetDeleteFlags()
-        {
-            try
-            {
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
         #endregion
         /// <summary>
         /// ループコード取得処理
@@ -1032,7 +1021,7 @@ namespace osu_taiko_Mapping_Helper.Services
                 int timingFrom = executeCode == Constants.EXECUTE_APPLY ?
                                  userInputData.timingTo : userInputData.timingFrom;
                 // 終点の次のタイミングポイント
-                int timingTo = beatmap.timingPoints.FirstOrDefault(tp => tp.time > userInputData.timingTo)?.time ?? int.MaxValue; ;
+                int timingTo = beatmap.timingPoints.FirstOrDefault(tp => tp.time > userInputData.timingTo)?.time ?? int.MaxValue;
                 // 順番を揃える為ソートする
                 outTimingPoints = [.. outTimingPoints.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0)];
                 for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
@@ -1041,10 +1030,10 @@ namespace osu_taiko_Mapping_Helper.Services
                     if (!beatmap.hitObjects[i].time.IsWithin(timingFrom, timingTo)) continue;
                     // 直前のTimingPointを探す
                     var greenLineIndex = outTimingPoints.FindLastIndex(tp => tp.time <= beatmap.hitObjects[i].time);
-                    if (greenLineIndex < 0 && beatmap.hitObjects[i].noteType == Constants.NoteType.SLIDER)
+                    if (greenLineIndex >= 0 && beatmap.hitObjects[i].noteType == Constants.NoteType.SLIDER)
                     {
                         // ノーツがスライダーだった場合、スライダーの長さを調整する
-                        beatmap.hitObjects[i].sliderLength = GetAdjustedSliderLength(i, beatmap.timingPoints[greenLineIndex].sv);
+                        beatmap.hitObjects[i].sliderLength = GetAdjustedSliderLength(i, outTimingPoints[greenLineIndex].sv);
                     }
                 }
                 return true;

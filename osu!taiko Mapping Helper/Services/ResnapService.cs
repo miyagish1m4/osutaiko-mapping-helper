@@ -117,6 +117,11 @@ namespace osu_taiko_Mapping_Helper.Services
             double beatSnapLength = -1L;
             try
             {
+                if (beatmap.hitObjects.Count == 0 || beatmap.timingPoints.Count == 0)
+                {
+                    return false;
+                }
+
                 // もし全範囲指定(タイミングの入力なし)だった場合1ノーツ目と最終ノーツを始点と終点にする
                 if (userInputUtilityData.isAllNotes)
                 {
@@ -135,6 +140,11 @@ namespace osu_taiko_Mapping_Helper.Services
                                                              .Where(x => x.tp.isRedLine)
                                                              .Select(x => x.Index)
                                                              .ToList();
+                if (timingPointIndexes.Count == 0)
+                {
+                    return false;
+                }
+
                 // 始点のBPMを取得
                 baseBpm = baseTimingPoint != null ? baseTimingPoint.bpm : 120;
                 if (baseTimingPoint == null) throw new Exception("No valid base timing point found for the specified resnap timing.");

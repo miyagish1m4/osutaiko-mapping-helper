@@ -59,8 +59,11 @@ namespace osu_taiko_Mapping_Helper.Models
                             var bgParams = line.Split(',');
                             startTime = int.Parse(bgParams[1]);
                             fileName = bgParams[2];
-                            xOffset = int.Parse(bgParams[3]);
-                            yOffset = int.Parse(bgParams[4]);
+                            if (bgParams.Length >= 4)
+                            {
+                                xOffset = int.Parse(bgParams[3]);
+                                yOffset = int.Parse(bgParams[4]);
+                            }
                         }
                         else
                         {

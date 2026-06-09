@@ -1,7 +1,8 @@
-using System.Text;
 using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Views;
+using OsuParsers.Decoders;
+using System.Text;
 
 namespace osu_taiko_Mapping_Helper.Utils
 {
@@ -412,6 +413,107 @@ namespace osu_taiko_Mapping_Helper.Utils
                 return string.Empty;
             }
         }
+        /// <summary>
+        /// 指定された譜面ファイルをリトライ付きで読み込みます
+        /// </summary>
+        /// <param name="path">読み込み対象の.osuファイルパス</param>
+        /// <returns>
+        /// 読み込みに成功した場合は譜面データ
+        /// 外部プロセスによる更新中などで読み込みに失敗した場合はnull
+        /// </returns>
+        internal static OsuParsers.Beatmaps.Beatmap? TryDecodeBeatmap(string path)
+        {
+            // 外部ツールが.osuを書き換えている瞬間はIOExceptionになる可能性があるため、
+            // 短時間だけリトライして、更新完了後に読み込めるようにする
+            for (int i = 0; i < 3; i++)
+            {
+                try
+                {
+                    return DecodeBeatmapShared(path);
+                }
+                catch (IOException)
+                {
+                    // ファイル更新中の可能性があるため、少し待って再試行する
+                    Thread.Sleep(50);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // 他プロセスのロックや権限競合の可能性があるため、少し待って再試行する
+                    Thread.Sleep(50);
+                }
+            }
 
+            //読み込みに失敗した場合でもアプリを落とさず、今回のメモリ更新だけスキップする
+            return null;
+        }
+        /// <summary>
+        /// 外部プロセスによる書き込み・置換と競合しにくい共有設定で、指定された譜面ファイルを読み込みます
+        /// </summary>
+        /// <param name="path">読み込み対象の.osuファイルパス</param>
+        /// <returns>読み込んだ譜面データ</returns>
+        private static OsuParsers.Beatmaps.Beatmap DecodeBeatmapShared(string path)
+        {
+            // 外部ツールが書き込み中でも、読み取り側が排他的にロックしないようにする
+            // FileShare.ReadWrite | FileShare.Deleteにより、外部からの更新・置換を妨げにくくする
+            using FileStream stream = File.Open(
+                path,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite | FileShare.Delete);
+
+            // BeatmapDecoderがStream入力に対応している場合は、この形でDecodeする
+            return BeatmapDecoder.Decode(stream);
+        }
+        /// <summary>
+        /// 外部プロセスによる書き込み・置換と競合しにくい共有設定で、指定されたファイルを全行読み込みます
+        /// </summary>
+        /// <param name="path">読み込み対象のファイルパス。</param>
+        /// <returns>
+        /// 読み込んだ行の配列
+        /// 読み込みに失敗した場合は空配列を返します
+        /// </returns>
+        internal static string[] ReadAllLinesShared(string path)
+        {
+            // 外部ツールが.osuを書き換えている瞬間はIOExceptionになる可能性があるため、
+            // 短時間だけリトライして、更新完了後に読み込めるようにする
+            for (int i = 0; i < 3; i ++ )
+            {
+                try
+                {
+                    // 外部ツールが書き込み中でも、読み取り側が排他的にロックしないようにする
+                    // FileShare.ReadWrite | FileShare.Deleteにより、外部からの更新・置換を妨げにくくする
+                    using FileStream stream = File.Open(
+                        path,
+                        FileMode.Open,
+                        FileAccess.Read,
+                        FileShare.ReadWrite | FileShare.Delete
+                    );
+
+                    // .osuは通常UTF-8だが、環境差を考えてBOM検出を有効にする
+                    using StreamReader reader = new(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+
+                    List<string> lines = [];
+
+                    while (!reader.EndOfStream)
+                    {
+                        lines.Add(reader.ReadLine() ?? string.Empty);
+                    }
+
+                    return [.. lines];
+                }
+                catch (IOException)
+                {
+                    // ファイル更新中の可能性があるため、少し待って再試行する
+                    Thread.Sleep(50);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // 他プロセスのロックや権限競合の可能性があるため、少し待って再試行する
+                    Thread.Sleep(50);
+                }
+            }
+            return [];
+        }
     }
 }
+
