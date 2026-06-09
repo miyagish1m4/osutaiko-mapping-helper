@@ -210,7 +210,12 @@ namespace osu_taiko_Mapping_Helper.Views
                 return;
             }
             // バックアップを作成する
-            if (BeatmapHelper.CreateBackup(this.beatmapPath, this.backupDirectoryName))
+            if (!BeatmapHelper.CreateBackup(this.beatmapPath, this.backupDirectoryName))
+            {
+                Common.ShowMessageDialog("E_A-P-1");
+                return;
+            }
+            else
             {
                 if (!SettingHelper.ResetBackupFile(config))
                 {

@@ -166,12 +166,12 @@ namespace osu_taiko_Mapping_Helper.Views
             this.TopMost = true;
 #endif
             InitializeLabelText();
-            parentForm.updateInterval = 15;
+            //parentForm.updateInterval = 15;
             GetBeatmap();
         }
         private void DebugForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            parentForm.updateInterval = 100;
+            //parentForm.updateInterval = 15;
         }
         private void DebugForm_FormClosing(object sender, FormClosingEventArgs e)
         {

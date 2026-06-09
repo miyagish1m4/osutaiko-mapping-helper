@@ -429,7 +429,6 @@
         private RadioButton rdoHexaAndDuoOffset;
         private RadioButton rdoMilliSecondOffset;
         private Panel panel1;
-        private Label label2;
         private Label lblSeparateSettingGuide;
     }
 }
