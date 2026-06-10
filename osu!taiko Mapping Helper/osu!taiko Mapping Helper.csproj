@@ -21,10 +21,13 @@
     <Compile Remove="Utils\TestUtils.cs" />
     <Compile Remove="Views\BackupForm.cs" />
     <Compile Remove="Views\BackupForm.Designer.cs" />
+    <Compile Remove="Views\DialogForm.cs" />
+    <Compile Remove="Views\DialogForm.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Remove="Views\BackupForm.resx" />
+    <EmbeddedResource Remove="Views\DialogForm.resx" />
   </ItemGroup>
 
   <ItemGroup>
