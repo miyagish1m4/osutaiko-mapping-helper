@@ -104,10 +104,7 @@ namespace osu_taiko_Mapping_Helper.Utils
             for (int i = 0; i < files.Length; i++)
             {
                 var date = int.Parse(files[i].Replace(folderPath + "\\" + logLevel + "_", "").Replace(Constants.LOG_EXTENSION, ""));
-                if (date < pastDate)
-                {
-                    File.Delete(files[i]);
-                }
+                if (date < pastDate) File.Delete(files[i]);
             }
             return;
         }
@@ -122,18 +119,12 @@ namespace osu_taiko_Mapping_Helper.Utils
             string userName = Environment.UserName;
             // osuのユーザー設定ファイルの取得
             string file = Path.Combine(osuDirectory, "osu!." + userName + ".cfg");
-            if (!File.Exists(file))
-            {
-                // osuのユーザー設定ファイルが存在しない場合はosuフォルダ直下のsongsフォルダを参照する
-                return Path.Combine(osuDirectory, "Songs");
-            }
+            // osuのユーザー設定ファイルが存在しない場合はosuフォルダ直下のsongsフォルダを参照する
+            if (!File.Exists(file)) return Path.Combine(osuDirectory, "Songs");
             // ユーザー設定を読み込む
             foreach (string readLine in File.ReadLines(file))
             {
-                if (!readLine.StartsWith("BeatmapDirectory"))
-                {
-                    continue;
-                }
+                if (!readLine.StartsWith("BeatmapDirectory")) continue;
                 // songsフォルダが指定されていた場合はそのsongsフォルダのパスを取得する
                 string path = readLine.Split('=')[1].Trim(' ');
                 return path == "Songs" ? Path.Combine(osuDirectory, "Songs") : path;
@@ -152,11 +143,11 @@ namespace osu_taiko_Mapping_Helper.Utils
             switch (config?.language)
             {
                 case "English":
-                    if (Labels.LabelsEn.ContainsKey(labelCode))
+                    if (Labels.LabelsEn.TryGetValue(labelCode, out string? valueEn))
                     {
                         // ラベルリストにラベルIDがあった場合は
                         // ラベルIDと紐づくラベルテキストを出力する
-                        label = Labels.LabelsEn[labelCode];
+                        label = valueEn;
                     }
                     else
                     {
@@ -166,11 +157,11 @@ namespace osu_taiko_Mapping_Helper.Utils
                     }
                     break;
                 case "日本語":
-                    if (Labels.LabelsJp.ContainsKey(labelCode))
+                    if (Labels.LabelsJp.TryGetValue(labelCode, out string? valueJp))
                     {
                         // ラベルリストにラベルIDがあった場合は
                         // ラベルIDと紐づくラベルテキストを出力する
-                        label = Labels.LabelsJp[labelCode];
+                        label = valueJp;
                     }
                     else
                     {
@@ -191,23 +182,38 @@ namespace osu_taiko_Mapping_Helper.Utils
         /// </summary>
         /// <param name="messageCode">メッセージコード、またはメッセージ</param>
         /// <param name="isOptional">オプションコード</param>
-        internal static bool ShowMessageDialog(string messageCode, int isOptional = 0)
+        internal static bool ShowMessageDialog(string messageCode, int isOptional = 0, params object[] formatArgs)
         {
-            bool isModeless = (isOptional & Constants.DIALOG_OPTION_MODELESS) != 0 ? true : false;
-            MessageBoxButtons messageBoxButton = (isOptional & Constants.DIALOG_OPTION_OKCANCEL) != 0 ? MessageBoxButtons.OKCancel : MessageBoxButtons.OK;
+            bool isModeless = (isOptional & Constants.DIALOG_OPTION_MODELESS) != 0;
+            MessageBoxButtons messageBoxButton = GetMessageBoxButtons(isOptional);
             if (isModeless)
             {
                 executeResultForm?.Close();
                 executeResultForm?.Dispose();
-                executeResultForm = new DialogForm(messageCode, messageBoxButton);
+                executeResultForm = new CustomMessageBox(messageCode, messageBoxButton, formatArgs);
                 executeResultForm.Show();
             }
             else
             {
-                executeResultForm = new DialogForm(messageCode, messageBoxButton);
-                executeResultForm.ShowDialog();
+                using CustomMessageBox dialog = new(messageCode, messageBoxButton, formatArgs);
+                DialogResult result = dialog.ShowDialog();
+                isDialogResult = result is DialogResult.OK or DialogResult.Yes or DialogResult.Retry;
             }
             return isDialogResult;
+        }
+        private static MessageBoxButtons GetMessageBoxButtons(int isOptional)
+        {
+            if ((isOptional & Constants.DIALOG_OPTION_YESNO) != 0)
+            {
+                return MessageBoxButtons.YesNo;
+            }
+
+            if ((isOptional & Constants.DIALOG_OPTION_OKCANCEL) != 0)
+            {
+                return MessageBoxButtons.OKCancel;
+            }
+
+            return MessageBoxButtons.OK;
         }
         /// <summary>
         /// ダイアログメッセージ設定処理
@@ -220,11 +226,11 @@ namespace osu_taiko_Mapping_Helper.Utils
             switch (config?.language)
             {
                 case "English":
-                    if (Messages.DialogMessagesEn.ContainsKey(messageCode))
+                    if (Messages.DialogMessagesEn.TryGetValue(messageCode, out string? valueEn))
                     {
                         // メッセージリストにメッセージIDがあった場合は
                         // メッセージIDと紐づくメッセージを出力する
-                        message = Messages.DialogMessagesEn[messageCode];
+                        message = valueEn;
                     }
                     else
                     {
@@ -234,11 +240,11 @@ namespace osu_taiko_Mapping_Helper.Utils
                     }
                     break;
                 case "日本語":
-                    if (Messages.DialogMessagesJp.ContainsKey(messageCode))
+                    if (Messages.DialogMessagesJp.TryGetValue(messageCode, out string? valueJp))
                     {
                         // メッセージリストにメッセージIDがあった場合は
                         // メッセージIDと紐づくメッセージを出力する
-                        message = Messages.DialogMessagesJp[messageCode];
+                        message = valueJp;
                     }
                     else
                     {

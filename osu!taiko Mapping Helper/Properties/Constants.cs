@@ -169,6 +169,7 @@ namespace osu_taiko_Mapping_Helper.Properties
         // index : 1 -> OK/キャンセルの選択肢
         internal const int DIALOG_OPTION_MODELESS = 0x00000001;
         internal const int DIALOG_OPTION_OKCANCEL = 0x00000002;
+        internal const int DIALOG_OPTION_YESNO = 0x00000004;
         #endregion
         #region タイミング定数
         internal const int ONE_MINUTE = 60000;
@@ -184,6 +185,11 @@ namespace osu_taiko_Mapping_Helper.Properties
 
 
         internal const double BASE_SLIDER_MULTIPLIER = 1.4;
+        /// <summary>
+        /// ノーツ種別をosuファイルで使用するコード文字列へ変換する
+        /// </summary>
+        /// <param name="noteType">変換対象のノーツ種別</param>
+        /// <returns>osuファイルへ出力するノーツ種別コード</returns>
         internal static string ConvertNoteType(NoteType noteType)
         {
             return noteType switch

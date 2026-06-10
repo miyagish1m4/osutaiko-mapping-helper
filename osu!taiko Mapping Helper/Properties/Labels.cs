@@ -70,6 +70,8 @@
             // DialogForm
             { "LBL_DIALOG_OK", "OK" },
             { "LBL_DIALOG_CANCEL", "キャンセル" },
+            { "LBL_DIALOG_YES", "はい" },
+            { "LBL_DIALOG_NO", "いいえ" },
         };
         internal static readonly Dictionary<string, string> LabelsEn = new()
         {
@@ -139,6 +141,8 @@
             // DialogForm
             { "LBL_DIALOG_OK", "OK" },
             { "LBL_DIALOG_CANCEL", "Cancel" },
+            { "LBL_DIALOG_YES", "Yes" },
+            { "LBL_DIALOG_NO", "No" },
         };
     }
 }

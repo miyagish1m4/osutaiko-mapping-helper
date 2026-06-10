@@ -31,7 +31,7 @@ namespace osu_taiko_Mapping_Helper
         private bool isDirectoryLoaded = false;
         private bool isUpdate = true;
         private string backupDirectoryName = string.Empty;
-        private DebugForm? DebugForm = null;
+        private TimingPropertyForm? TimingPropertyForm = null;
         public int updateInterval { get; set; } = 15;
         #endregion
         #region メソッド
@@ -104,7 +104,7 @@ namespace osu_taiko_Mapping_Helper
                     {
                         try
                         {
-                            DebugForm?.SetOsuData(beatmapInfo, currentTime);
+                            TimingPropertyForm?.SetOsuData(beatmapInfo, currentTime);
                         }
                         catch
                         {
@@ -141,7 +141,7 @@ namespace osu_taiko_Mapping_Helper
                     beatmapInfo.lastUpdate = File.GetLastWriteTime(beatmapInfo.beatmapPath).ToString("yyyy-MM-dd HH:mm:ss.fff");
                     try
                     {
-                        DebugForm?.SetOsuData(beatmapInfo, currentTime);
+                        TimingPropertyForm?.SetOsuData(beatmapInfo, currentTime);
                     }
                     catch
                     {
@@ -216,7 +216,7 @@ namespace osu_taiko_Mapping_Helper
                                           beatmapInfo.version + "]";
                     try
                     {
-                        DebugForm?.GetBeatmap();
+                        TimingPropertyForm?.GetBeatmap();
                     }
                     catch
                     {
@@ -481,7 +481,7 @@ namespace osu_taiko_Mapping_Helper
                 Common.ShowMessageDialog("E_A-P-1");
                 return;
             }
-            DebugForm?.GetBeatmap();
+            TimingPropertyForm?.GetBeatmap();
 #endif
             // 成功した場合はメッセージダイアログを表示する
             Common.ShowMessageDialog("I_A-P-1", Constants.DIALOG_OPTION_MODELESS);
@@ -687,7 +687,7 @@ namespace osu_taiko_Mapping_Helper
             }
             try
             {
-                DebugForm?.GetBeatmap();
+                TimingPropertyForm?.GetBeatmap();
             }
             catch
             {
@@ -932,7 +932,7 @@ namespace osu_taiko_Mapping_Helper
             InitializeLabelText();
             try
             {
-                DebugForm?.InitializeLabelText();
+                TimingPropertyForm?.InitializeLabelText();
             }
             catch
             {
@@ -1001,14 +1001,14 @@ namespace osu_taiko_Mapping_Helper
         }
         private void timingPropertyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DebugForm?.Close();
-            DebugForm?.Dispose();
-            DebugForm = new DebugForm()
+            TimingPropertyForm?.Close();
+            TimingPropertyForm?.Dispose();
+            TimingPropertyForm = new TimingPropertyForm()
             {
                 parentForm = this
             };
-            DebugForm.Show();
-            DebugForm.Text = "Timing Property";
+            TimingPropertyForm.Show();
+            TimingPropertyForm.Text = "Timing Property";
             if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
             {
                 return;
@@ -1016,7 +1016,7 @@ namespace osu_taiko_Mapping_Helper
             bool isGetBeatmap = false;
             while (!isGetBeatmap)
             {
-                isGetBeatmap = DebugForm.GetBeatmap();
+                isGetBeatmap = TimingPropertyForm.GetBeatmap();
             }
         }
         private void bGSetterToolStripMenuItem_Click(object sender, EventArgs e)

@@ -494,44 +494,6 @@ namespace osu_taiko_Mapping_Helper.Utils
         #region SettingsForm
         #endregion
         #region DialogForm
-        /// <summary>
-        /// メッセージの設定
-        /// </summary>
-        /// <param name="messageCode"></param>
-        internal static void SetMessage(PictureBox picSystemIcon, 
-                                        Label lblMessage,
-                                        DialogForm form,
-                                        string messageCode)
-        {
-            string messageLevel = messageCode[..1];
-            switch (messageLevel)
-            {
-                // Informationメッセージの場合
-                case "I":
-                    picSystemIcon.Image = Properties.Resources.systemicon_info;
-                    lblMessage.Text = Common.WriteDialogMessage(messageCode);
-                    form.Text = "Information";
-                    break;
-                // Warningメッセージの場合
-                case "W":
-                    picSystemIcon.Image = Properties.Resources.systemicon_warn;
-                    lblMessage.Text = Common.WriteDialogMessage(messageCode);
-                    form.Text = "Warning";
-                    break;
-                // Errorメッセージの場合
-                case "E":
-                    picSystemIcon.Image = Properties.Resources.systemicon_err;
-                    lblMessage.Text = Common.WriteDialogMessage(messageCode);
-                    form.Text = "Error";
-                    break;
-                // 上記以外の場合
-                default:
-                    picSystemIcon.Image = Properties.Resources.systemicon_info;
-                    lblMessage.Text = messageCode;
-                    form.Text = "Information";
-                    break;
-            }
-        }
         #endregion
         #region DebugForm
         #endregion

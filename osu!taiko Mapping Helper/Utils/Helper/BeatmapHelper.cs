@@ -554,7 +554,13 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
             return Path.Combine(directory, $".{fileName}.{Guid.NewGuid():N}.tmp");
         }
-
+        /// <summary>
+        /// 指定された一時ファイルパスから一時ディレクトリを取得し、存在する場合はディレクトリごと削除します
+        /// </summary>
+        /// <param name="tempPath">削除対象の一時ファイルパス</param>
+        /// <remarks>
+        /// 削除中に発生した例外は無視されます。
+        /// </remarks>
         private static void DeleteTemporaryFile(string tempPath)
         {
             try
@@ -566,7 +572,15 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             {
             }
         }
-
+        /// <summary>
+        /// 一時ビートマップファイルを指定されたビートマップファイルへ上書きコピーし、一時ファイルを削除します
+        /// </summary>
+        /// <param name="tempPath">コピー元となる一時ビートマップファイルのパス</param>
+        /// <param name="beatmapPath">コピー先となるビートマップファイルのパス</param>
+        /// <returns>
+        /// コピーと一時ファイルの削除処理が正常に完了した場合は<c>true</c>、
+        /// 例外が発生した場合はエラーログを出力して<c>false</c>
+        /// </returns>
         private static bool CommitTemporaryBeatmapFile(string tempPath, string beatmapPath)
         {
             try
