@@ -41,11 +41,37 @@ namespace osu_taiko_Mapping_Helper
         public MainForm()
         {
             InitializeComponent();
-            // GithubUtils.CheckUpdate(Constants.APP_VERSION);
             Thread getMemoryDataThread = new(UpdateMemoryData) { IsBackground = true };
             getMemoryDataThread.Start();
             UpdateBeatmapInfo();
+            Shown += async (_, _) => await CheckForUpdatesAsync();
 
+        }
+        private async Task CheckForUpdatesAsync()
+        {
+            if (ShowPendingUpdateError())
+            {
+                return;
+            }
+
+            if (await UpdaterUtils.CheckUpdateAsync("v" + Constants.APP_VERSION))
+            {
+                Close();
+            }
+        }
+        private static bool ShowPendingUpdateError()
+        {
+            const string updateErrorVariable = "OSU_TAIKO_MAPPING_HELPER_UPDATE_ERROR";
+            var updateErrorLogPath = Environment.GetEnvironmentVariable(updateErrorVariable);
+            Environment.SetEnvironmentVariable(updateErrorVariable, null);
+
+            if (string.IsNullOrWhiteSpace(updateErrorLogPath))
+            {
+                return false;
+            }
+
+            Common.ShowMessageDialog("W_U-A-2", 0, updateErrorLogPath);
+            return true;
         }
         /// <summary>
         /// osu.exeÇÃÉÅÉÇÉäÉfÅ[É^éÊìæèàóù
@@ -1013,10 +1039,9 @@ namespace osu_taiko_Mapping_Helper
             {
                 return;
             }
-            bool isGetBeatmap = false;
-            while (!isGetBeatmap)
+            if (!TimingPropertyForm.GetBeatmap())
             {
-                isGetBeatmap = TimingPropertyForm.GetBeatmap();
+                Common.ShowMessageDialog("E_A-D-1");
             }
         }
         private void bGSetterToolStripMenuItem_Click(object sender, EventArgs e)

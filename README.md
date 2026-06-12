@@ -20,7 +20,7 @@ osu!taiko の譜面編集を補助する Windows 向けツールです。
 
 ## 使用ライブラリ
 
-- [OsuMemoryDataProvider](https://www.nuget.org/packages/OsuMemoryDataProvider) `0.11.1`
+- [OsuMemoryDataProvider](https://www.nuget.org/packages/OsuMemoryDataProvider) `0.12.1`
 - [OsuParsers](https://www.nuget.org/packages/OsuParsers) `1.7.2`
 
 依存パッケージは `osu!taiko Mapping Helper.csproj` に定義されています。
@@ -73,5 +73,9 @@ dotnet run --project "osu!taiko Mapping Helper/osu!taiko Mapping Helper.csproj"
 
 ## ライセンス
 
-このプロジェクトは MIT License の下で公開されています。
-詳細は [LICENSE](LICENSE) を参照してください。
+このリポジトリでは、プログラムと画像データでライセンスを分けています。
+
+- プログラム本体およびドキュメント: MIT License
+- `osu!taiko Mapping Helper/Resources/` 配下の画像データ: GNU Affero General Public License version 3 or later
+
+詳細は [LICENSES.md](LICENSES.md) を参照してください。

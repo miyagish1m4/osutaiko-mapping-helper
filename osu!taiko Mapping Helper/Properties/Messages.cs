@@ -54,6 +54,7 @@
             { "I_U-C-1", "最新版が見つかりました。\n\n現在のバージョン: {0}\n最新バージョン: {1}\n\nアップデートしますか？" },
             { "I_U-D-1", "最新版を取得しました。\n\n保存先:\n{0}" },
             { "W_U-A-1", "最新リリースにダウンロード可能なアプリケーションファイルがありません。" },
+            { "W_U-A-2", "アップデートに失敗しました。\n\nログ:\n{0}" },
         };
         // ダイアログメッセージ
         internal static readonly Dictionary<string, string> DialogMessagesEn = new()
@@ -102,7 +103,8 @@
             { "E_V-T-18", "Please specify the scroll speed(BPM) as a positive value." },
             { "I_U-C-1", "A new version is available.\n\nCurrent version: {0}\nLatest version: {1}\n\nDo you want to update?" },
             { "I_U-D-1", "The latest version has been downloaded.\n\nSaved to:\n{0}" },
-            { "W_U-A-1", "No downloadable application file was found in the latest release." }
+            { "W_U-A-1", "No downloadable application file was found in the latest release." },
+            { "W_U-A-2", "The update failed.\n\nLog:\n{0}" }
         };
         // ログメッセージ
         internal static readonly Dictionary<string, string> LogMessages = new()

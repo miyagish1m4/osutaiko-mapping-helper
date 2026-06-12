@@ -27,11 +27,11 @@ namespace osu_taiko_Mapping_Helper.Utils
         /// </summary>
         /// <param name="currentVersion">現在のアプリケーションバージョン</param>
         /// <returns>アップデート処理を開始した場合はtrue、通常起動を継続する場合はfalse</returns>
-        internal static bool CheckUpdate(string currentVersion)
+        internal static async Task<bool> CheckUpdateAsync(string currentVersion)
         {
             try
             {
-                var latestRelease = GetLatestReleaseAsync(currentVersion).GetAwaiter().GetResult();
+                var latestRelease = await GetLatestReleaseAsync(currentVersion);
                 if (latestRelease == null || !IsNewerVersion(latestRelease.TagName, currentVersion))
                 {
                     return false;
@@ -46,7 +46,7 @@ namespace osu_taiko_Mapping_Helper.Utils
                     return false;
                 }
 
-                return DownloadAndRunUpdaterAsync(latestRelease).GetAwaiter().GetResult();
+                return await DownloadAndRunUpdaterAsync(latestRelease);
             }
             catch (Exception ex)
             {
@@ -290,7 +290,15 @@ namespace osu_taiko_Mapping_Helper.Utils
                 "  goto wait",
                 ")",
                 "xcopy \"%SRC%\\*\" \"%DST%\\\" /E /I /Y >nul",
-                $"if not errorlevel 1 if exist \"%CLEANUP%\\{UpdateMarkerFileName}\" rmdir /S /Q \"%CLEANUP%\" >nul 2>nul",
+                "if errorlevel 1 (",
+                "  echo Update failed. Failed to copy files from \"%SRC%\" to \"%DST%\". > \"%CLEANUP%\\update-error.log\"",
+                "  set \"OSU_TAIKO_MAPPING_HELPER_UPDATE_ERROR=%CLEANUP%\\update-error.log\"",
+                "  start \"\" \"%EXE%\"",
+                "  endlocal",
+                "  del \"%~f0\"",
+                "  exit /b 1",
+                ")",
+                $"if exist \"%CLEANUP%\\{UpdateMarkerFileName}\" rmdir /S /Q \"%CLEANUP%\" >nul 2>nul",
                 "start \"\" \"%EXE%\"",
                 "endlocal",
                 "del \"%~f0\""
