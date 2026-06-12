@@ -20,7 +20,6 @@ namespace osu_taiko_Mapping_Helper
             config.ConfigLoad();
             Common.LoadConfig(config);
 
-            if (UpdaterUtils.CheckUpdate("v" + Constants.APP_VERSION)) return;
             Application.Run(new MainForm());
         }
     }

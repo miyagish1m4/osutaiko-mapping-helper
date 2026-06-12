@@ -239,13 +239,13 @@ namespace osu_taiko_Mapping_Helper.Views
                     yield return new ButtonSpec("Ignore", DialogResult.Ignore);
                     break;
                 case MessageBoxButtons.YesNoCancel:
-                    yield return new ButtonSpec("Yes", DialogResult.Yes);
-                    yield return new ButtonSpec("No", DialogResult.No);
+                    yield return new ButtonSpec(GetLabel("LBL_DIALOG_YES", "Yes"), DialogResult.Yes);
+                    yield return new ButtonSpec(GetLabel("LBL_DIALOG_NO", "No"), DialogResult.No);
                     yield return new ButtonSpec(GetLabel("LBL_DIALOG_CANCEL", "Cancel"), DialogResult.Cancel);
                     break;
                 case MessageBoxButtons.YesNo:
-                    yield return new ButtonSpec("Yes", DialogResult.Yes);
-                    yield return new ButtonSpec("No", DialogResult.No);
+                    yield return new ButtonSpec(GetLabel("LBL_DIALOG_YES", "Yes"), DialogResult.Yes);
+                    yield return new ButtonSpec(GetLabel("LBL_DIALOG_NO", "No"), DialogResult.No);
                     break;
                 case MessageBoxButtons.RetryCancel:
                     yield return new ButtonSpec("Retry", DialogResult.Retry);

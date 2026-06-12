@@ -20,7 +20,7 @@ For the main features and usage instructions, see the following user guides.
 
 ## Libraries
 
-- [OsuMemoryDataProvider](https://www.nuget.org/packages/OsuMemoryDataProvider) `0.11.1`
+- [OsuMemoryDataProvider](https://www.nuget.org/packages/OsuMemoryDataProvider) `0.12.1`
 - [OsuParsers](https://www.nuget.org/packages/OsuParsers) `1.7.2`
 
 Dependencies are defined in `osu!taiko Mapping Helper.csproj`.
@@ -73,5 +73,9 @@ This project is built with C# and Windows Forms.
 
 ## License
 
-This project is released under the MIT License.
-See [LICENSE](LICENSE) for details.
+This repository uses separate licenses for program files and image assets.
+
+- Program and documentation: MIT License
+- Image assets in `osu!taiko Mapping Helper/Resources/`: GNU Affero General Public License version 3 or later
+
+See [LICENSES.md](LICENSES.md) for details.

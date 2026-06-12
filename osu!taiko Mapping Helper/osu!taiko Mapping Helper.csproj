@@ -39,6 +39,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\LICENSE-AGPL-3.0" Link="LICENSE-AGPL-3.0" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\LICENSES.md" Link="LICENSES.md" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -54,7 +60,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OsuMemoryDataProvider" Version="0.11.1" />
+    <PackageReference Include="OsuMemoryDataProvider" Version="0.12.1" />
     <PackageReference Include="OsuParsers" Version="1.7.2" />
   </ItemGroup>
 
