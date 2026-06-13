@@ -39,12 +39,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="..\LICENSE-AGPL-3.0" Link="LICENSE-AGPL-3.0" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="..\LICENSES.md" Link="LICENSES.md" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
