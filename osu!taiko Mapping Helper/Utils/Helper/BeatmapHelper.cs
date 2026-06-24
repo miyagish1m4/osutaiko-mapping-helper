@@ -1,10 +1,7 @@
 using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
-using OsuParsers.Beatmaps.Objects.Catch;
 using System.Text;
 using System.Text.RegularExpressions;
-using static System.Windows.Forms.LinkLabel;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 
 namespace osu_taiko_Mapping_Helper.Utils.Helper
 {
