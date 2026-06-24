@@ -15,6 +15,7 @@ namespace osu_taiko_Mapping_Helper.Utils
         private const string Owner = "miyagish1m4";
         private const string Repository = "osutaiko-mapping-helper";
         private const string ReleasesApiUrl = $"https://api.github.com/repos/{Owner}/{Repository}/releases";
+        private const string LatestReleaseApiUrl = $"https://api.github.com/repos/{Owner}/{Repository}/releases/latest";
         private const string UserAgent = "osu-taiko-mapping-helper-updater";
         private const string UpdateMarkerFileName = ".osu-taiko-mapping-helper-update";
         private static readonly JsonSerializerOptions JsonOptions = new()
@@ -62,8 +63,15 @@ namespace osu_taiko_Mapping_Helper.Utils
         private static async Task<GithubRelease?> GetLatestReleaseAsync(string currentVersion)
         {
             using var client = CreateHttpClient();
-            using var response = await client.GetAsync(ReleasesApiUrl);
+            var latestRelease = await GetReleaseAsync(client, LatestReleaseApiUrl);
+            if (latestRelease != null &&
+                !latestRelease.Draft &&
+                IsNewerVersion(latestRelease.TagName, currentVersion))
+            {
+                return latestRelease;
+            }
 
+            using var response = await client.GetAsync(ReleasesApiUrl);
             if (!response.IsSuccessStatusCode)
             {
                 return null;
@@ -82,6 +90,24 @@ namespace osu_taiko_Mapping_Helper.Utils
                 .Where(release => IsNewerVersion(release.TagName, currentVersion))
                 .OrderByDescending(release => AppVersion.Parse(release.TagName))
                 .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// GitHub Releases APIから単一リリース情報を取得する
+        /// </summary>
+        /// <param name="client">GitHub API用HTTPクライアント</param>
+        /// <param name="url">取得対象URL</param>
+        /// <returns>リリース情報。取得できない場合はnull</returns>
+        private static async Task<GithubRelease?> GetReleaseAsync(HttpClient client, string url)
+        {
+            using var response = await client.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            return await JsonSerializer.DeserializeAsync<GithubRelease>(stream, JsonOptions);
         }
 
         /// <summary>
