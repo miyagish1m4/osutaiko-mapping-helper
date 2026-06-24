@@ -275,7 +275,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 double retSvFrom = -1;
                 double retSvTo = -1;
                 userInputData.isSv = userInputTempData.isSv;
-                if (!userInputData.isSv)
+                if (!userInputData.isSv || userInputData.applySetCode == 0x00000008)
                 {
                     //SV有効化フラグが有効ではない
                     retSvFrom = -1;
