@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
+using System.Configuration;
 using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -142,6 +143,7 @@ namespace osu_taiko_Mapping_Helper.Utils
             }
 
             var extractedDirectory = ExtractApplicationArchive(assetPath, updateDirectory);
+            MergeApplicationConfig(extractedDirectory);
             var batchPath = CreateUpdateBatch(extractedDirectory, updateDirectory);
             Process.Start(new ProcessStartInfo("cmd.exe", $"/c \"{batchPath}\"")
             {
@@ -250,12 +252,88 @@ namespace osu_taiko_Mapping_Helper.Utils
         }
 
         /// <summary>
+        /// 現在利用中のconfigを、展開済みの新バージョンconfigへ反映する
+        /// </summary>
+        /// <param name="extractedDirectory">更新ファイルの展開先フォルダパス</param>
+        private static void MergeApplicationConfig(string extractedDirectory)
+        {
+            var currentConfigPath = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None).FilePath;
+            var newConfigPath = GetExtractedConfigPath(extractedDirectory, currentConfigPath);
+            if (string.IsNullOrEmpty(currentConfigPath) ||
+                string.IsNullOrEmpty(newConfigPath) ||
+                !File.Exists(currentConfigPath) ||
+                !File.Exists(newConfigPath))
+            {
+                return;
+            }
+
+            var currentConfig = OpenMappedConfiguration(currentConfigPath);
+            var newConfig = OpenMappedConfiguration(newConfigPath);
+
+            foreach (KeyValueConfigurationElement currentSetting in currentConfig.AppSettings.Settings)
+            {
+                var newSetting = newConfig.AppSettings.Settings[currentSetting.Key];
+                if (newSetting == null)
+                {
+                    continue;
+                }
+
+                newSetting.Value = currentSetting.Value;
+            }
+
+            newConfig.Save(ConfigurationSaveMode.Modified);
+        }
+
+        /// <summary>
+        /// 展開済み更新ファイルから、現在利用中のconfigに対応するconfigファイルパスを取得する
+        /// </summary>
+        /// <param name="extractedDirectory">更新ファイルの展開先フォルダパス</param>
+        /// <param name="currentConfigPath">現在利用中のconfigファイルパス</param>
+        /// <returns>展開済みconfigファイルパス。見つからない場合は空文字</returns>
+        private static string GetExtractedConfigPath(string extractedDirectory, string currentConfigPath)
+        {
+            var configFileName = Path.GetFileName(currentConfigPath);
+            var sameNameConfigPath = Path.Combine(extractedDirectory, configFileName);
+            if (File.Exists(sameNameConfigPath))
+            {
+                return sameNameConfigPath;
+            }
+
+            return Directory
+                .GetFiles(extractedDirectory, "*.config", SearchOption.TopDirectoryOnly)
+                .FirstOrDefault() ?? string.Empty;
+        }
+
+        /// <summary>
+        /// 指定パスのexe configを読み込む
+        /// </summary>
+        /// <param name="configPath">読み込み対象のconfigファイルパス</param>
+        /// <returns>読み込んだconfig</returns>
+        private static Configuration OpenMappedConfiguration(string configPath)
+        {
+            var fileMap = new ExeConfigurationFileMap
+            {
+                ExeConfigFilename = configPath
+            };
+            return ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
+        }
+
+        /// <summary>
         /// 更新用の一時フォルダを配置する親フォルダパスを取得する
         /// </summary>
         /// <returns>更新用一時フォルダの親フォルダパス</returns>
         private static string GetUpdateRootDirectory()
         {
-            return Path.Combine(Path.GetTempPath(), "osu-taiko-mapping-helper", "update");
+            return Path.Combine(GetUpdateBaseDirectory(), "update");
+        }
+
+        /// <summary>
+        /// 更新用の一時フォルダ全体を配置する親フォルダパスを取得する
+        /// </summary>
+        /// <returns>更新用一時フォルダ全体の親フォルダパス</returns>
+        private static string GetUpdateBaseDirectory()
+        {
+            return Path.Combine(Path.GetTempPath(), "osu-taiko-mapping-helper");
         }
 
         /// <summary>
@@ -281,6 +359,21 @@ namespace osu_taiko_Mapping_Helper.Utils
         }
 
         /// <summary>
+        /// 更新後に削除する一時フォルダ全体が想定した更新用フォルダか判定する
+        /// </summary>
+        /// <param name="cleanupRootDirectory">削除対象の一時フォルダ全体のパス</param>
+        /// <returns>削除してよい更新用一時フォルダ全体の場合はtrue、それ以外はfalse</returns>
+        private static bool IsSafeCleanupRootDirectory(string cleanupRootDirectory)
+        {
+            var updateBaseDirectory = Path.GetFullPath(GetUpdateBaseDirectory())
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var cleanupRootFullPath = Path.GetFullPath(cleanupRootDirectory)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+            return string.Equals(cleanupRootFullPath, updateBaseDirectory, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
         /// 実行中アプリ終了後に更新ファイルを配置するバッチファイルを作成する
         /// </summary>
         /// <param name="sourceDirectory">更新ファイルの展開先フォルダパス</param>
@@ -293,11 +386,17 @@ namespace osu_taiko_Mapping_Helper.Utils
                 throw new InvalidOperationException($"Invalid cleanup directory: {cleanupDirectory}");
             }
 
+            var cleanupRootDirectory = GetUpdateBaseDirectory();
+            if (!IsSafeCleanupRootDirectory(cleanupRootDirectory))
+            {
+                throw new InvalidOperationException($"Invalid cleanup root directory: {cleanupRootDirectory}");
+            }
+
             var currentProcess = Process.GetCurrentProcess();
             var executablePath = Environment.ProcessPath ?? Application.ExecutablePath;
             var applicationDirectory = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
-            var batchPath = Path.Combine(Path.GetTempPath(), "osu-taiko-mapping-helper", "update", "apply-update.bat");
-
+            var batchPath = Path.Combine(Path.GetTempPath(), "osu-taiko-mapping-helper-apply-update.bat");
+            
             Directory.CreateDirectory(Path.GetDirectoryName(batchPath)!);
 
             var batchLines = new[]
@@ -307,6 +406,7 @@ namespace osu_taiko_Mapping_Helper.Utils
                 $"set \"PID={currentProcess.Id}\"",
                 $"set \"SRC={sourceDirectory}\"",
                 $"set \"CLEANUP={cleanupDirectory}\"",
+                $"set \"CLEANUP_ROOT={cleanupRootDirectory}\"",
                 $"set \"DST={applicationDirectory}\"",
                 $"set \"EXE={executablePath}\"",
                 ":wait",
@@ -324,7 +424,8 @@ namespace osu_taiko_Mapping_Helper.Utils
                 "  del \"%~f0\"",
                 "  exit /b 1",
                 ")",
-                $"if exist \"%CLEANUP%\\{UpdateMarkerFileName}\" rmdir /S /Q \"%CLEANUP%\" >nul 2>nul",
+                "cd /d \"%TEMP%\"",
+                $"if exist \"%CLEANUP%\\{UpdateMarkerFileName}\" rmdir /S /Q \"%CLEANUP_ROOT%\" >nul 2>nul",
                 "start \"\" \"%EXE%\"",
                 "endlocal",
                 "del \"%~f0\""
