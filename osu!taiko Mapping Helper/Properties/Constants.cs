@@ -55,6 +55,9 @@ namespace osu_taiko_Mapping_Helper.Properties
         #region osuファイルのセクション
         internal const string GENERAL = "[General]";
         internal const string PREVIEW = "PreviewTime: ";
+        internal const string MODE = "Mode:";
+        // osu!taikoのモード番号 (Mode: 1)
+        internal const int MODE_TAIKO = 1;
         internal const string EDITOR = "[Editor]";
         internal const string METADATA = "[Metadata]";
         internal const string DIFFICULTY = "[Difficulty]";
