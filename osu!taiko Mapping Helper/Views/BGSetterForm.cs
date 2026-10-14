@@ -48,7 +48,13 @@ namespace osu_taiko_Mapping_Helper.Views
         /// <param name="background">背景画像設定文字列</param>
         private void InitializeBG(string background)
         {
-            backgrounds = background.Split(',', 5);
+            // 座標が省略されている場合(0,0の場合は省略できる)は0,0として扱う
+            List<string> backgroundParams = [.. background.Split(',', 5)];
+            while (backgroundParams.Count < 5)
+            {
+                backgroundParams.Add("0");
+            }
+            backgrounds = [.. backgroundParams];
             // 背景画像を表示する
             picDisplayBg.Image = BGHelper.SetBgOnForm(backgroundPath,
                                                       new Point(INITIAL_SIZE.Width, INITIAL_SIZE.Height),
@@ -95,7 +101,7 @@ namespace osu_taiko_Mapping_Helper.Views
         #region イベント
         private void BGSetterForm_KeyDown(object sender, KeyEventArgs e)
         {
-            string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + this.backupDirectoryName;
+            string backupPath = BeatmapHelper.GetBackupDirectoryPath(this.backupDirectoryName);
             switch (e.KeyData)
             {
                 //［Ctrl］+［S］が押されたらBG変更を実行する
@@ -202,9 +208,9 @@ namespace osu_taiko_Mapping_Helper.Views
         }
         private void btnApply_Click(object sender, EventArgs e)
         {
-            GetBeatmap();
-            // 入力値と譜面情報が取得できていない場合はエラーダイアログを表示する
-            if (beatmapData == null)
+            // 譜面情報が取得できていない場合はエラーダイアログを表示する
+            // (読み込みに失敗した譜面を途中までのデータで上書きしないため、戻り値も確認する)
+            if (!GetBeatmap() || beatmapData == null)
             {
                 Common.ShowMessageDialog("E_A-D-1");
                 return;

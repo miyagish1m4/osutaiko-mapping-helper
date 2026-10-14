@@ -68,6 +68,7 @@ namespace osu_taiko_Mapping_Helper.Utils
             var latestRelease = await GetReleaseAsync(client, LatestReleaseApiUrl);
             if (latestRelease != null &&
                 !latestRelease.Draft &&
+                !latestRelease.Prerelease &&
                 IsNewerVersion(latestRelease.TagName, currentVersion))
             {
                 return latestRelease;
@@ -88,6 +89,7 @@ namespace osu_taiko_Mapping_Helper.Utils
 
             return releases
                 .Where(release => !release.Draft)
+                .Where(release => !release.Prerelease)
                 .Where(release => AppVersion.TryParse(release.TagName, out _))
                 .Where(release => IsNewerVersion(release.TagName, currentVersion))
                 .OrderByDescending(release => AppVersion.Parse(release.TagName))
@@ -441,13 +443,13 @@ namespace osu_taiko_Mapping_Helper.Utils
                         Remove-Item -LiteralPath $cleanupRootDirectory -Recurse -Force -ErrorAction SilentlyContinue
                     }
 
-                    Start-Process -FilePath $executablePath
+                    Start-Process -FilePath $executablePath -WorkingDirectory $applicationDirectory
                     exit 0
                 }
                 catch {
                     $_ | Out-String | Set-Content -LiteralPath $errorLogPath -Encoding UTF8
                     [Environment]::SetEnvironmentVariable('OSU_TAIKO_MAPPING_HELPER_UPDATE_ERROR', $errorLogPath, 'Process')
-                    Start-Process -FilePath $executablePath
+                    Start-Process -FilePath $executablePath -WorkingDirectory $applicationDirectory
                     exit 1
                 }
                 """;
@@ -490,6 +492,9 @@ namespace osu_taiko_Mapping_Helper.Utils
 
             [JsonPropertyName("draft")]
             public bool Draft { get; init; }
+
+            [JsonPropertyName("prerelease")]
+            public bool Prerelease { get; init; }
 
             [JsonPropertyName("assets")]
             public List<GithubReleaseAsset> Assets { get; init; } = [];

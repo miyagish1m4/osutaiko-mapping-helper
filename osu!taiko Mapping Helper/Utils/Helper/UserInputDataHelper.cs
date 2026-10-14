@@ -434,6 +434,12 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 userInputData.offsetMode = userInputTempData.offsetMode;
                 userInputData.isOffset = userInputTempData.isOffset;
                 userInputData.isDuoOffset = userInputTempData.isDuoOffset;
+                // ブックマークのみを対象にする場合はオフセットを適用しない
+                if (userInputTempData.setOption.isSetObjects && userInputTempData.setObjectOption.isOnlyBookmarks)
+                {
+                    userInputData.isOffset = false;
+                    userInputData.isDuoOffset = false;
+                }
                 if (!userInputData.isOffset)
                 {
                     //Offset有効化フラグが有効ではない

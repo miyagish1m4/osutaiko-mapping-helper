@@ -456,39 +456,20 @@ namespace osu_taiko_Mapping_Helper.Utils
                                              CheckBox chkRelative,
                                              CheckBox chkEnableSvTo)
         {
-            chkEnableSv.Enabled = isEnable;
-            txtSvFrom.Enabled = isEnable && chkEnableSv.Checked;
-            txtSvTo.Enabled = (isEnable || (chkRelative.Checked && chkEnableSvTo.Checked)) && chkEnableSv.Checked ;
-            btnSetSvFrom.Enabled = isEnable && chkEnableSv.Checked;
-            btnSetSvTo.Enabled = isEnable && chkEnableSv.Checked;
-            btnSwapSv.Enabled = isEnable && chkEnableSv.Checked;
-            if (isEnable && chkEnableSv.Checked)
-            {
-                txtSvFrom.ForeColor = SystemColors.WindowText;
-                txtSvFrom.BackColor = SystemColors.Window;
-                txtSvTo.ForeColor = SystemColors.WindowText;
-                txtSvTo.BackColor = SystemColors.Window;
-                btnSetSvFrom.ForeColor = SystemColors.Control;
-                btnSetSvFrom.FlatAppearance.BorderColor = Color.Cyan;
-                btnSetSvTo.ForeColor = SystemColors.Control;
-                btnSetSvTo.FlatAppearance.BorderColor = Color.Cyan;
-                btnSwapSv.ForeColor = SystemColors.Control;
-                btnSwapSv.FlatAppearance.BorderColor = Color.Cyan;
-            }
-            else
-            {
-                txtSvFrom.ForeColor = SystemColors.WindowFrame;
-                txtSvFrom.BackColor = SystemColors.WindowFrame;
-                txtSvTo.ForeColor = SystemColors.WindowFrame;
-                txtSvTo.BackColor = SystemColors.WindowFrame;
-                btnSetSvFrom.FlatAppearance.BorderColor = SystemColors.WindowFrame;
-                btnSetSvFrom.ForeColor = SystemColors.WindowFrame;
-                btnSetSvTo.ForeColor = SystemColors.WindowFrame;
-                btnSetSvTo.FlatAppearance.BorderColor = SystemColors.WindowFrame;
-                btnSwapSv.ForeColor = SystemColors.WindowFrame;
-                btnSwapSv.FlatAppearance.BorderColor = SystemColors.WindowFrame;
-            }
-            //chkEnableSv.Checked = isEnable;
+            // 相対速度変化が有効な場合は、SVのチェックを外せないようにする (SetRelativeEnabledStateと同じ)
+            bool isRelative = isEnable && chkRelative.Checked;
+            chkEnableSv.Enabled = isEnable && !isRelative;
+            bool isSvFromEnable = isEnable && chkEnableSv.Checked;
+            // 相対速度変化が有効な場合、終点のSVは"終点のSVを使う"が有効な場合のみ入力できるようにする
+            bool isSvToEnable = isSvFromEnable && (!isRelative || chkEnableSvTo.Checked);
+            // 始点のSVはSetTxtSvFromEnabledStateを使うと入力値が書き換わるため、ここで設定する
+            txtSvFrom.Enabled = isSvFromEnable;
+            txtSvFrom.BackColor = isSvFromEnable ? SystemColors.Window : SystemColors.WindowFrame;
+            txtSvFrom.ForeColor = isSvFromEnable ? SystemColors.WindowText : txtSvFrom.BackColor;
+            SetBtnSetSvFromEnabledState(isSvFromEnable, btnSetSvFrom);
+            SetTxtSvToEnabledState(isSvToEnable, txtSvTo);
+            SetBtnSetSvToEnabledState(isSvToEnable, btnSetSvTo);
+            SetBtnSwapSvEnabledState(isSvToEnable, btnSwapSv);
         }
         #endregion
         #region SettingsForm

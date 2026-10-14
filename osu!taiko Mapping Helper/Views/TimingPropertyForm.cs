@@ -11,9 +11,13 @@ namespace osu_taiko_Mapping_Helper.Views
         #region クラス変数
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public MainForm parentForm { get; set; }
-        private BeatmapMetadata beatmapInfo = new();
+        private string beatmapPath = string.Empty;
         private Beatmap? beatmapData;
         private int currentTime;
+        // 最後に読み込みに成功した譜面のパスと、読み込む前に取得した更新日時
+        private string loadedPath = string.Empty;
+        private DateTime loadedLastWriteTime;
+        private readonly object beatmapLock = new();
         delegate void DelegateProcess();//delegateを宣言
         private int updateInterval = 15;
         private bool isClose = false;
@@ -59,6 +63,15 @@ namespace osu_taiko_Mapping_Helper.Views
                 Thread.Sleep(updateInterval);
                 try
                 {
+                    // 譜面が変わったか、更新されていた場合は読み込み直す
+                    ReloadBeatmapIfChanged();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+                try
+                {
                     this.Invoke(() =>
                     {
                         SetCurrentTimeInfo(lblCurrentTiming, Constants.SET_TIMING);
@@ -96,36 +109,78 @@ namespace osu_taiko_Mapping_Helper.Views
         /// <summary>
         /// Osu!から譜面情報を受け取る処理
         /// </summary>
-        /// <param name="beatmapInfo">更新する譜面情報</param>
+        /// <param name="beatmapPath">osu!で選択している譜面のパス(osu!が起動していない場合は空)</param>
         /// <param name="currentTime">現在の時間</param>
-        internal void SetOsuData(BeatmapMetadata beatmapInfo, int currentTime)
+        /// <remarks>
+        /// 譜面の読み込みはUpdateLabelTextで行うため、ここではパスと時間のみ受け取る
+        /// </remarks>
+        internal void SetOsuData(string? beatmapPath, int currentTime)
         {
-            if (beatmapInfo.beatmapPath == null || beatmapInfo.beatmapPath == string.Empty)
-            {
-                return;
-            }
-            // 譜面の内容を取得する
-            this.beatmapInfo = beatmapInfo;
+            this.beatmapPath = beatmapPath ?? string.Empty;
             this.currentTime = currentTime;
         }
         /// <summary>
         /// 譜面情報を取得する
         /// </summary>
         /// <returns>取得に成功した場合はtrue、失敗した場合はfalseを返す</returns>
-        /// <returns>取得に成功した場合はtrue、失敗した場合はfalseを返す</returns>
         internal bool GetBeatmap()
         {
-            // 譜面情報がリアルタイムで取得できていない場合はエラーダイアログを表示する
-            if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
+            lock (beatmapLock)
             {
+                return LoadBeatmap(beatmapPath);
+            }
+        }
+        /// <summary>
+        /// 譜面のパスか更新日時が前回読み込んだ時と違う場合、譜面を読み込み直す
+        /// </summary>
+        /// <remarks>
+        /// 読み込みに失敗した場合は前回読み込んだ時の値が変わらないため、次の周回で読み込み直す
+        /// </remarks>
+        private void ReloadBeatmapIfChanged()
+        {
+            lock (beatmapLock)
+            {
+                string path = beatmapPath;
+                // (譜面を選択していない場合、loadedPathは空で表示も消えている)
+                if (path == loadedPath &&
+                    (path == string.Empty || File.GetLastWriteTime(path) == loadedLastWriteTime))
+                {
+                    return;
+                }
+                LoadBeatmap(path);
+            }
+        }
+        /// <summary>
+        /// 譜面を読み込む (beatmapLockをかけてから呼ぶ)
+        /// </summary>
+        /// <param name="path">譜面のパス</param>
+        /// <returns>読み込みに成功した場合はtrue、失敗した場合はfalseを返す</returns>
+        private bool LoadBeatmap(string path)
+        {
+            if (path == string.Empty || !File.Exists(path))
+            {
+                // 譜面を選択していない場合は表示を消す
+                beatmapData = null;
+                loadedPath = string.Empty;
                 return false;
             }
-            // 譜面の内容を取得する
-            beatmapData = BeatmapHelper.GetBeatmapData(this.beatmapInfo.beatmapPath, true);
-            if (beatmapData.version == string.Empty)
+            // 読み込み中に更新された場合に次の周回で読み込み直せるよう、読み込む前に更新日時を取得する
+            DateTime lastWriteTime = File.GetLastWriteTime(path);
+            var tempBeatmapData = BeatmapHelper.GetTimingPointsData(path);
+            if (tempBeatmapData == null)
             {
+                // 別の譜面に切り替わっている場合は、前の譜面の情報を表示しないよう表示を消す
+                // (同じ譜面の場合は、読み込めるまで前回読み込んだ内容を表示する)
+                if (path != loadedPath)
+                {
+                    beatmapData = null;
+                    loadedPath = string.Empty;
+                }
                 return false;
             }
+            beatmapData = tempBeatmapData;
+            loadedPath = path;
+            loadedLastWriteTime = lastWriteTime;
             return true;
         }
         /// <summary>
@@ -140,7 +195,7 @@ namespace osu_taiko_Mapping_Helper.Views
                 switch (setCode)
                 {
                     case Constants.SET_TIMING:
-                        control.Text = Common.ConvertFormatTiming(currentTime);
+                        control.Text = beatmapPath == string.Empty ? string.Empty : Common.ConvertFormatTiming(currentTime);
                         break;
                     case Constants.SET_BPM:
                         control.Text = Utils.Helper.Debug.SetCurrentBpm(beatmapData, currentTime);
@@ -169,7 +224,6 @@ namespace osu_taiko_Mapping_Helper.Views
 #endif
             InitializeLabelText();
             //parentForm.updateInterval = 15;
-            GetBeatmap();
         }
         private void DebugForm_FormClosed(object sender, FormClosedEventArgs e)
         {

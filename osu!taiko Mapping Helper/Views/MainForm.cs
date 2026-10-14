@@ -30,8 +30,18 @@ namespace osu_taiko_Mapping_Helper
         private string songsPath = string.Empty;
         private int currentTime;
         private bool isDirectoryLoaded = false;
+        // 見つけたosu!のプロセス (起動中かどうかの確認に使う)
+        private Process? osuProcess = null;
+        // 次にosu!のプロセスを探す時刻
+        private DateTime nextOsuProcessSearchTime = DateTime.MinValue;
+        // osu!のプロセスを探す間隔(ミリ秒)
+        private const int OSU_PROCESS_SEARCH_INTERVAL = 1000;
         private bool isUpdate = true;
-        private string backupDirectoryName = string.Empty;
+        // バックアップフォルダ名 (機能によらず、.osuのファイル名で統一する)
+        private string backupDirectoryName => Path.GetFileNameWithoutExtension(beatmapInfo.beatmapPath ?? string.Empty);
+        // 処理対象の譜面情報とバックアップフォルダ名 (処理の開始時にSetTargetBeatmapで設定する)
+        private BeatmapMetadata targetBeatmapInfo = new();
+        private string targetBackupDirectoryName = string.Empty;
         private TimingPropertyForm? TimingPropertyForm = null;
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int updateInterval { get; set; } = 15;
@@ -86,27 +96,28 @@ namespace osu_taiko_Mapping_Helper
                 {
                     Thread.Sleep(updateInterval);
                     // osu.exeを探す
-                    var processes = Process.GetProcessesByName("osu!");
-                    if (processes.Length == 0)
+                    Process? process = GetOsuProcess();
+                    if (process == null)
                     {
                         if (isDirectoryLoaded)
                         {
                             beatmapInfo = new();
                         }
                         isDirectoryLoaded = false;
+                        // 前の譜面の情報を表示し続けないよう、TimingPropertyの表示を消す
+                        TimingPropertyForm?.SetOsuData(string.Empty, currentTime);
                         throw new Exception("osu!が起動されていません。");
                     }
                     // osuフォルダ取得処理
                     if (!isDirectoryLoaded)
                     {
-                        Process process = processes[0];
                         string? fileName = process.MainModule?.FileName;
                         osuDirectory = Path.GetDirectoryName(fileName) ?? string.Empty;
                         if (osuDirectory != string.Empty)
                         {
                             if (!Directory.Exists(osuDirectory))
                             {
-                                return;
+                                continue;
                             }
                             songsPath = Common.GetSongsFolderLocation(osuDirectory);
                             isDirectoryLoaded = !isDirectoryLoaded;
@@ -124,19 +135,14 @@ namespace osu_taiko_Mapping_Helper
                     DateTime lastWriteTime = File.GetLastWriteTime(osuBeatmapPath);
 
                     currentTime = baseAddresses.GeneralData.AudioTime;
+                    // TimingPropertyには選択している譜面のパスを渡す (譜面の読み込みはTimingProperty側で行う)
+                    TimingPropertyForm?.SetOsuData(osuBeatmapPath, currentTime);
 
                     // 譜面パスと更新日時が変わっていない場合、.osuのDecodeを行わない
                     // これによりUpdateMemoryDataが短周期で.osuを読み続けることを防ぐ
                     if (beatmapInfo.beatmapPath == osuBeatmapPath &&
                         beatmapInfo.lastUpdate == lastWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fff"))
                     {
-                        try
-                        {
-                            TimingPropertyForm?.SetOsuData(beatmapInfo, currentTime);
-                        }
-                        catch
-                        {
-                        }
                         continue;
                     }
                     // 譜面のデータを取得
@@ -166,14 +172,8 @@ namespace osu_taiko_Mapping_Helper
                                                          baseAddresses.Beatmap.FolderName ?? "",
                                                          beatmapData.EventsSection.BackgroundImage) : "";
                     beatmapInfo.backgroundPath = backgroundPath ?? "";
-                    beatmapInfo.lastUpdate = File.GetLastWriteTime(beatmapInfo.beatmapPath).ToString("yyyy-MM-dd HH:mm:ss.fff");
-                    try
-                    {
-                        TimingPropertyForm?.SetOsuData(beatmapInfo, currentTime);
-                    }
-                    catch
-                    {
-                    }
+                    // 読み込み中に更新された場合に次の周回で読み込み直せるよう、読み込む前に取得した更新日時を使う
+                    beatmapInfo.lastUpdate = lastWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
                     if (beatmapInfo.backgroundPath != "")
                     {
                         if (!BeatmapHelper.GetBackground(ref beatmapInfo))
@@ -193,6 +193,49 @@ namespace osu_taiko_Mapping_Helper
                     Console.WriteLine(ex);
                 }
             }
+        }
+        /// <summary>
+        /// 起動中のosu!のプロセスを取得する
+        /// </summary>
+        /// <returns>osu!のプロセス (起動していない場合はnull)</returns>
+        private Process? GetOsuProcess()
+        {
+            if (osuProcess != null)
+            {
+                try
+                {
+                    if (!osuProcess.HasExited)
+                    {
+                        return osuProcess;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 終了したか確認できない場合は、探し直す
+                    Console.WriteLine(ex);
+                }
+                osuProcess.Dispose();
+                osuProcess = null;
+                // 終了した直後は、すぐに探し直す
+                nextOsuProcessSearchTime = DateTime.MinValue;
+            }
+            if (DateTime.Now < nextOsuProcessSearchTime)
+            {
+                return null;
+            }
+            nextOsuProcessSearchTime = DateTime.Now.AddMilliseconds(OSU_PROCESS_SEARCH_INTERVAL);
+            var processes = Process.GetProcessesByName("osu!");
+            if (processes.Length == 0)
+            {
+                return null;
+            }
+            osuProcess = processes[0];
+            // 使わないプロセスは破棄する
+            foreach (var other in processes.Skip(1))
+            {
+                other.Dispose();
+            }
+            return osuProcess;
         }
         /// <summary>
         /// UpdateMemoryDataで取得したosuのメモリデータを使用し、
@@ -237,18 +280,6 @@ namespace osu_taiko_Mapping_Helper
                                        (beatmapInfo.version == string.Empty ? "" : "]"));
                     preBeatmapInfo.tags = beatmapInfo.tags == null ? [""] : beatmapInfo.tags;
                     txtTags.Text = beatmapInfo.tags == null ? "" : string.Join(" ", beatmapInfo.tags);
-                    // バックアップフォルダ名を設定する
-                    backupDirectoryName = beatmapInfo.artist + " - " +
-                                          beatmapInfo.title + " (" +
-                                          beatmapInfo.creator + ") [" +
-                                          beatmapInfo.version + "]";
-                    try
-                    {
-                        TimingPropertyForm?.GetBeatmap();
-                    }
-                    catch
-                    {
-                    }
                     preBeatmapInfo.version = beatmapInfo.version;
                     preBeatmapInfo.previewTime = beatmapInfo.previewTime;
                     preBeatmapInfo.beatmapPath = beatmapInfo.beatmapPath;
@@ -334,24 +365,41 @@ namespace osu_taiko_Mapping_Helper
                 tabSetType.Controls.Add(tabHitObjectsPage);
                 tabSetType.Controls.Add(tabBeatSnap);
             }
-            chkEnableHexaOffset.Checked = config.offsetHexa == 1;
-            chkEnableDuoOffset.Checked = config.offsetDuo == 1;
-            chkEnableOffset.Checked = config.offsetMs == 1;
-            txtOffset.Text = config.offsetMsValue ?? string.Empty;
-            switch (config.offsetMode)
-            {
-                case 0:
-                    chkEnableOffset_CheckedChanged(null, null);
-                    chkEnableHexaOffset_CheckedChanged(null, null);
-                    break;
-                case 1:
-                    chkEnableOffset_CheckedChanged(null, null);
-                    chkEnableHexaOffset_CheckedChanged(null, null);
-                    break;
-            }
-            chkEnableDuoOffset_CheckedChanged(null, null);
-            txtOffset_TextChanged(null, null);
+            InitializeOffsetControls();
             tabSetType.ItemSize = new Size(Constants.TAB_MAX_ITEM_SIZE / tabSetType.Controls.Count, tabSetType.ItemSize.Height);
+        }
+        /// <summary>
+        /// オフセット関連のコントロールの初期化処理
+        /// </summary>
+        /// <remarks>
+        /// 一旦すべてのオフセットのチェックを外し、設定画面で選択しているオフセットモードのチェックのみ
+        /// 設定ファイルに保存されている前回の状態に戻す
+        /// </remarks>
+        private void InitializeOffsetControls()
+        {
+            // 初期化中にCheckedChanged/TextChangedが呼ばれると、選択していないモードの状態まで
+            // 設定ファイルに上書き保存されてしまうため、イベントを一時的に外す
+            chkEnableHexaOffset.CheckedChanged -= chkEnableHexaOffset_CheckedChanged;
+            chkEnableDuoOffset.CheckedChanged -= chkEnableDuoOffset_CheckedChanged;
+            chkEnableOffset.CheckedChanged -= chkEnableOffset_CheckedChanged;
+            txtOffset.TextChanged -= txtOffset_TextChanged;
+            bool isHexaMode = config.offsetMode == 0;
+            // 1/16(1/12) offset
+            chkEnableHexaOffset.Checked = isHexaMode && config.offsetHexa == 1;
+            // 1/12 offsetは1/16 offsetが有効な場合のみ有効にする
+            chkEnableDuoOffset.Checked = chkEnableHexaOffset.Checked && config.offsetDuo == 1;
+            // ms指定のoffset
+            chkEnableOffset.Checked = !isHexaMode && config.offsetMs == 1;
+            txtOffset.Text = config.offsetMsValue ?? string.Empty;
+            FormUtils.SetChkEnableOffset(chkEnableOffset.Checked, txtOffset);
+            // 入力値に反映する (オフセットの有効化設定は選択しているモードのチェックで決める)
+            userInputTempData.isOffset = isHexaMode ? chkEnableHexaOffset.Checked : chkEnableOffset.Checked;
+            userInputTempData.isDuoOffset = chkEnableDuoOffset.Checked;
+            userInputTempData.offset = txtOffset.Text;
+            chkEnableHexaOffset.CheckedChanged += chkEnableHexaOffset_CheckedChanged;
+            chkEnableDuoOffset.CheckedChanged += chkEnableDuoOffset_CheckedChanged;
+            chkEnableOffset.CheckedChanged += chkEnableOffset_CheckedChanged;
+            txtOffset.TextChanged += txtOffset_TextChanged;
         }
         /// <summary>
         /// 処理項目タブが"Objectsのみ"の時のコントロールの初期化処理
@@ -376,8 +424,6 @@ namespace osu_taiko_Mapping_Helper
             rdoOnlySpecificHitObject.Checked = userInputTempData.setObjectOption.isOnlyHitObjects;
             chkEnableOffset.Enabled = true;
             FormUtils.SetChkEnableOffset(chkEnableOffset.Checked, txtOffset);
-            txtOffset.BackColor = SystemColors.Window;
-            txtOffset.ForeColor = SystemColors.WindowText;
             Common.SetLabelText(chkEnableOffset, "LBL_APPLY_OFFSET");
             Common.SetLabelText(chkEnableHexaOffset, "LBL_APPLY_HEXA_OFFSET");
             Common.SetLabelText(chkEnableDuoOffset, "LBL_APPLY_DUO_OFFSET");
@@ -466,6 +512,19 @@ namespace osu_taiko_Mapping_Helper
                 // 適用
                 case Constants.EXECUTE_APPLY:
                     isSvCalculation = SVCalculatorService.Apply(userInputData, beatmapData, ref timingPoints);
+                    // 計算後のSVが0以下になる緑線(追加する緑線、または変更した範囲内の緑線)がある場合は、譜面を書き換えずに中止する
+                    // (相対速度変化の加算などで0以下になると、緑線の値が-∞や正の値になり譜面が壊れるため)
+                    if (isSvCalculation &&
+                        (timingPoints.Any(tp => !(tp.sv > 0)) ||
+                         beatmapData.timingPoints.Any(tp => !tp.isRedLine &&
+                                                            tp.time >= userInputData.timingFrom &&
+                                                            tp.time <= userInputData.timingTo &&
+                                                            !(tp.sv > 0))))
+                    {
+                        timingPoints.Clear();
+                        Common.ShowMessageDialog("E_V-C-7");
+                        return;
+                    }
                     beatmapData.timingPoints.AddRange(timingPoints);
                     beatmapData.timingPoints = beatmapData.timingPoints.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0).ToList();
                     timingPoints.Clear();
@@ -482,7 +541,7 @@ namespace osu_taiko_Mapping_Helper
                 return;
             }
             // バックアップを作成する
-            if (!BeatmapHelper.CreateBackup(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
+            if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
             {
                 Common.ShowMessageDialog("E_A-P-1");
                 return;
@@ -500,7 +559,7 @@ namespace osu_taiko_Mapping_Helper
             // 内容確認などに使ってね
             //if (!Utils.Helper.Debug.ExportToCsvFile(beatmapData, this.backupDirectoryName))
             // osuファイルに上書きする
-            if (!BeatmapHelper.ExportToOsuFile(beatmapData, this.beatmapInfo.beatmapPath))
+            if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath))
             {
                 // 失敗した場合はエラーダイアログを表示する
                 Common.ShowMessageDialog("E_A-P-1");
@@ -514,7 +573,6 @@ namespace osu_taiko_Mapping_Helper
                 Common.ShowMessageDialog("E_A-P-1");
                 return;
             }
-            TimingPropertyForm?.GetBeatmap();
 #endif
             // 成功した場合はメッセージダイアログを表示する
             Common.ShowMessageDialog("I_A-P-1", Constants.DIALOG_OPTION_MODELESS);
@@ -528,11 +586,11 @@ namespace osu_taiko_Mapping_Helper
         private void ExecuteUtilityProcess()
         {
             // 譜面情報がリアルタイムで取得できていない場合はエラーダイアログを表示する
-            if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
+            if (targetBeatmapInfo.beatmapPath == null || targetBeatmapInfo.beatmapPath == string.Empty)
             {
                 return;
             }
-            string beatmapDirectory = Path.GetDirectoryName(this.beatmapInfo.beatmapPath) ?? string.Empty;
+            string beatmapDirectory = Path.GetDirectoryName(targetBeatmapInfo.beatmapPath) ?? string.Empty;
             string[] beatmapsPath = Directory.GetFiles(beatmapDirectory, "*" + Constants.OSU_EXTENSION, SearchOption.TopDirectoryOnly);
             switch (userInputUtilityData.utilityCode)
             {
@@ -546,23 +604,19 @@ namespace osu_taiko_Mapping_Helper
                     {
                         return;
                     }
-                    foreach (var beatmapPath in beatmapsPath)
+                    switch (BeatmapHelper.ExportToAllOsuFiles(beatmapsPath, userInputUtilityData, targetBeatmapInfo))
                     {
-                        if (!BeatmapHelper.CreateBackup(beatmapPath, Path.GetFileNameWithoutExtension(beatmapPath)))
-                        {
-                            Common.ShowMessageDialog("E_A-P-1");
+                        case 0:
+                            // 正常終了した場合、先の処理を続行
+                            break;
+                        case 1:
+                            // 読み込みに失敗したdiffがあった場合はエラーダイアログを表示する
+                            Common.ShowMessageDialog("E_A-D-1");
                             return;
-                        }
-                        // マップセットの内容を取得する
-                        var tempBeatmap = BeatmapHelper.GetBeatmapData(beatmapPath);
-
-                        // 出力
-                        if (!BeatmapHelper.ExportToOsuFile(tempBeatmap, beatmapPath, userInputUtilityData, beatmapInfo))
-                        {
+                        default:
                             // 失敗した場合はエラーダイアログを表示する
                             Common.ShowMessageDialog("E_A-P-1");
                             return;
-                        }
                     }
                     if (!SettingHelper.ResetBackupFile(config))
                     {
@@ -572,30 +626,27 @@ namespace osu_taiko_Mapping_Helper
                     break;
                 case Constants.UTILITY_TAG_EDIT:
                 case Constants.UTILITY_SETTING_COPIER:
-                    var tags = txtTags.Text.Replace("\n", "");
+                    // タグ内の改行コードを取り除く
+                    userInputUtilityData.tags = txtTags.Text.Replace("\r", string.Empty).Replace("\n", string.Empty);
                     if (string.IsNullOrEmpty(beatmapDirectory) ||
                         (userInputUtilityData.utilityCode == Constants.UTILITY_SETTING_COPIER && beatmapData == null))
                     {
                         return;
                     }
                     var timingPoints = beatmapData?.timingPoints.Where(tp => tp.isRedLine).ToList();
-                    foreach (var beatmapPath in beatmapsPath)
+                    switch (BeatmapHelper.ExportToAllOsuFiles(beatmapsPath, userInputUtilityData, targetBeatmapInfo, timingPoints))
                     {
-                        if (!BeatmapHelper.CreateBackup(beatmapPath, Path.GetFileNameWithoutExtension(beatmapPath)))
-                        {
-                            Common.ShowMessageDialog("E_A-P-1");
+                        case 0:
+                            // 正常終了した場合、先の処理を続行
+                            break;
+                        case 1:
+                            // 読み込みに失敗したdiffがあった場合はエラーダイアログを表示する
+                            Common.ShowMessageDialog("E_A-D-1");
                             return;
-                        }
-                        // マップセットの内容を取得する
-                        var tempBeatmap = BeatmapHelper.GetBeatmapData(beatmapPath);
-
-                        // 出力
-                        if (!BeatmapHelper.ExportToOsuFile(tempBeatmap, beatmapPath, userInputUtilityData, beatmapInfo, timingPoints))
-                        {
+                        default:
                             // 失敗した場合はエラーダイアログを表示する
                             Common.ShowMessageDialog("E_A-P-1");
                             return;
-                        }
                     }
                     if (!SettingHelper.ResetBackupFile(config))
                     {
@@ -611,7 +662,7 @@ namespace osu_taiko_Mapping_Helper
                         return;
                     }
                     // バックアップを作成する
-                    if (!BeatmapHelper.CreateBackup(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
+                    if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
                     {
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
@@ -625,7 +676,7 @@ namespace osu_taiko_Mapping_Helper
                             return;
                         }
                     }
-                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, this.beatmapInfo.beatmapPath, userInputUtilityData))
+                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath, userInputUtilityData))
                     {
                         // 失敗した場合はエラーダイアログを表示する
                         Common.ShowMessageDialog("E_A-P-1");
@@ -649,7 +700,7 @@ namespace osu_taiko_Mapping_Helper
                     userInputUtilityData.finisherKatX = config.finisherKatX;
                     userInputUtilityData.finisherKatY = config.finisherKatY;
                     // バックアップを作成する
-                    if (!BeatmapHelper.CreateBackup(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
+                    if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
                     {
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
@@ -663,7 +714,7 @@ namespace osu_taiko_Mapping_Helper
                             return;
                         }
                     }
-                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, this.beatmapInfo.beatmapPath, userInputUtilityData))
+                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath, userInputUtilityData))
                     {
                         // 失敗した場合はエラーダイアログを表示する
                         Common.ShowMessageDialog("E_A-P-1");
@@ -696,7 +747,7 @@ namespace osu_taiko_Mapping_Helper
                         return;
                     }
                     // バックアップを作成する
-                    if (!BeatmapHelper.CreateBackup(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
+                    if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
                     {
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
@@ -710,20 +761,13 @@ namespace osu_taiko_Mapping_Helper
                             return;
                         }
                     }
-                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, this.beatmapInfo.beatmapPath, userInputUtilityData))
+                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath, userInputUtilityData))
                     {
                         // 失敗した場合はエラーダイアログを表示する
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
                     }
                     break;
-            }
-            try
-            {
-                TimingPropertyForm?.GetBeatmap();
-            }
-            catch
-            {
             }
             // 成功した場合はメッセージダイアログを表示する
             Common.ShowMessageDialog("I_A-P-1", Constants.DIALOG_OPTION_MODELESS);
@@ -736,13 +780,15 @@ namespace osu_taiko_Mapping_Helper
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
         private bool GetBeatmap()
         {
+            // 処理対象の譜面を、処理を始めた時点の譜面に固定する
+            SetTargetBeatmap();
             // 譜面情報がリアルタイムで取得できていない場合はエラーダイアログを表示する
-            if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
+            if (targetBeatmapInfo.beatmapPath == null || targetBeatmapInfo.beatmapPath == string.Empty)
             {
                 return false;
             }
             // 譜面の内容を取得する
-            beatmapData = BeatmapHelper.GetBeatmapData(this.beatmapInfo.beatmapPath);
+            beatmapData = BeatmapHelper.GetBeatmapData(targetBeatmapInfo.beatmapPath);
 #if DEBUG
             Utils.Helper.Debug.ExportHitObejcts(beatmapData);
 #endif
@@ -752,6 +798,35 @@ namespace osu_taiko_Mapping_Helper
                 return false;
             }
             return true;
+        }
+        /// <summary>
+        /// 処理対象の譜面情報を設定する
+        /// </summary>
+        /// <remarks>
+        /// beatmapInfoはosu!の監視スレッドが書き換えるため、処理中にosu!で譜面を切り替えても
+        /// 処理を始めた時点の譜面に書き込むよう、処理の開始時にコピーを取る
+        /// </remarks>
+        private void SetTargetBeatmap()
+        {
+            var info = beatmapInfo;
+            targetBeatmapInfo = new BeatmapMetadata
+            {
+                title = info.title,
+                titleUnicode = info.titleUnicode,
+                artist = info.artist,
+                artistUnicode = info.artistUnicode,
+                creator = info.creator,
+                version = info.version,
+                source = info.source,
+                backgroundPath = info.backgroundPath,
+                background = info.background,
+                beatmapPath = info.beatmapPath,
+                previewTime = info.previewTime,
+                tags = info.tags,
+                lastUpdate = info.lastUpdate
+            };
+            // バックアップフォルダ名は、コピーした譜面のパスから求める (パスとずれないようにするため)
+            targetBackupDirectoryName = Path.GetFileNameWithoutExtension(info.beatmapPath ?? string.Empty);
         }
         /// <summary>
         /// 現地点の情報を取得する処理
@@ -898,7 +973,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void osu_taiko_Mapping_Helper_KeyDown(object sender, KeyEventArgs e)
         {
-            string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + this.backupDirectoryName;
+            string backupPath = BeatmapHelper.GetBackupDirectoryPath(this.backupDirectoryName);
             switch (e.KeyData)
             {
                 //［Ctrl］+［S］が押されたらSV適用/削除を実行する
@@ -920,6 +995,8 @@ namespace osu_taiko_Mapping_Helper
                     break;
                 //［Ctrl］+［Z］が押されたら実行前の譜面にする
                 case (Keys.Z | Keys.Control):
+                    // テキストボックスの入力の取り消し(Ctrl+Z)が一緒に行われないよう、キーを子のコントロールに渡さない
+                    e.SuppressKeyPress = true;
                     // 譜面情報がリアルタイムで取得できていない場合はエラーダイアログを表示する
                     if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
                     {
@@ -954,8 +1031,18 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnBackup_Click(object sender, EventArgs e)
         {
-            // バックアップフォルダをエクスプローラで開く
-            System.Diagnostics.Process.Start("EXPLORER.EXE", Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY);
+            // 選択している譜面のバックアップフォルダがある場合はそのフォルダを、
+            // 無い場合(譜面を選択していない、まだバックアップを作っていない)はバックアップフォルダ全体をエクスプローラで開く
+            string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY;
+            if (!string.IsNullOrEmpty(beatmapInfo.beatmapPath))
+            {
+                string beatmapBackupPath = BeatmapHelper.GetBackupDirectoryPath(backupDirectoryName);
+                if (Directory.Exists(beatmapBackupPath))
+                {
+                    backupPath = beatmapBackupPath;
+                }
+            }
+            System.Diagnostics.Process.Start("EXPLORER.EXE", "\"" + backupPath + "\"");
         }
         private void btnViewSetting_Click(object sender, EventArgs e)
         {
@@ -989,17 +1076,12 @@ namespace osu_taiko_Mapping_Helper
                                    (beatmapInfo.version == string.Empty ? "" : "]"));
             }
             userInputTempData.offsetMode = config.offsetMode;
-            tabExecuteType_SelectedIndexChanged(sender, e);
+            // 設定画面でオフセットモードが変更されている場合があるため、オフセットのチェックを初期化する
+            // (削除タブを開いている場合はtabExecuteType_SelectedIndexChangedでオフセットが無効になるため、先に呼ぶ)
+            InitializeOffsetControls();
             tabSetType_SelectedIndexChanged(sender, e);
-            switch (config.offsetMode)
-            {
-                case 0:
-                    userInputTempData.isOffset = chkEnableHexaOffset.Checked;
-                    break;
-                case 1:
-                    userInputTempData.isOffset = chkEnableOffset.Checked;
-                    break;
-            }
+            // 処理項目タブを作り直すと先頭のタブに戻るため、作り直す前に選択していたタブを覚えておく
+            int selectedSetTypeIndex = tabSetType.SelectedIndex;
             menuStrip1.Items.Clear();
             tabSetType.Controls.Clear();
             if (config.advanceMode == 1)
@@ -1020,6 +1102,11 @@ namespace osu_taiko_Mapping_Helper
                 tabSetType.Controls.Add(tabBeatSnap);
             }
             tabSetType.ItemSize = new Size(Constants.TAB_MAX_ITEM_SIZE / tabSetType.Controls.Count, tabSetType.ItemSize.Height);
+            // 作り直す前に選択していた処理項目タブに戻す (詳細モードの変更でタブが無くなった場合は先頭のタブにする)
+            tabSetType.SelectedIndex = (selectedSetTypeIndex >= 0 && selectedSetTypeIndex < tabSetType.TabCount) ? selectedSetTypeIndex : 0;
+            tabSetType_SelectedIndexChanged(sender, e);
+            // 処理項目タブの初期化でSVのコントロールが有効になるため、最後に適用/削除タブに合わせて有効/無効を設定し直す
+            tabExecuteType_SelectedIndexChanged(sender, e);
             preUnicodeSupport = config.unicodeSupport;
         }
         private void sVEditorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1040,13 +1127,7 @@ namespace osu_taiko_Mapping_Helper
             {
                 parentForm = this
             };
-            try
-            {
-                TimingPropertyForm.SetOsuData(beatmapInfo, currentTime);
-            }
-            catch
-            {
-            }
+            TimingPropertyForm.SetOsuData(beatmapInfo.beatmapPath, currentTime);
             TimingPropertyForm.Show();
             TimingPropertyForm.Text = "Timing Property";
             if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
@@ -1060,7 +1141,8 @@ namespace osu_taiko_Mapping_Helper
         }
         private void bGSetterToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (beatmapInfo.backgroundPath != null && beatmapInfo.backgroundPath != string.Empty)
+            // BGの画像と、BGの行(座標)の両方が取得できている場合のみBG設定画面を表示する
+            if (!string.IsNullOrEmpty(beatmapInfo.backgroundPath) && !string.IsNullOrEmpty(beatmapInfo.background))
             {
                 BGSetterForm bgSetterForm = new(config,
                                                 beatmapInfo.beatmapPath,
@@ -1569,10 +1651,13 @@ namespace osu_taiko_Mapping_Helper
         {
             if (rdoOnlyBookMark.Checked)
             {
-                // Tabコントロール内のコントロールをすべて無効化
+                // ブックマークのみの場合はオフセットのコントロールを非表示にする
                 chkEnableOffset.Visible = false;
                 txtOffset.Visible = false;
                 lblMiliSecond.Visible = false;
+                chkEnableHexaOffset.Visible = false;
+                label1.Visible = false;
+                chkEnableDuoOffset.Visible = false;
                 rdoOnlyOnNotes.Visible = true;
                 rdoOnlyOffNotes.Visible = true;
                 rdoOnlyOnNotes.Checked = userInputTempData.setObjectOption.isOnBookmarks;
@@ -1584,10 +1669,13 @@ namespace osu_taiko_Mapping_Helper
             }
             else
             {
-                // Tabコントロール内のコントロールを有効化
+                // オフセットのコントロールを表示する
                 chkEnableOffset.Visible = true;
                 txtOffset.Visible = true;
                 lblMiliSecond.Visible = true;
+                chkEnableHexaOffset.Visible = true;
+                label1.Visible = true;
+                chkEnableDuoOffset.Visible = true;
                 rdoOnlyOnNotes.CheckedChanged -= rdoOnlyOnNotes_CheckedChanged;
                 rdoOnlyOffNotes.CheckedChanged -= rdoOnlyOffNotes_CheckedChanged;
             }
@@ -1814,6 +1902,8 @@ namespace osu_taiko_Mapping_Helper
         private void btnApplyTags_Click(object sender, EventArgs e)
         {
             userInputUtilityData.utilityCode = Constants.UTILITY_TAG_EDIT;
+            // 処理対象の譜面を、処理を始めた時点の譜面に固定する
+            SetTargetBeatmap();
             ExecuteUtilityProcess();
         }
         private void cmbMetadataSetting_SelectedIndexChanged(object sender, EventArgs e)
