@@ -62,7 +62,7 @@ namespace osu_taiko_Mapping_Helper.Models
                             if (bgParams.Length >= 4)
                             {
                                 xOffset = int.Parse(bgParams[3]);
-                                yOffset = int.Parse(bgParams[4]);
+                                yOffset = bgParams.Length >= 5 ? int.Parse(bgParams[4]) : 0;
                             }
                         }
                         else
@@ -74,7 +74,7 @@ namespace osu_taiko_Mapping_Helper.Models
                             if (videoParams.Length >= 4)
                             {
                                 xOffset = int.Parse(videoParams[3]);
-                                yOffset = int.Parse(videoParams[4]);
+                                yOffset = videoParams.Length >= 5 ? int.Parse(videoParams[4]) : 0;
                             }
                         }
                         break;

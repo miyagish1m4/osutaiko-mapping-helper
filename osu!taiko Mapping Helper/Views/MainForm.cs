@@ -30,8 +30,18 @@ namespace osu_taiko_Mapping_Helper
         private string songsPath = string.Empty;
         private int currentTime;
         private bool isDirectoryLoaded = false;
+        // 見つけたosu!のプロセス (起動中かどうかの確認に使う)
+        private Process? osuProcess = null;
+        // 次にosu!のプロセスを探す時刻
+        private DateTime nextOsuProcessSearchTime = DateTime.MinValue;
+        // osu!のプロセスを探す間隔(ミリ秒)
+        private const int OSU_PROCESS_SEARCH_INTERVAL = 1000;
         private bool isUpdate = true;
-        private string backupDirectoryName = string.Empty;
+        // バックアップフォルダ名 (機能によらず、.osuのファイル名で統一する)
+        private string backupDirectoryName => Path.GetFileNameWithoutExtension(beatmapInfo.beatmapPath ?? string.Empty);
+        // 処理対象の譜面情報とバックアップフォルダ名 (処理の開始時にSetTargetBeatmapで設定する)
+        private BeatmapMetadata targetBeatmapInfo = new();
+        private string targetBackupDirectoryName = string.Empty;
         private TimingPropertyForm? TimingPropertyForm = null;
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int updateInterval { get; set; } = 15;
@@ -86,20 +96,21 @@ namespace osu_taiko_Mapping_Helper
                 {
                     Thread.Sleep(updateInterval);
                     // osu.exeを探す
-                    var processes = Process.GetProcessesByName("osu!");
-                    if (processes.Length == 0)
+                    Process? process = GetOsuProcess();
+                    if (process == null)
                     {
                         if (isDirectoryLoaded)
                         {
                             beatmapInfo = new();
                         }
                         isDirectoryLoaded = false;
+                        // 前の譜面の情報を表示し続けないよう、TimingPropertyの表示を消す
+                        TimingPropertyForm?.SetOsuData(string.Empty, currentTime);
                         throw new Exception("osu!が起動されていません。");
                     }
                     // osuフォルダ取得処理
                     if (!isDirectoryLoaded)
                     {
-                        Process process = processes[0];
                         string? fileName = process.MainModule?.FileName;
                         osuDirectory = Path.GetDirectoryName(fileName) ?? string.Empty;
                         if (osuDirectory != string.Empty)
@@ -124,19 +135,14 @@ namespace osu_taiko_Mapping_Helper
                     DateTime lastWriteTime = File.GetLastWriteTime(osuBeatmapPath);
 
                     currentTime = baseAddresses.GeneralData.AudioTime;
+                    // TimingPropertyには選択している譜面のパスを渡す (譜面の読み込みはTimingProperty側で行う)
+                    TimingPropertyForm?.SetOsuData(osuBeatmapPath, currentTime);
 
                     // 譜面パスと更新日時が変わっていない場合、.osuのDecodeを行わない
                     // これによりUpdateMemoryDataが短周期で.osuを読み続けることを防ぐ
                     if (beatmapInfo.beatmapPath == osuBeatmapPath &&
                         beatmapInfo.lastUpdate == lastWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fff"))
                     {
-                        try
-                        {
-                            TimingPropertyForm?.SetOsuData(beatmapInfo, currentTime);
-                        }
-                        catch
-                        {
-                        }
                         continue;
                     }
                     // 譜面のデータを取得
@@ -166,14 +172,8 @@ namespace osu_taiko_Mapping_Helper
                                                          baseAddresses.Beatmap.FolderName ?? "",
                                                          beatmapData.EventsSection.BackgroundImage) : "";
                     beatmapInfo.backgroundPath = backgroundPath ?? "";
-                    beatmapInfo.lastUpdate = File.GetLastWriteTime(beatmapInfo.beatmapPath).ToString("yyyy-MM-dd HH:mm:ss.fff");
-                    try
-                    {
-                        TimingPropertyForm?.SetOsuData(beatmapInfo, currentTime);
-                    }
-                    catch
-                    {
-                    }
+                    // 読み込み中に更新された場合に次の周回で読み込み直せるよう、読み込む前に取得した更新日時を使う
+                    beatmapInfo.lastUpdate = lastWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
                     if (beatmapInfo.backgroundPath != "")
                     {
                         if (!BeatmapHelper.GetBackground(ref beatmapInfo))
@@ -193,6 +193,49 @@ namespace osu_taiko_Mapping_Helper
                     Console.WriteLine(ex);
                 }
             }
+        }
+        /// <summary>
+        /// 起動中のosu!のプロセスを取得する
+        /// </summary>
+        /// <returns>osu!のプロセス (起動していない場合はnull)</returns>
+        private Process? GetOsuProcess()
+        {
+            if (osuProcess != null)
+            {
+                try
+                {
+                    if (!osuProcess.HasExited)
+                    {
+                        return osuProcess;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 終了したか確認できない場合は、探し直す
+                    Console.WriteLine(ex);
+                }
+                osuProcess.Dispose();
+                osuProcess = null;
+                // 終了した直後は、すぐに探し直す
+                nextOsuProcessSearchTime = DateTime.MinValue;
+            }
+            if (DateTime.Now < nextOsuProcessSearchTime)
+            {
+                return null;
+            }
+            nextOsuProcessSearchTime = DateTime.Now.AddMilliseconds(OSU_PROCESS_SEARCH_INTERVAL);
+            var processes = Process.GetProcessesByName("osu!");
+            if (processes.Length == 0)
+            {
+                return null;
+            }
+            osuProcess = processes[0];
+            // 使わないプロセスは破棄する
+            foreach (var other in processes.Skip(1))
+            {
+                other.Dispose();
+            }
+            return osuProcess;
         }
         /// <summary>
         /// UpdateMemoryDataで取得したosuのメモリデータを使用し、
@@ -237,18 +280,6 @@ namespace osu_taiko_Mapping_Helper
                                        (beatmapInfo.version == string.Empty ? "" : "]"));
                     preBeatmapInfo.tags = beatmapInfo.tags == null ? [""] : beatmapInfo.tags;
                     txtTags.Text = beatmapInfo.tags == null ? "" : string.Join(" ", beatmapInfo.tags);
-                    // バックアップフォルダ名を設定する
-                    backupDirectoryName = beatmapInfo.artist + " - " +
-                                          beatmapInfo.title + " (" +
-                                          beatmapInfo.creator + ") [" +
-                                          beatmapInfo.version + "]";
-                    try
-                    {
-                        TimingPropertyForm?.GetBeatmap();
-                    }
-                    catch
-                    {
-                    }
                     preBeatmapInfo.version = beatmapInfo.version;
                     preBeatmapInfo.previewTime = beatmapInfo.previewTime;
                     preBeatmapInfo.beatmapPath = beatmapInfo.beatmapPath;
@@ -481,6 +512,19 @@ namespace osu_taiko_Mapping_Helper
                 // 適用
                 case Constants.EXECUTE_APPLY:
                     isSvCalculation = SVCalculatorService.Apply(userInputData, beatmapData, ref timingPoints);
+                    // 計算後のSVが0以下になる緑線(追加する緑線、または変更した範囲内の緑線)がある場合は、譜面を書き換えずに中止する
+                    // (相対速度変化の加算などで0以下になると、緑線の値が-∞や正の値になり譜面が壊れるため)
+                    if (isSvCalculation &&
+                        (timingPoints.Any(tp => !(tp.sv > 0)) ||
+                         beatmapData.timingPoints.Any(tp => !tp.isRedLine &&
+                                                            tp.time >= userInputData.timingFrom &&
+                                                            tp.time <= userInputData.timingTo &&
+                                                            !(tp.sv > 0))))
+                    {
+                        timingPoints.Clear();
+                        Common.ShowMessageDialog("E_V-C-7");
+                        return;
+                    }
                     beatmapData.timingPoints.AddRange(timingPoints);
                     beatmapData.timingPoints = beatmapData.timingPoints.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0).ToList();
                     timingPoints.Clear();
@@ -497,7 +541,7 @@ namespace osu_taiko_Mapping_Helper
                 return;
             }
             // バックアップを作成する
-            if (!BeatmapHelper.CreateBackup(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
+            if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
             {
                 Common.ShowMessageDialog("E_A-P-1");
                 return;
@@ -515,7 +559,7 @@ namespace osu_taiko_Mapping_Helper
             // 内容確認などに使ってね
             //if (!Utils.Helper.Debug.ExportToCsvFile(beatmapData, this.backupDirectoryName))
             // osuファイルに上書きする
-            if (!BeatmapHelper.ExportToOsuFile(beatmapData, this.beatmapInfo.beatmapPath))
+            if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath))
             {
                 // 失敗した場合はエラーダイアログを表示する
                 Common.ShowMessageDialog("E_A-P-1");
@@ -529,7 +573,6 @@ namespace osu_taiko_Mapping_Helper
                 Common.ShowMessageDialog("E_A-P-1");
                 return;
             }
-            TimingPropertyForm?.GetBeatmap();
 #endif
             // 成功した場合はメッセージダイアログを表示する
             Common.ShowMessageDialog("I_A-P-1", Constants.DIALOG_OPTION_MODELESS);
@@ -543,11 +586,11 @@ namespace osu_taiko_Mapping_Helper
         private void ExecuteUtilityProcess()
         {
             // 譜面情報がリアルタイムで取得できていない場合はエラーダイアログを表示する
-            if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
+            if (targetBeatmapInfo.beatmapPath == null || targetBeatmapInfo.beatmapPath == string.Empty)
             {
                 return;
             }
-            string beatmapDirectory = Path.GetDirectoryName(this.beatmapInfo.beatmapPath) ?? string.Empty;
+            string beatmapDirectory = Path.GetDirectoryName(targetBeatmapInfo.beatmapPath) ?? string.Empty;
             string[] beatmapsPath = Directory.GetFiles(beatmapDirectory, "*" + Constants.OSU_EXTENSION, SearchOption.TopDirectoryOnly);
             switch (userInputUtilityData.utilityCode)
             {
@@ -561,7 +604,7 @@ namespace osu_taiko_Mapping_Helper
                     {
                         return;
                     }
-                    switch (BeatmapHelper.ExportToAllOsuFiles(beatmapsPath, userInputUtilityData, beatmapInfo))
+                    switch (BeatmapHelper.ExportToAllOsuFiles(beatmapsPath, userInputUtilityData, targetBeatmapInfo))
                     {
                         case 0:
                             // 正常終了した場合、先の処理を続行
@@ -583,14 +626,15 @@ namespace osu_taiko_Mapping_Helper
                     break;
                 case Constants.UTILITY_TAG_EDIT:
                 case Constants.UTILITY_SETTING_COPIER:
-                    var tags = txtTags.Text.Replace("\n", "");
+                    // タグ内の改行コードを取り除く
+                    userInputUtilityData.tags = txtTags.Text.Replace("\r", string.Empty).Replace("\n", string.Empty);
                     if (string.IsNullOrEmpty(beatmapDirectory) ||
                         (userInputUtilityData.utilityCode == Constants.UTILITY_SETTING_COPIER && beatmapData == null))
                     {
                         return;
                     }
                     var timingPoints = beatmapData?.timingPoints.Where(tp => tp.isRedLine).ToList();
-                    switch (BeatmapHelper.ExportToAllOsuFiles(beatmapsPath, userInputUtilityData, beatmapInfo, timingPoints))
+                    switch (BeatmapHelper.ExportToAllOsuFiles(beatmapsPath, userInputUtilityData, targetBeatmapInfo, timingPoints))
                     {
                         case 0:
                             // 正常終了した場合、先の処理を続行
@@ -618,7 +662,7 @@ namespace osu_taiko_Mapping_Helper
                         return;
                     }
                     // バックアップを作成する
-                    if (!BeatmapHelper.CreateBackup(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
+                    if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
                     {
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
@@ -632,7 +676,7 @@ namespace osu_taiko_Mapping_Helper
                             return;
                         }
                     }
-                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, this.beatmapInfo.beatmapPath, userInputUtilityData))
+                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath, userInputUtilityData))
                     {
                         // 失敗した場合はエラーダイアログを表示する
                         Common.ShowMessageDialog("E_A-P-1");
@@ -656,7 +700,7 @@ namespace osu_taiko_Mapping_Helper
                     userInputUtilityData.finisherKatX = config.finisherKatX;
                     userInputUtilityData.finisherKatY = config.finisherKatY;
                     // バックアップを作成する
-                    if (!BeatmapHelper.CreateBackup(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
+                    if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
                     {
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
@@ -670,7 +714,7 @@ namespace osu_taiko_Mapping_Helper
                             return;
                         }
                     }
-                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, this.beatmapInfo.beatmapPath, userInputUtilityData))
+                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath, userInputUtilityData))
                     {
                         // 失敗した場合はエラーダイアログを表示する
                         Common.ShowMessageDialog("E_A-P-1");
@@ -703,7 +747,7 @@ namespace osu_taiko_Mapping_Helper
                         return;
                     }
                     // バックアップを作成する
-                    if (!BeatmapHelper.CreateBackup(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
+                    if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
                     {
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
@@ -717,20 +761,13 @@ namespace osu_taiko_Mapping_Helper
                             return;
                         }
                     }
-                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, this.beatmapInfo.beatmapPath, userInputUtilityData))
+                    if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath, userInputUtilityData))
                     {
                         // 失敗した場合はエラーダイアログを表示する
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
                     }
                     break;
-            }
-            try
-            {
-                TimingPropertyForm?.GetBeatmap();
-            }
-            catch
-            {
             }
             // 成功した場合はメッセージダイアログを表示する
             Common.ShowMessageDialog("I_A-P-1", Constants.DIALOG_OPTION_MODELESS);
@@ -743,13 +780,15 @@ namespace osu_taiko_Mapping_Helper
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
         private bool GetBeatmap()
         {
+            // 処理対象の譜面を、処理を始めた時点の譜面に固定する
+            SetTargetBeatmap();
             // 譜面情報がリアルタイムで取得できていない場合はエラーダイアログを表示する
-            if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
+            if (targetBeatmapInfo.beatmapPath == null || targetBeatmapInfo.beatmapPath == string.Empty)
             {
                 return false;
             }
             // 譜面の内容を取得する
-            beatmapData = BeatmapHelper.GetBeatmapData(this.beatmapInfo.beatmapPath);
+            beatmapData = BeatmapHelper.GetBeatmapData(targetBeatmapInfo.beatmapPath);
 #if DEBUG
             Utils.Helper.Debug.ExportHitObejcts(beatmapData);
 #endif
@@ -759,6 +798,35 @@ namespace osu_taiko_Mapping_Helper
                 return false;
             }
             return true;
+        }
+        /// <summary>
+        /// 処理対象の譜面情報を設定する
+        /// </summary>
+        /// <remarks>
+        /// beatmapInfoはosu!の監視スレッドが書き換えるため、処理中にosu!で譜面を切り替えても
+        /// 処理を始めた時点の譜面に書き込むよう、処理の開始時にコピーを取る
+        /// </remarks>
+        private void SetTargetBeatmap()
+        {
+            var info = beatmapInfo;
+            targetBeatmapInfo = new BeatmapMetadata
+            {
+                title = info.title,
+                titleUnicode = info.titleUnicode,
+                artist = info.artist,
+                artistUnicode = info.artistUnicode,
+                creator = info.creator,
+                version = info.version,
+                source = info.source,
+                backgroundPath = info.backgroundPath,
+                background = info.background,
+                beatmapPath = info.beatmapPath,
+                previewTime = info.previewTime,
+                tags = info.tags,
+                lastUpdate = info.lastUpdate
+            };
+            // バックアップフォルダ名は、コピーした譜面のパスから求める (パスとずれないようにするため)
+            targetBackupDirectoryName = Path.GetFileNameWithoutExtension(info.beatmapPath ?? string.Empty);
         }
         /// <summary>
         /// 現地点の情報を取得する処理
@@ -963,8 +1031,18 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnBackup_Click(object sender, EventArgs e)
         {
-            // バックアップフォルダをエクスプローラで開く
-            System.Diagnostics.Process.Start("EXPLORER.EXE", Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY);
+            // 選択している譜面のバックアップフォルダがある場合はそのフォルダを、
+            // 無い場合(譜面を選択していない、まだバックアップを作っていない)はバックアップフォルダ全体をエクスプローラで開く
+            string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY;
+            if (!string.IsNullOrEmpty(beatmapInfo.beatmapPath))
+            {
+                string beatmapBackupPath = BeatmapHelper.GetBackupDirectoryPath(backupDirectoryName);
+                if (Directory.Exists(beatmapBackupPath))
+                {
+                    backupPath = beatmapBackupPath;
+                }
+            }
+            System.Diagnostics.Process.Start("EXPLORER.EXE", "\"" + backupPath + "\"");
         }
         private void btnViewSetting_Click(object sender, EventArgs e)
         {
@@ -1049,13 +1127,7 @@ namespace osu_taiko_Mapping_Helper
             {
                 parentForm = this
             };
-            try
-            {
-                TimingPropertyForm.SetOsuData(beatmapInfo, currentTime);
-            }
-            catch
-            {
-            }
+            TimingPropertyForm.SetOsuData(beatmapInfo.beatmapPath, currentTime);
             TimingPropertyForm.Show();
             TimingPropertyForm.Text = "Timing Property";
             if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
@@ -1830,6 +1902,8 @@ namespace osu_taiko_Mapping_Helper
         private void btnApplyTags_Click(object sender, EventArgs e)
         {
             userInputUtilityData.utilityCode = Constants.UTILITY_TAG_EDIT;
+            // 処理対象の譜面を、処理を始めた時点の譜面に固定する
+            SetTargetBeatmap();
             ExecuteUtilityProcess();
         }
         private void cmbMetadataSetting_SelectedIndexChanged(object sender, EventArgs e)

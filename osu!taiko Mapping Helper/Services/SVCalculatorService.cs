@@ -61,11 +61,11 @@ namespace osu_taiko_Mapping_Helper.Services
                 }
                 if (userInputData.isVolume && userInputData.shouldApplyRedlines)
                 {
-                    if (!ApplyVolumeOnTimingPoints(ref timingPointsBuff)) throw new Exception("Failed to apply volume on timing points.");
+                    if (!ApplyVolumeOnTimingPoints()) throw new Exception("Failed to apply volume on timing points.");
                 }
 
-                // ユーザーが指定した範囲外のスライダーの長さの調整
-                if (!AdjustSliderLengthAfterExecute(timingPointsBuff, Constants.EXECUTE_APPLY)) throw new Exception("Failed to adjust slider length.");
+                // SVを変えてもスライダーの長さ(時間)が変わらないよう、スライダーの長さを調整する
+                if (!AdjustSliderLength(timingPointsBuff)) throw new Exception("Failed to adjust slider length.");
 
                 if (!DeleteTimingPoints()) throw new Exception("Failed to delete timing points.");
                 // 処理で取得した緑線を情報を格納する
@@ -231,10 +231,6 @@ namespace osu_taiko_Mapping_Helper.Services
                         double sv = CalculateSv(i, greenLineIndex, svPerMs) *
                             ((userInputData.relativeCode == Constants.RELATIVE_DISABLE && userInputData.isSv) ? (baseBpm / bpm) : 1);
                         int volume = CalculateVolume(i, greenLineIndex, volumePerMs);
-                        if (beatmap.hitObjects[i].noteType == Constants.NoteType.SLIDER)
-                        {
-                            beatmap.hitObjects[i].sliderLength = GetAdjustedSliderLength(i, sv);
-                        }
                         // SVの最適化 必要かな？
                         //if (outTimingPoints.Count != 0 &&
                         //    outTimingPoints[^1].sv == sv &&
@@ -398,9 +394,8 @@ namespace osu_taiko_Mapping_Helper.Services
                 double currentTiming = beatmap.timingPoints.SafeGetIndex(redLineIndex)?.time ?? beatmap.timingPoints[0].time;
                 double baseBpm = beatmap.timingPoints.SafeGetIndex(redLineIndex)?.bpm ?? 120;
                 double beatSnapTiming = Constants.ONE_MINUTE / baseBpm / userInputData.setBeatSnapOption.beatSnap;
-                // timingが指定されたビートスナップ間隔からどれぐらいズレてるか算出する
-                double timingOffset = GetBeatSnapOffset(currentTiming, beatSnapTiming, rawTimingFrom);
-                currentTiming += timingOffset;
+                // 赤線の位置からビートスナップ間隔で進め、始点より前の位置はGetLoopCodeで飛ばす
+                // (始点以降の最初のスナップの位置から緑線を置く)
                 for (int i = 0; i < redLineIndexes.Count; i++)
                 {
                     int loopCode = GetLoopCode(redLineIndexes[i], true, true);
@@ -500,19 +495,9 @@ namespace osu_taiko_Mapping_Helper.Services
                     // 直前の緑線のIndexを探す
                     var greenLineIndex = beatmap.timingPoints.FindLastIndex(tp => tp.time == redLineList[i].time);
                     double sv = userInputData.bpm / redLineList[i].bpm;
-                    int volume = CalculateVolume(i, volumePerMs);
-
-                    var afterGreenLineIndex = beatmap.timingPoints.FindIndex(tp => tp.time > redLineList[i].time);
-                    var hitObjectIndexes = beatmap.hitObjects.Select((ho, index) => new { ho, index }).
-                                                              Where(x => (x.ho.time < (beatmap.timingPoints.SafeGetIndex(afterGreenLineIndex)?.time ?? int.MaxValue)) &&
-                                                                    x.ho.time >= redLineList[i].time).
-                                                              Select(x => x.index).
-                                                              ToList();
-                    foreach (var index in hitObjectIndexes)
-                    {
-                        if (beatmap.hitObjects[index].noteType != Constants.NoteType.SLIDER) continue;
-                        beatmap.hitObjects[index].sliderLength = GetAdjustedSliderLength(index, sv);
-                    }
+                    // 音量は赤線の時刻で求める (iはredLineListのインデックスのため、timingPointsのインデックスとしては使えない)
+                    // 音量を変更しない場合は、その時刻の音量(同じ時刻に緑線がある場合は緑線、無い場合は赤線の音量)になる
+                    int volume = CalculateVolume((double)redLineList[i].time, volumePerMs);
                     outTimingPoints.Add(new TimingPoint
                     {
                         time = redLineList[i].time,
@@ -543,25 +528,23 @@ namespace osu_taiko_Mapping_Helper.Services
         /// <summary>
         /// 赤線音量適用処理
         /// </summary>
-        /// <param name="outTimingPoints">追加する緑線の格納先</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool ApplyVolumeOnTimingPoints(ref List<TimingPoint> outTimingPoints)
+        /// <remarks>
+        /// 範囲内の赤線の音量を、赤線の時刻での音量(始点と終点の音量から計算した値)にする<br/>
+        /// (赤線の位置に緑線が置かれない場合や、赤線より前に緑線が無い場合でも適用できるようにするため)
+        /// </remarks>
+        private static bool ApplyVolumeOnTimingPoints()
         {
             try
             {
+                double volumePerMs = GetVolumePerMs();
                 for (int i = 0; i < beatmap.timingPoints.Count; i++)
                 {
                     if (!beatmap.timingPoints[i].isRedLine) continue;
                     int loopExcuteCode = GetLoopCode(i, true);
                     if (loopExcuteCode == Constants.STATE_CONTINUE) continue;
                     if (loopExcuteCode == Constants.STATE_BREAK) break;
-                    var applyInheritedPoint = outTimingPoints.LastOrDefault(tp => tp.time == beatmap.timingPoints[i].time && !tp.isRedLine);
-                    if (applyInheritedPoint == null)
-                    {
-                        applyInheritedPoint = beatmap.timingPoints.LastOrDefault(tp => tp.time <= beatmap.timingPoints[i].time && !tp.isRedLine);
-                        if (applyInheritedPoint == null) return false;
-                    }
-                    beatmap.timingPoints[i].volume = applyInheritedPoint.volume;
+                    beatmap.timingPoints[i].volume = CalculateVolume((double)beatmap.timingPoints[i].time, volumePerMs);
                 }
                 return true;
             }
@@ -782,15 +765,18 @@ namespace osu_taiko_Mapping_Helper.Services
         /// <returns>オフセットの値</returns>
         private static double GetOffsetTiming(int hitObjectIndex, int redLineIndex)
         {
-            double hexaOffset = Constants.ONE_MINUTE / beatmap.timingPoints[redLineIndex].bpm / Constants.HEXA_SNAP;
-            double duoOffset = Constants.ONE_MINUTE / beatmap.timingPoints[redLineIndex].bpm / Constants.DUO_SNAP;
+            // BPM60000以上の赤線は小節線ギミック用のため、その前の赤線のBPMでオフセットを求める (GetSnapsOnHitObjectsと同じ)
+            double bpm = beatmap.timingPoints.Take(redLineIndex + 1).LastOrDefault(tp => tp.isRedLine && tp.bpm < Constants.ONE_MINUTE)?.bpm ??
+                         beatmap.timingPoints[redLineIndex].bpm;
+            double hexaOffset = Constants.ONE_MINUTE / bpm / Constants.HEXA_SNAP;
+            double duoOffset = Constants.ONE_MINUTE / bpm / Constants.DUO_SNAP;
             HitObject? prevHitObject = beatmap.hitObjects.SafeGetIndex(hitObjectIndex - 1);
             HitObject? nextHitObject = beatmap.hitObjects.SafeGetIndex(hitObjectIndex + 1);
             if (userInputData.isDuoOffset)
             {
                 if (beatmap.hitObjects[hitObjectIndex].snap != Constants.DUO_SNAP)
                 {
-                    double intervalTri = Constants.ONE_MINUTE / beatmap.timingPoints[redLineIndex].bpm / Constants.TRI_SNAP;
+                    double intervalTri = Constants.ONE_MINUTE / bpm / Constants.TRI_SNAP;
 
                     bool isOddAdjacent = (prevHitObject != null && prevHitObject.time >= beatmap.hitObjects[hitObjectIndex].time - intervalTri - Constants.MILLISECOND_TOLERANCE && prevHitObject.snap == Constants.DUO_SNAP)
                                       || (nextHitObject != null && nextHitObject.time <= beatmap.hitObjects[hitObjectIndex].time + intervalTri + Constants.MILLISECOND_TOLERANCE && nextHitObject.snap == Constants.DUO_SNAP);
@@ -892,22 +878,6 @@ namespace osu_taiko_Mapping_Helper.Services
 
         }
         /// <summary>
-        /// 始点からbeatsnapまでのoffsetを求める
-        /// </summary>
-        /// <param name="currentTiming">現在のタイミング</param>
-        /// <param name="beatSnapTiming">beatsnapのタイミング</param>
-        /// <param name="rawTimingFrom">厳密な始点のタイミング</param>
-        /// <returns></returns>
-        private static double GetBeatSnapOffset(double currentTiming, double beatSnapTiming, double rawTimingFrom)
-        {
-            double baseTiming = currentTiming;
-            for (int i = 0; ; i++)
-            {
-                if (currentTiming >= rawTimingFrom) return currentTiming - rawTimingFrom;
-                currentTiming = baseTiming + beatSnapTiming * (i + 1);
-            }
-        }
-        /// <summary>
         /// 緑線設置判定処理
         /// </summary>
         /// <param name="hitObjectIndex">ヒットオブジェクトのインデックス</param>
@@ -960,8 +930,8 @@ namespace osu_taiko_Mapping_Helper.Services
                 {
                     throw new Exception("Failed to remove green lines.");
                 }
-                // ユーザーが指定した範囲外のスライダーの長さの調整
-                if (!AdjustSliderLengthAfterExecute(beatmap.timingPoints, Constants.EXECUTE_REMOVE)) throw new Exception("Failed to adjust slider length.");
+                // 緑線を削除してもスライダーの長さ(時間)が変わらないよう、スライダーの長さを調整する
+                if (!AdjustSliderLength([])) throw new Exception("Failed to adjust slider length.");
                 if (!DeleteTimingPoints()) throw new Exception("Failed to delete timing points.");
                 return true;
             }
@@ -1013,34 +983,32 @@ namespace osu_taiko_Mapping_Helper.Services
             return Constants.STATE_NONE;
         }
         /// <summary>
-        /// ユーザーが指定した範囲より後にあるスライダーの長さ調整をする
+        /// SVを変えてもスライダーの長さ(時間)が変わらないよう、スライダーの長さを調整する
         /// </summary>
-        /// <param name="outTimingPoints">適用された緑線</param>
-        /// <param name="executeCode">実行コード</param>
+        /// <param name="addedTimingPoints">追加する緑線</param>
         /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
-        private static bool AdjustSliderLengthAfterExecute(List<TimingPoint> outTimingPoints, int executeCode)
+        /// <remarks>
+        /// 適用後(削除後)の赤線/緑線で各スライダーのSVを求め、読み込み時の長さとSVから長さを計算し直す<br/>
+        /// (読み込み時の値から計算するため、二重に調整されない。SVが変わらないスライダーの長さは変わらない)
+        /// </remarks>
+        private static bool AdjustSliderLength(List<TimingPoint> addedTimingPoints)
         {
-            // 削除処理をすると上手くスライダーの長さが調整されない
             try
             {
-                // 指定範囲の始点
-                int timingFrom = executeCode == Constants.EXECUTE_APPLY ?
-                                 userInputData.timingTo : userInputData.timingFrom;
-                // 終点の次のタイミングポイント
-                int timingTo = beatmap.timingPoints.FirstOrDefault(tp => tp.time > userInputData.timingTo)?.time ?? int.MaxValue;
-                // 順番を揃える為ソートする
-                outTimingPoints = [.. outTimingPoints.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0)];
+                // 適用後(削除後)の赤線/緑線 (読み込み時と同じく、時間順・同じ時間は赤線が先)
+                List<TimingPoint> timingPoints = [.. beatmap.timingPoints.Where(tp => !tp.isDelete)
+                                                                         .Concat(addedTimingPoints)
+                                                                         .OrderBy(a => a.time)
+                                                                         .ThenByDescending(b => b.isRedLine ? 1 : 0)];
                 for (global::System.Int32 i = 0; i < beatmap.hitObjects.Count; i++)
                 {
-                    // ノーツのタイミングが指定範囲外だった場合は何も処理をしない
-                    if (!beatmap.hitObjects[i].time.IsWithin(timingFrom, timingTo)) continue;
-                    // 直前のTimingPointを探す
-                    var greenLineIndex = outTimingPoints.FindLastIndex(tp => tp.time <= beatmap.hitObjects[i].time);
-                    if (greenLineIndex >= 0 && beatmap.hitObjects[i].noteType == Constants.NoteType.SLIDER)
-                    {
-                        // ノーツがスライダーだった場合、スライダーの長さを調整する
-                        beatmap.hitObjects[i].sliderLength = GetAdjustedSliderLength(i, outTimingPoints[greenLineIndex].sv);
-                    }
+                    if (beatmap.hitObjects[i].noteType != Constants.NoteType.SLIDER) continue;
+                    // 直前のタイミングポイントを探す
+                    var timingPoint = timingPoints.LastOrDefault(tp => tp.time <= beatmap.hitObjects[i].time);
+                    if (timingPoint == null) continue;
+                    // 読み込み時と同じく、同じ時間に緑線がある場合は緑線のSV、赤線のみの場合は1.0とする
+                    double sv = timingPoints.FirstOrDefault(tp => tp.time == timingPoint.time && !tp.isRedLine)?.sv ?? 1.0;
+                    beatmap.hitObjects[i].sliderLength = GetAdjustedSliderLength(i, sv);
                 }
                 return true;
             }

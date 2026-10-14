@@ -1,6 +1,5 @@
 using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
-using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -95,6 +94,48 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                                    coloursList,
                                    hitObjectList,
                                    bookmarkList);
+            }
+        }
+        /// <summary>
+        /// beatmapのTimingPointsとDifficultyだけを取得する (TimingProperty用)
+        /// </summary>
+        /// <param name="path">beatmapのパス</param>
+        /// <returns>TimingPointsとDifficultyだけを格納した譜面情報 (取得に失敗した場合はnull)</returns>
+        internal static Beatmap? GetTimingPointsData(string path)
+        {
+            try
+            {
+                var lines = Common.ReadAllLinesShared(path);
+                var beatmap = new Beatmap();
+                string section = string.Empty;
+                foreach (var line in lines)
+                {
+                    var trimmedLine = line.Trim();
+                    // セクションの見出しで、今どのセクションの中かを切り替える
+                    if (trimmedLine.StartsWith('[') && trimmedLine.EndsWith(']'))
+                    {
+                        section = trimmedLine;
+                        continue;
+                    }
+                    if (trimmedLine == "" || trimmedLine.StartsWith("//"))
+                    {
+                        continue;
+                    }
+                    if (section == Constants.TIMING_POINTS)
+                    {
+                        beatmap.timingPoints.Add(new TimingPoint(trimmedLine));
+                    }
+                    else if (section == Constants.DIFFICULTY)
+                    {
+                        beatmap.difficulty.Add(trimmedLine);
+                    }
+                }
+                return beatmap;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
             }
         }
         /// <summary>
@@ -292,7 +333,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     else
                     {
                         // ある場合はオブジェクトコードにBookmarkを追加
-                        hitObjectOnBookmark.hitObjectCode += 0x00000800;
+                        hitObjectOnBookmark.hitObjectCode |= 0x00000800;
                     }
                 }
                 foreach (var hitObject in hitObjectList)
@@ -302,13 +343,13 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     {
                         // オブジェクトコードにbookmarkがない場合は
                         // オブジェクトコードにbookmark以外を追加
-                        hitObject.hitObjectCode += unchecked((int)0x00000400);
+                        hitObject.hitObjectCode |= unchecked((int)0x00000400);
                     }
                     if ((hitObject.hitObjectCode & 0x00000200) == 0)
                     {
                         // オブジェクトコードに小節線がない場合は
                         // オブジェクトコードに小節線以外を追加
-                        hitObject.hitObjectCode += 0x00000100;
+                        hitObject.hitObjectCode |= 0x00000100;
                     }
                 }
                 hitObjectList.AddRange(tempHitObjects);
@@ -329,9 +370,10 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     timingPointList = [.. timingPointList.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0)];
                     return true;
                 }
-                // 最終ノーツを取る(これ以上は見ない)
+                // 最終ノーツと最後の赤線の遅い方まで小節線を算出する(これ以上は見ない)
+                // (最終ノーツより後ろの赤線にも小節線を置き、赤線の区切りとして使えるようにする)
                 HitObject lastHitObject = hitObjectList.Last();
-                double limit = lastHitObject.time + 1;
+                double limit = Math.Max(lastHitObject.time, uninheritedTimingPointList.Last().time) + 1;
                 int j = 0;
                 double t = uninheritedTimingPointList[0].time
                     - Math.Truncate(uninheritedTimingPointList[0].time / uninheritedTimingPointList[0].barLength) * uninheritedTimingPointList[0].barLength;
@@ -363,8 +405,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     {
                         lazerTiming = (int)Math.Floor(t);
                     }
-                    // omitされている小節線以外を算出
-                    if (!(t <= uninheritedTimingPointList[j].time &&
+                    // 小節線を算出
+                    if (!(t < uninheritedTimingPointList[j].time - 1e-7 &&
                         (uninheritedTimingPointList[j].effect & 8) > 0))
                     {
                         var hitObjectOnBarLine = hitObjectList.FirstOrDefault(h => h.time == (lazerTiming != stableTiming ? lazerTiming : stableTiming));
@@ -375,7 +417,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         } else
                         {
                             // オブジェクトコードに小節線を追加
-                            hitObjectOnBarLine.hitObjectCode += unchecked((int)0x00000200);
+                            hitObjectOnBarLine.hitObjectCode |= unchecked((int)0x00000200);
                             if (lazerTiming != stableTiming)
                             {
                                 hitObjectOnBarLine.isSeparateBarline = true;
@@ -473,7 +515,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             try
             {
                 // 赤線リストの取得
-                var timingPoints = beatmap.timingPoints.Where(tp => tp.isRedLine).ToList();
+                // (BPM60000以上の赤線は小節線ギミック用のため、スナップの基準にしない)
+                var timingPoints = beatmap.timingPoints.Where(tp => tp.isRedLine && tp.bpm < Constants.ONE_MINUTE).ToList();
                 // タイミングポイントでループする
                 for (int i = 0, hoIndex = 0; i < timingPoints.Count; i++)
                 {
@@ -575,7 +618,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         /// <summary>
         /// バックアップフォルダのパスを取得する
         /// </summary>
-        /// <param name="backupDirectoryName">バックアップフォルダ名(譜面の情報から作成した名前)</param>
+        /// <param name="backupDirectoryName">バックアップフォルダ名(.osuのファイル名)</param>
         /// <returns>バックアップフォルダのパス</returns>
         /// <remarks>
         /// フォルダ名に使えない記号は空白に置き換える
@@ -587,22 +630,21 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             return Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + escapedBackupDirectoryName;
         }
         /// <summary>
-        /// バックアップのファイル名(yyyy_MM_dd_HH_mm_ss_fff.osu)から作成日時を取得する
+        /// バックアップフォルダ内のバックアップファイルを新しい順に取得する
         /// </summary>
-        /// <param name="path">バックアップファイルのパス</param>
-        /// <returns>
-        /// ファイル名がバックアップの形式の場合 : 作成日時<br/>
-        /// ファイル名がバックアップの形式ではない場合(手動でコピーしたファイルなど) : null</returns>
+        /// <param name="backupPath">バックアップフォルダのパス</param>
+        /// <returns>バックアップファイルのパス(新しい順)</returns>
         /// <remarks>
-        /// CreateBackupはOSの地域設定の暦でファイル名を作成するため、同じ地域設定で読み取る
+        /// ファイル名がバックアップの形式(yyyy_MM_dd_HH_mm_ss_fff.osu)ではないファイル(手動でコピーしたファイルなど)は対象にしない<br/>
+        /// 以前のバージョンはOSの地域設定の暦でファイル名を作成していた(タイ語の設定では仏暦)ため、新しい順はファイル名ではなく更新日時で決める
         /// </remarks>
-        internal static DateTime? GetBackupDate(string path)
+        internal static List<string> GetBackupFiles(string backupPath)
         {
-            return DateTime.TryParseExact(Path.GetFileNameWithoutExtension(path),
-                                          "yyyy_MM_dd_HH_mm_ss_fff",
-                                          CultureInfo.CurrentCulture,
-                                          DateTimeStyles.None,
-                                          out DateTime date) ? date : null;
+            return [.. Directory.GetFiles(backupPath, "*" + Constants.OSU_EXTENSION)
+                                .Where(file => Regex.IsMatch(Path.GetFileNameWithoutExtension(file),
+                                                             "^[0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{2}_[0-9]{2}_[0-9]{2}_[0-9]{3}$"))
+                                .OrderByDescending(File.GetLastWriteTime)
+                                .ThenByDescending(file => file)];
         }
         /// <summary>
         /// osuファイルを作成する (SVEditor,Utility)
@@ -617,18 +659,18 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             return Path.Combine(directory, $".{fileName}.{Guid.NewGuid():N}.tmp");
         }
         /// <summary>
-        /// 指定された一時ファイルパスから一時ディレクトリを取得し、存在する場合はディレクトリごと削除します
+        /// 指定された一時ファイルを削除します
         /// </summary>
         /// <param name="tempPath">削除対象の一時ファイルパス</param>
         /// <remarks>
-        /// 削除中に発生した例外は無視されます。
+        /// 削除中に発生した例外は無視されます。<br/>
+        /// 同時に起動している別のHelperの一時ファイルを消さないよう、一時ディレクトリごとは削除しません。
         /// </remarks>
         private static void DeleteTemporaryFile(string tempPath)
         {
             try
             {
-                var tempDirectory = Path.GetDirectoryName(tempPath);
-                if (Directory.Exists(tempDirectory)) Directory.Delete(tempDirectory, true);
+                if (File.Exists(tempPath)) File.Delete(tempPath);
             }
             catch
             {
@@ -1502,13 +1544,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     return false;
                 }
                 // 最後の実行で作成されたバックアップファイルを探す
-                // (ファイル名がバックアップの形式ではないファイルは対象にしない)
-                string? targetFile = Directory.GetFiles(backupPath, "*" + Constants.OSU_EXTENSION)
-                                              .Select(file => (file, date: GetBackupDate(file)))
-                                              .Where(x => x.date != null && x.date <= DateTime.Now)
-                                              .OrderByDescending(x => x.date)
-                                              .Select(x => x.file)
-                                              .FirstOrDefault();
+                string? targetFile = GetBackupFiles(backupPath).FirstOrDefault();
                 // バックアップファイルが見つからない場合はfalseで返す
                 if (targetFile == null)
                 {
@@ -1618,11 +1654,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 // 手前のTimingPointを算出する
                 var applyTimingPoint = timingPoints.LastOrDefault(tp => (tp.time <= timing) && tp.isRedLine) ?? throw new Exception();
                 // それぞれのノーツ間隔を算出する
-                snapPerMs[0] = 60 / applyTimingPoint.bpm / 16;
-                snapPerMs[1] = 60 / applyTimingPoint.bpm / 12;
-                snapPerMs[2] = 60 / applyTimingPoint.bpm / 9;
-                snapPerMs[3] = 60 / applyTimingPoint.bpm / 7;
-                snapPerMs[4] = 60 / applyTimingPoint.bpm / 5;
+                snapPerMs[0] = Constants.ONE_MINUTE / applyTimingPoint.bpm / 16;
+                snapPerMs[1] = Constants.ONE_MINUTE / applyTimingPoint.bpm / 12;
+                snapPerMs[2] = Constants.ONE_MINUTE / applyTimingPoint.bpm / 9;
+                snapPerMs[3] = Constants.ONE_MINUTE / applyTimingPoint.bpm / 7;
+                snapPerMs[4] = Constants.ONE_MINUTE / applyTimingPoint.bpm / 5;
 
                 // 細かいスナップ間隔から指定されたタイミングの正確なタイミングを算出する
                 foreach (var snap in snapPerMs)

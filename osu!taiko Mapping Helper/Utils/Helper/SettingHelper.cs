@@ -178,16 +178,9 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 // バックアップを作成した譜面の数分ループ
                 for (global::System.Int32 i = 0; i < songPath.Length; i++)
                 {
-                    // バックアップフォルダ内にあるバックアップファイルを新しい順に取得する
-                    // (ファイル名がバックアップの形式ではないファイルは、バックアップとして数えない・削除しない)
-                    var backupFiles = Directory.GetFiles(songPath[i], "*" + Constants.OSU_EXTENSION)
-                                               .Select(file => (file, date: BeatmapHelper.GetBackupDate(file)))
-                                               .Where(x => x.date != null)
-                                               .OrderByDescending(x => x.date)
-                                               .Select(x => x.file)
-                                               .ToList();
                     // バックアップの最大保持数分新しいファイルのみ残す
-                    foreach (var file in backupFiles.Skip(config.maxBackupCount))
+                    // (ファイル名がバックアップの形式ではないファイルは、バックアップとして数えない・削除しない)
+                    foreach (var file in BeatmapHelper.GetBackupFiles(songPath[i]).Skip(config.maxBackupCount))
                     {
                         File.Delete(file);
                     }

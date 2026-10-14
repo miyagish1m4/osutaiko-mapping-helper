@@ -48,7 +48,13 @@ namespace osu_taiko_Mapping_Helper.Views
         /// <param name="background">背景画像設定文字列</param>
         private void InitializeBG(string background)
         {
-            backgrounds = background.Split(',', 5);
+            // 座標が省略されている場合(0,0の場合は省略できる)は0,0として扱う
+            List<string> backgroundParams = [.. background.Split(',', 5)];
+            while (backgroundParams.Count < 5)
+            {
+                backgroundParams.Add("0");
+            }
+            backgrounds = [.. backgroundParams];
             // 背景画像を表示する
             picDisplayBg.Image = BGHelper.SetBgOnForm(backgroundPath,
                                                       new Point(INITIAL_SIZE.Width, INITIAL_SIZE.Height),
