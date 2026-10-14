@@ -171,8 +171,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 if (lines.Length <= 0) throw new Exception("Failed to get beatmap");
                 foreach (var line in lines)
                 {
-                    // 空白行は何もしない
-                    if (line == "")
+                    // 空白行(空白だけの行も含む)は何もしない
+                    if (string.IsNullOrWhiteSpace(line))
                     {
                         continue;
                     }
@@ -720,7 +720,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 file.WriteLine(Constants.GENERAL);
                 foreach (var line in beatmap.general)
                 {
-                    if (line.Contains(Constants.PREVIEW) && userInputUtilityData != null)
+                    if (line.StartsWith(Constants.PREVIEW.TrimEnd()) && userInputUtilityData != null)
                     {
                         if (userInputUtilityData?.utilityCode == Constants.UTILITY_SETTING_COPIER &&
                             userInputUtilityData?.settingCopierCode == Constants.SETTING_COPIER_PREVIEW)
@@ -750,18 +750,21 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 {
                     if (edit.StartsWith(Constants.BOOKMARKS) && userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET)
                     {
-                        string retBookmarkLine = Constants.BOOKMARKS + ": ";
-                        var bookmarks = edit.Substring(11).Split(',');
-                        for (int i = 0; i < bookmarks.Length; i++)
+                        // ":"の後ろを値として取得する
+                        var bookmarks = edit[(edit.IndexOf(':') + 1)..].Split(',')
+                                                                       .Select(bookmark => bookmark.Trim())
+                                                                       .Where(bookmark => bookmark != string.Empty)
+                                                                       .ToList();
+                        if (bookmarks.Count == 0)
                         {
-                            var retBookmark = (int.Parse(bookmarks[i]) + userInputUtilityData.offset).ToString();
-                            retBookmarkLine += retBookmark;
-                            if (i < bookmarks.Length - 1)
-                            {
-                                retBookmarkLine += ",";
-                            }
+                            // ブックマークが無い場合はそのまま出力する
+                            file.WriteLine(edit);
                         }
-                        file.WriteLine(retBookmarkLine);
+                        else
+                        {
+                            file.WriteLine(Constants.BOOKMARKS + ": " +
+                                           string.Join(",", bookmarks.Select(bookmark => int.Parse(bookmark) + userInputUtilityData.offset)));
+                        }
                     }
                     else
                     {
@@ -773,7 +776,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 for (int i = 0; i < beatmap.metadata.Count; i++)
                 {
                     // タグ編集ユーティリティが選択されている場合は入力されているタグを上書きする
-                    if (beatmap.metadata[i].Contains(Constants.TAGS) && userInputUtilityData?.utilityCode == Constants.UTILITY_TAG_EDIT)
+                    if (beatmap.metadata[i].StartsWith(Constants.TAGS) && userInputUtilityData?.utilityCode == Constants.UTILITY_TAG_EDIT)
                     {
                         file.WriteLine(Constants.TAGS + userInputUtilityData?.tags);
                     }
@@ -781,27 +784,27 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     else if (userInputUtilityData?.utilityCode == Constants.UTILITY_SETTING_COPIER &&
                              userInputUtilityData?.settingCopierCode == Constants.SETTING_COPIER_METADATA)
                     {
-                        if (beatmap.metadata[i].Contains(Constants.TITLE))
+                        if (beatmap.metadata[i].StartsWith(Constants.TITLE))
                         {
                             file.WriteLine(Constants.TITLE + beatmapInfo?.title);
                         }
-                        else if (beatmap.metadata[i].Contains(Constants.TITLE_UNICODE))
+                        else if (beatmap.metadata[i].StartsWith(Constants.TITLE_UNICODE))
                         {
                             file.WriteLine(Constants.TITLE_UNICODE + beatmapInfo?.titleUnicode);
                         }
-                        else if (beatmap.metadata[i].Contains(Constants.ARTIST))
+                        else if (beatmap.metadata[i].StartsWith(Constants.ARTIST))
                         {
                             file.WriteLine(Constants.ARTIST + beatmapInfo?.artist);
                         }
-                        else if (beatmap.metadata[i].Contains(Constants.ARTIST_UNICODE))
+                        else if (beatmap.metadata[i].StartsWith(Constants.ARTIST_UNICODE))
                         {
                             file.WriteLine(Constants.ARTIST_UNICODE + beatmapInfo?.artistUnicode);
                         }
-                        else if (beatmap.metadata[i].Contains(Constants.CREATOR))
+                        else if (beatmap.metadata[i].StartsWith(Constants.CREATOR))
                         {
                             file.WriteLine(Constants.CREATOR + beatmapInfo?.creator);
                         }
-                        else if (beatmap.metadata[i].Contains(Constants.SOURCE))
+                        else if (beatmap.metadata[i].StartsWith(Constants.SOURCE))
                         {
                             file.WriteLine(Constants.SOURCE + beatmapInfo?.source);
                         }
@@ -854,6 +857,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         // beatLengthが整数だった場合は"0"と"."を削除する
                         beatLength = beatLength.TrimEnd('0');
                         beatLength = beatLength.TrimEnd('.');
+                    }
+                    // 極端に小さいbeatLengthの赤線は、計算し直すと0になってしまうため、元の値のまま出力する
+                    if (timingPoint.isRedLine && beatLength == "0" && timingPoint.rawBeatLength != null)
+                    {
+                        beatLength = timingPoint.rawBeatLength;
                     }
                     int time = userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET ?
                                (timingPoint.time + userInputUtilityData.offset) : timingPoint.time;
@@ -1267,6 +1275,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         // beatLengthが整数だった場合は"0"と"."を削除する
                         beatLength = beatLength.TrimEnd('0');
                         beatLength = beatLength.TrimEnd('.');
+                    }
+                    // 極端に小さいbeatLengthの赤線は、計算し直すと0になってしまうため、元の値のまま出力する
+                    if (timingPoint.isRedLine && beatLength == "0" && timingPoint.rawBeatLength != null)
+                    {
+                        beatLength = timingPoint.rawBeatLength;
                     }
                     string timingPointLine = timingPoint.time + "," +
                                              beatLength + "," +

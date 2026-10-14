@@ -117,7 +117,7 @@ namespace osu_taiko_Mapping_Helper
                         {
                             if (!Directory.Exists(osuDirectory))
                             {
-                                return;
+                                continue;
                             }
                             songsPath = Common.GetSongsFolderLocation(osuDirectory);
                             isDirectoryLoaded = !isDirectoryLoaded;
