@@ -42,6 +42,7 @@ namespace osu_taiko_Mapping_Helper
             txtVolumeTo = new TextBox();
             lblTiming = new Label();
             chkEnableSv = new CheckBox();
+            chkSvBpm = new CheckBox();
             rdoArithmetic = new RadioButton();
             rdoGeometric = new RadioButton();
             chkEnableVolume = new CheckBox();
@@ -305,6 +306,19 @@ namespace osu_taiko_Mapping_Helper
             chkEnableSv.Text = "SV";
             chkEnableSv.UseVisualStyleBackColor = true;
             chkEnableSv.CheckedChanged += chkEnableSv_CheckedChanged;
+            // 
+            // chkSvBpm
+            // 
+            chkSvBpm.Font = new Font("Yu Gothic UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            chkSvBpm.ForeColor = Color.White;
+            chkSvBpm.Location = new Point(9, 87);
+            chkSvBpm.Name = "chkSvBpm";
+            chkSvBpm.Size = new Size(80, 21);
+            chkSvBpm.TabIndex = 43;
+            chkSvBpm.TabStop = false;
+            chkSvBpm.Text = "BPMÇ≈éwíË";
+            chkSvBpm.UseVisualStyleBackColor = true;
+            chkSvBpm.CheckedChanged += chkSvBpm_CheckedChanged;
             // 
             // rdoArithmetic
             // 
@@ -1307,6 +1321,7 @@ namespace osu_taiko_Mapping_Helper
             pnlGroupSvEditor.Controls.Add(pnlCalcurationTypeGroup);
             pnlGroupSvEditor.Controls.Add(chkEnableVolume);
             pnlGroupSvEditor.Controls.Add(chkEnableSv);
+            pnlGroupSvEditor.Controls.Add(chkSvBpm);
             pnlGroupSvEditor.Controls.Add(lblTiming);
             pnlGroupSvEditor.Controls.Add(txtVolumeTo);
             pnlGroupSvEditor.Controls.Add(txtVolumeFrom);
@@ -1330,7 +1345,7 @@ namespace osu_taiko_Mapping_Helper
             chkApplyRedLines.ImageAlign = ContentAlignment.TopLeft;
             chkApplyRedLines.Location = new Point(9, 140);
             chkApplyRedLines.Name = "chkApplyRedLines";
-            chkApplyRedLines.Size = new Size(79, 39);
+            chkApplyRedLines.Size = new Size(79, 49);
             chkApplyRedLines.TabIndex = 20;
             chkApplyRedLines.TabStop = false;
             chkApplyRedLines.Text = "ê‘ê¸Ç…VolumeÇìKóp";
@@ -1813,6 +1828,7 @@ namespace osu_taiko_Mapping_Helper
         private TextBox txtVolumeTo;
         private Label lblTiming;
         private CheckBox chkEnableSv;
+        private CheckBox chkSvBpm;
         private RadioButton rdoArithmetic;
         private RadioButton rdoGeometric;
         private CheckBox chkEnableVolume;

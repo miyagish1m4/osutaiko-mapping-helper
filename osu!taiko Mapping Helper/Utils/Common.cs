@@ -192,6 +192,12 @@ namespace osu_taiko_Mapping_Helper.Utils
         /// <param name="isOptional">オプションコード</param>
         internal static bool ShowMessageDialog(string messageCode, int isOptional = 0, params object[] formatArgs)
         {
+            // テスト中はダイアログを表示せず、表示しようとしたメッセージコードを記録する
+            if (isTestMode)
+            {
+                testMessageCodes.Add(messageCode);
+                return testDialogResult;
+            }
             bool isModeless = (isOptional & Constants.DIALOG_OPTION_MODELESS) != 0;
             MessageBoxButtons messageBoxButton = GetMessageBoxButtons(isOptional);
             if (isModeless)
@@ -223,6 +229,14 @@ namespace osu_taiko_Mapping_Helper.Utils
 
             return MessageBoxButtons.OK;
         }
+        #region テスト用
+        // テスト中かどうか (trueの場合はShowMessageDialogでダイアログを表示しない)
+        internal static bool isTestMode = false;
+        // テスト中に表示しようとしたメッセージコード
+        internal static List<string> testMessageCodes = [];
+        // テスト中のダイアログの戻り値 (OK・キャンセルのダイアログでOKを押した場合はtrue)
+        internal static bool testDialogResult = true;
+        #endregion
         /// <summary>
         /// ダイアログメッセージ設定処理
         /// </summary>

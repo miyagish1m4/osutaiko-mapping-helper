@@ -43,48 +43,51 @@ namespace osu_taiko_Mapping_Helper.Models
                 isComment = true;
                 return;
             }
-            // イベントコードが2以上の場合はStoryboardとみなす
-            if (eventCode >= 2)
+            // ストーリーボードの命令の行(先頭が" "か"_")は、動画などの下にあっても書き出し時にそのまま出力するよう、コメントと同じく元の行のまま扱う
+            if (line.StartsWith(' ') || line.StartsWith('_'))
             {
-                layer = line;
+                isComment = true;
+                return;
             }
-            else
+            // 行の種類は、見出しのコメントではなく行の先頭の値で判定する
+            var parameters = line.Split(',');
+            switch (parameters[0].Trim())
             {
-                switch (eventCode)
-                {
-                    case 0:
-                        string eventType = line.Split(',')[0];
-                        if (eventType == "0")
-                        {
-                            var bgParams = line.Split(',');
-                            startTime = int.Parse(bgParams[1]);
-                            fileName = bgParams[2];
-                            if (bgParams.Length >= 4)
-                            {
-                                xOffset = int.Parse(bgParams[3]);
-                                yOffset = bgParams.Length >= 5 ? int.Parse(bgParams[4]) : 0;
-                            }
-                        }
-                        else
-                        {
-                            isVideo = true;
-                            var videoParams = line.Split(',');
-                            startTime = int.Parse(videoParams[1]);
-                            fileName = videoParams[2];
-                            if (videoParams.Length >= 4)
-                            {
-                                xOffset = int.Parse(videoParams[3]);
-                                yOffset = videoParams.Length >= 5 ? int.Parse(videoParams[4]) : 0;
-                            }
-                        }
-                        break;
-                    case 1:
-                        var breakParams = line.Split(',');
-                        startTime = int.Parse(breakParams[1]);
-                        endTime = int.Parse(breakParams[2]);
-                        break;
-                }
-
+                case "0":
+                    // BG
+                    this.eventCode = Constants.BG_AND_VIDEO_CODE;
+                    startTime = int.Parse(parameters[1]);
+                    fileName = parameters[2];
+                    if (parameters.Length >= 4)
+                    {
+                        xOffset = int.Parse(parameters[3]);
+                        yOffset = parameters.Length >= 5 ? int.Parse(parameters[4]) : 0;
+                    }
+                    break;
+                case "1":
+                case "Video":
+                    // 動画
+                    this.eventCode = Constants.BG_AND_VIDEO_CODE;
+                    isVideo = true;
+                    startTime = int.Parse(parameters[1]);
+                    fileName = parameters[2];
+                    if (parameters.Length >= 4)
+                    {
+                        xOffset = int.Parse(parameters[3]);
+                        yOffset = parameters.Length >= 5 ? int.Parse(parameters[4]) : 0;
+                    }
+                    break;
+                case "2":
+                case "Break":
+                    // 休憩
+                    this.eventCode = Constants.BREAK_PERIODS_CODE;
+                    startTime = int.Parse(parameters[1]);
+                    endTime = int.Parse(parameters[2]);
+                    break;
+                default:
+                    // それ以外(ストーリーボードのオブジェクトなど)は、書き出し時にそのまま出力するよう、コメントと同じく元の行のまま扱う
+                    isComment = true;
+                    break;
             }
         }
     }

@@ -345,11 +345,19 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         // オブジェクトコードにbookmark以外を追加
                         hitObject.hitObjectCode |= unchecked((int)0x00000400);
                     }
-                    if ((hitObject.hitObjectCode & 0x00000200) == 0)
+                }
+                // 小節線以外の印を付ける対象
+                List<HitObject> offBarlineTargets = [.. hitObjectList];
+                void AddOffBarlineCode()
+                {
+                    foreach (var hitObject in offBarlineTargets)
                     {
-                        // オブジェクトコードに小節線がない場合は
-                        // オブジェクトコードに小節線以外を追加
-                        hitObject.hitObjectCode |= 0x00000100;
+                        if ((hitObject.hitObjectCode & 0x00000200) == 0)
+                        {
+                            // オブジェクトコードに小節線がない場合は
+                            // オブジェクトコードに小節線以外を追加
+                            hitObject.hitObjectCode |= 0x00000100;
+                        }
                     }
                 }
                 hitObjectList.AddRange(tempHitObjects);
@@ -367,6 +375,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 // ノーツが無い、または赤線が無い場合は小節線を算出できないため、ソートだけして終了する
                 if (hitObjectList.Count == 0 || uninheritedTimingPointList.Count == 0)
                 {
+                    AddOffBarlineCode();
                     timingPointList = [.. timingPointList.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0)];
                     return true;
                 }
@@ -433,6 +442,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         t = uninheritedTimingPointList[j].time;
                     }
                 }
+                AddOffBarlineCode();
                 // ソートする
                 timingPointList = [.. timingPointList.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0)];
                 hitObjectList = [.. hitObjectList.OrderBy(a => a.time)];
@@ -912,10 +922,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
             catch (Exception ex)
             {
-                DeleteTemporaryFile(tempPath);
                 Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
                 Common.WriteExceptionMessage(ex);
-                return false;
             }
             finally
             {
@@ -924,6 +932,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     file.Close();
                 }
             }
+            // 書き込みに失敗した場合は、一時ファイルを閉じてから消す
             if (!isWriteCompleted)
             {
                 DeleteTemporaryFile(tempPath);
@@ -1314,10 +1323,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
             catch (Exception ex)
             {
-                DeleteTemporaryFile(tempPath);
                 Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
                 Common.WriteExceptionMessage(ex);
-                return false;
             }
             finally
             {
@@ -1326,6 +1333,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     file.Close();
                 }
             }
+            // 書き込みに失敗した場合は、一時ファイルを閉じてから消す
             if (!isWriteCompleted)
             {
                 DeleteTemporaryFile(tempPath);
@@ -1583,31 +1591,26 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         {
             try
             {
-                int bgAndVideoSectionIndex = -1;
-                int storyboardSectionIndex = -1;
+                // BGの行は、見出しのコメントではなく行の先頭の値("0")で探す
+                bool isEvents = false;
                 var lines = Common.ReadAllLinesShared(beatmapInfo.beatmapPath);
-                for (global::System.Int32 i = 0; i < lines.Length; i++)
+                foreach (var line in lines)
                 {
-                    if (lines[i] == Constants.BG_AND_VIDEO)
+                    var trimmedLine = line.Trim();
+                    if (trimmedLine.StartsWith('[') && trimmedLine.EndsWith(']'))
                     {
-                        bgAndVideoSectionIndex = i;
+                        isEvents = trimmedLine == Constants.EVENTS;
                         continue;
                     }
-                    if (lines[i] == Constants.STORYBOARD_LAYER_0)
-                    {
-                        storyboardSectionIndex = i;
-                        continue;
-                    }
-                    if (bgAndVideoSectionIndex != -1 &&
-                        storyboardSectionIndex == -1 &&
+                    if (isEvents &&
+                        line.Split(',')[0].Trim() == "0" &&
                         // 拡張子は大文字の場合もあるため (BG.JPG など)、大文字小文字を区別せずに判定する
-                        (lines[i].Contains(Constants.JPG_EXTENSION, StringComparison.OrdinalIgnoreCase) ||
-                         lines[i].Contains(Constants.JPEG_EXTENSION, StringComparison.OrdinalIgnoreCase) ||
-                         lines[i].Contains(Constants.PNG_EXTENSION, StringComparison.OrdinalIgnoreCase) ||
-                         lines[i].Contains(Constants.WEBP_EXTENSION, StringComparison.OrdinalIgnoreCase)))
+                        (line.Contains(Constants.JPG_EXTENSION, StringComparison.OrdinalIgnoreCase) ||
+                         line.Contains(Constants.JPEG_EXTENSION, StringComparison.OrdinalIgnoreCase) ||
+                         line.Contains(Constants.PNG_EXTENSION, StringComparison.OrdinalIgnoreCase) ||
+                         line.Contains(Constants.WEBP_EXTENSION, StringComparison.OrdinalIgnoreCase)))
                     {
-                        beatmapInfo.background = lines[i];
-                        i++;
+                        beatmapInfo.background = line;
                         return true;
                     }
                 }
@@ -1643,6 +1646,24 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 return 0;
             }
             return int.TryParse(modeLine[Constants.MODE.Length..].Trim(), out int mode) ? mode : null;
+        }
+        /// <summary>
+        /// 譜面のSliderMultiplierを取得する
+        /// </summary>
+        /// <param name="beatmap">譜面情報</param>
+        /// <returns>
+        /// Difficultyセクションに正の値がある場合 : SliderMultiplierの値<br/>
+        /// 行が無い・値が読めない場合 : null</returns>
+        internal static double? GetSliderMultiplier(Beatmap beatmap)
+        {
+            var line = beatmap.difficulty.FirstOrDefault(line => line.StartsWith(Constants.SLIDER_MULTIPLIER));
+            if (line == null ||
+                !double.TryParse(line[Constants.SLIDER_MULTIPLIER.Length..].Trim(), out double sliderMultiplier) ||
+                sliderMultiplier <= 0)
+            {
+                return null;
+            }
+            return sliderMultiplier;
         }
         /// <summary>
         /// osu側で丸められたTimingの正確な値を算出する

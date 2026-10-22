@@ -19,6 +19,9 @@ namespace osu_taiko_Mapping_Helper.Views
         private Beatmap? beatmapData;
         private int retY = 0;
         private int offsetY = 0;
+        // BGのy座標を動かせる範囲 (Mapset Verifierの警告(CheckBgOffsetIssues)が出ない範囲)
+        private int minY = int.MinValue;
+        private int maxY = int.MaxValue;
         #endregion
         #region メソッド
         /// <summary>
@@ -69,6 +72,35 @@ namespace osu_taiko_Mapping_Helper.Views
             // osuで設定されている初期位置を表示する
             retY = int.Parse(backgrounds[4]);
             lblCurrentPosY.Text = "y : " + retY;
+            // y座標を動かせる範囲を設定する
+            SetOffsetLimits(backgroundPath);
+        }
+        /// <summary>
+        /// BGのy座標を動かせる範囲を設定する
+        /// </summary>
+        /// <param name="path">BG画像のパス</param>
+        private void SetOffsetLimits(string path)
+        {
+            try
+            {
+                using var stream = File.OpenRead(path);
+                using var image = Image.FromStream(stream, false, false);
+                double width = image.Width;
+                double height = image.Height;
+                if (width <= 0 || height <= 0)
+                {
+                    return;
+                }
+                int upperLimit = (int)Math.Floor(1360d / 3d * height / width - 140);
+                int lowerLimit = -(int)Math.Floor(1264d / 3d * height / width - 101);
+                // 0は警告にならないため、範囲には必ず0を含める
+                maxY = Math.Max(0, upperLimit - 1);
+                minY = Math.Min(0, lowerLimit);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
         /// <summary>
         /// ラベルテキストを初期化する
@@ -96,6 +128,62 @@ namespace osu_taiko_Mapping_Helper.Views
                 return false;
             }
             return true;
+        }
+        /// <summary>
+        /// 選択している譜面と同じBGファイルを使っている他のdiffを取得する
+        /// </summary>
+        /// <param name="targets">書き換え対象 (取得したdiffを追加する)</param>
+        /// <returns>読み込みに失敗したdiffが無い場合はtrue、ある場合はfalseを返す</returns>
+        private bool GetSameBackgroundBeatmaps(ref List<(string path, Beatmap beatmap, string[] backgrounds, string backupDirectoryName)> targets)
+        {
+            string? beatmapDirectory = Path.GetDirectoryName(this.beatmapPath);
+            if (string.IsNullOrEmpty(beatmapDirectory))
+            {
+                return true;
+            }
+            string backgroundFileName = NormalizeBackgroundFileName(backgrounds[2]);
+            foreach (var path in Directory.GetFiles(beatmapDirectory, "*" + Constants.OSU_EXTENSION, SearchOption.TopDirectoryOnly))
+            {
+                // 選択している譜面は対象に追加済み
+                if (string.Equals(Path.GetFullPath(path), Path.GetFullPath(this.beatmapPath), StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                var tempBeatmap = BeatmapHelper.GetBeatmapData(path, true);
+                // osu!taiko以外のdiffは対象外のため書き換えない
+                var mode = BeatmapHelper.GetMode(tempBeatmap);
+                if (mode != null && mode != Constants.MODE_TAIKO)
+                {
+                    continue;
+                }
+                // 読み込みに失敗した場合
+                if (tempBeatmap.version == string.Empty)
+                {
+                    return false;
+                }
+                // 同じBGファイルを使っていないdiffは書き換えない
+                var background = tempBeatmap.events.FirstOrDefault(ev => ev.eventCode == Constants.BG_AND_VIDEO_CODE && !ev.isComment && !ev.isVideo);
+                if (background == null || NormalizeBackgroundFileName(background.fileName) != backgroundFileName)
+                {
+                    continue;
+                }
+                string[] tempBackgrounds = ["0",
+                                            background.startTime.ToString(),
+                                            background.fileName,
+                                            (background.xOffset == int.MinValue ? 0 : background.xOffset).ToString(),
+                                            retY.ToString()];
+                targets.Add((path, tempBeatmap, tempBackgrounds, Path.GetFileNameWithoutExtension(path)));
+            }
+            return true;
+        }
+        /// <summary>
+        /// 比較用にBGのファイル名を揃える (前後の「"」を除き、大文字・小文字を区別しない)
+        /// </summary>
+        /// <param name="fileName">BGの行のファイル名</param>
+        /// <returns>比較用のファイル名</returns>
+        private static string NormalizeBackgroundFileName(string fileName)
+        {
+            return fileName.Trim().Trim('"').Replace('/', '\\').ToLowerInvariant();
         }
         #endregion
         #region イベント
@@ -196,6 +284,14 @@ namespace osu_taiko_Mapping_Helper.Views
                 retY = (int)(BGHelper.ConvertPixelToOsuPixel((double)(picDisplayBg.Location.Y - INITIAL_BG_Y),
                                                              (double)INITIAL_SIZE.Height) +
                              offsetY);
+                // Mapset Verifierの警告が出ない範囲を超えた場合は、範囲の端に合わせる
+                if (retY < minY || retY > maxY)
+                {
+                    retY = Math.Clamp(retY, minY, maxY);
+                    int posY = (int)BGHelper.ConvertOsuPixelToPixel((double)(retY - offsetY),
+                                                                    (double)INITIAL_SIZE.Height);
+                    picDisplayBg.Location = new Point(picDisplayBg.Location.X, INITIAL_BG_Y + posY);
+                }
                 lblCurrentPosY.Text = $"y : {retY}";
             }
         }
@@ -209,33 +305,44 @@ namespace osu_taiko_Mapping_Helper.Views
         private void btnApply_Click(object sender, EventArgs e)
         {
             // 譜面情報が取得できていない場合はエラーダイアログを表示する
-            // (読み込みに失敗した譜面を途中までのデータで上書きしないため、戻り値も確認する)
             if (!GetBeatmap() || beatmapData == null)
             {
                 Common.ShowMessageDialog("E_A-D-1");
                 return;
             }
-            // バックアップを作成する
-            if (!BeatmapHelper.CreateBackup(this.beatmapPath, this.backupDirectoryName))
+            backgrounds[4] = retY.ToString();
+            // 書き換え対象 (選択している譜面と、同じBGファイルを使っている他のdiff)
+            List<(string path, Beatmap beatmap, string[] backgrounds, string backupDirectoryName)> targets =
+                [(this.beatmapPath, beatmapData, backgrounds, this.backupDirectoryName)];
+            // 先に他のdiffを読み込む。1つでも読み込めない場合は何も書き換えない
+            if (!GetSameBackgroundBeatmaps(ref targets))
             {
+                Common.ShowMessageDialog("E_A-D-1");
+                return;
+            }
+            // バックアップを作成する
+            foreach (var target in targets)
+            {
+                if (!BeatmapHelper.CreateBackup(target.path, target.backupDirectoryName))
+                {
+                    Common.ShowMessageDialog("E_A-P-1");
+                    return;
+                }
+            }
+            if (!SettingHelper.ResetBackupFile(config))
+            {
+                // 失敗した場合はエラーダイアログを表示する
                 Common.ShowMessageDialog("E_A-P-1");
                 return;
             }
-            else
+            foreach (var target in targets)
             {
-                if (!SettingHelper.ResetBackupFile(config))
+                if (!BeatmapHelper.ExportToOsuFile(target.beatmap, target.path, target.backgrounds))
                 {
                     // 失敗した場合はエラーダイアログを表示する
                     Common.ShowMessageDialog("E_A-P-1");
                     return;
                 }
-            }
-            backgrounds[4] = retY.ToString();
-            if (!BeatmapHelper.ExportToOsuFile(beatmapData, this.beatmapPath, backgrounds))
-            {
-                // 失敗した場合はエラーダイアログを表示する
-                Common.ShowMessageDialog("E_A-P-1");
-                return;
             }
             // 成功した場合は成功ダイアログを表示する
             Common.ShowMessageDialog("I_A-P-1");

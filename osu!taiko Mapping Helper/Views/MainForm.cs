@@ -366,7 +366,29 @@ namespace osu_taiko_Mapping_Helper
                 tabSetType.Controls.Add(tabBeatSnap);
             }
             InitializeOffsetControls();
+            InitializeCalculationControls();
+            UpdateSvBpmControls();
             tabSetType.ItemSize = new Size(Constants.TAB_MAX_ITEM_SIZE / tabSetType.Controls.Count, tabSetType.ItemSize.Height);
+        }
+        /// <summary>
+        /// 計算方法(等差・等比)のコントロールの初期化処理
+        /// </summary>
+        /// <remarks>
+        /// 設定ファイルに保存されている前回の状態に戻す
+        /// </remarks>
+        private void InitializeCalculationControls()
+        {
+            // 初期化中に設定ファイルへ上書き保存されないよう、イベントを一時的に外す
+            rdoArithmetic.CheckedChanged -= rdoArithmetic_CheckedChanged;
+            rdoGeometric.CheckedChanged -= rdoGeometric_CheckedChanged;
+            // 等比以外の値の場合は等差にする
+            bool isGeometric = config.calculationCode == Constants.CALCULATION_GEOMETRIC;
+            rdoGeometric.Checked = isGeometric;
+            rdoArithmetic.Checked = !isGeometric;
+            userInputTempData.isArithmetic = rdoArithmetic.Checked;
+            userInputTempData.isGeometric = rdoGeometric.Checked;
+            rdoArithmetic.CheckedChanged += rdoArithmetic_CheckedChanged;
+            rdoGeometric.CheckedChanged += rdoGeometric_CheckedChanged;
         }
         /// <summary>
         /// オフセット関連のコントロールの初期化処理
@@ -850,6 +872,7 @@ namespace osu_taiko_Mapping_Helper
                     Constants.SET_SV => UserInputDataHelper.SetCurrentSv(beatmapData, currentTime),
                     Constants.SET_VOLUME => UserInputDataHelper.SetCurrentVolume(beatmapData, currentTime),
                     Constants.SET_BPM => UserInputDataHelper.SetCurrentBpm(beatmapData, currentTime),
+                    Constants.SET_VISUAL_BPM => UserInputDataHelper.SetCurrentVisualBpm(beatmapData, currentTime),
                     _ => throw new Exception(),
                 };
             }
@@ -884,6 +907,9 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(chkApplyStartObject, "LBL_APPLY_TIMING_FROM");
             Common.SetLabelText(chkApplyEndObject, "LBL_APPLY_TIMING_TO");
             Common.SetLabelText(chkApplyRedLines, "LBL_APPLY_REDLINES");
+            Common.SetLabelText(chkSvBpm, "LBL_SV_BPM");
+            Common.SetLabelText(btnSetSvFrom, userInputTempData.isSvBpm ? "LBL_SET_BPM_FROM" : "LBL_SET_SV_FROM");
+            Common.SetLabelText(btnSetSvTo, userInputTempData.isSvBpm ? "LBL_SET_BPM_TO" : "LBL_SET_SV_TO");
             Common.SetLabelText(lblCalculationType, "LBL_SV_CALCULATION");
             Common.SetLabelText(rdoArithmetic, "LBL_LINEAR");
             Common.SetLabelText(rdoGeometric, "LBL_GEOMETRIC");
@@ -940,6 +966,14 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(btnApplySettingCopier, "LBL_UTILITY_APPLY");
             Common.SetLabelText(btnApplyResnap, "LBL_UTILITY_APPLY");
         }
+        /// <summary>
+        /// "BPMで指定"のチェックと、相対速度変化オプションのチェックの有効/無効を設定する
+        /// </summary>
+        private void UpdateSvBpmControls()
+        {
+            chkSvBpm.Visible = tabExecuteType.SelectedIndex == 0 && tabSetType.SelectedIndex != 3 && chkEnableSv.Checked;
+            chkRelative.Enabled = !chkSvBpm.Checked;
+        }
         #endregion
         #region イベントハンドラ
         #region 共通機能のイベントハンドラ
@@ -995,6 +1029,11 @@ namespace osu_taiko_Mapping_Helper
                     break;
                 //［Ctrl］+［Z］が押されたら実行前の譜面にする
                 case (Keys.Z | Keys.Control):
+                    // SV Editorを表示している場合のみ実行する
+                    if (!pnlGroupSvEditor.Visible)
+                    {
+                        break;
+                    }
                     // テキストボックスの入力の取り消し(Ctrl+Z)が一緒に行われないよう、キーを子のコントロールに渡さない
                     e.SuppressKeyPress = true;
                     // 譜面情報がリアルタイムで取得できていない場合はエラーダイアログを表示する
@@ -1201,7 +1240,12 @@ namespace osu_taiko_Mapping_Helper
         }
         private void txtSvFrom_TextChanged(object? sender, EventArgs e)
         {
-            if (userInputTempData.isRelative)
+            if (userInputTempData.isSvBpm)
+            {
+                // BPMで指定する場合は、SVとは別に覚える
+                userInputTempData.svBpmFrom = txtSvFrom.Text;
+            }
+            else if (userInputTempData.isRelative)
             {
                 if (userInputTempData.isRelativeMultiply)
                 {
@@ -1223,7 +1267,12 @@ namespace osu_taiko_Mapping_Helper
         }
         private void txtSvTo_TextChanged(object? sender, EventArgs e)
         {
-            if (chkRelative.Checked)
+            if (userInputTempData.isSvBpm)
+            {
+                // BPMで指定する場合は、SVとは別に覚える
+                userInputTempData.svBpmTo = txtSvTo.Text;
+            }
+            else if (chkRelative.Checked)
             {
                 if (rdoRelativeMultiply.Checked)
                 {
@@ -1245,11 +1294,12 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnSetSvFrom_Click(object sender, EventArgs e)
         {
-            SetCurrentTimeInfo(txtSvFrom, Constants.SET_SV);
+            // BPMで指定する場合は、現地点の見た目BPMを入れる
+            SetCurrentTimeInfo(txtSvFrom, userInputTempData.isSvBpm ? Constants.SET_VISUAL_BPM : Constants.SET_SV);
         }
         private void btnSetSvTo_Click(object sender, EventArgs e)
         {
-            SetCurrentTimeInfo(txtSvTo, Constants.SET_SV);
+            SetCurrentTimeInfo(txtSvTo, userInputTempData.isSvBpm ? Constants.SET_VISUAL_BPM : Constants.SET_SV);
         }
         private void chkEnableSv_CheckedChanged(object? sender, EventArgs e)
         {
@@ -1269,6 +1319,22 @@ namespace osu_taiko_Mapping_Helper
                 pnlRelativeSvGroup.Visible = false;
                 chkEnableSvTo.Visible = false;
             }
+            UpdateSvBpmControls();
+        }
+        private void chkSvBpm_CheckedChanged(object sender, EventArgs e)
+        {
+            userInputTempData.isSvBpm = chkSvBpm.Checked;
+            if (chkSvBpm.Checked)
+            {
+                // BPMで指定する場合は相対速度変化オプションを使わないため、チェックを外す
+                chkRelative.Checked = false;
+            }
+            // SVの入力欄を、選んだ指定方法で前回入力した値に戻す
+            txtSvFrom.Text = chkSvBpm.Checked ? userInputTempData.svBpmFrom : userInputTempData.svFrom;
+            txtSvTo.Text = chkSvBpm.Checked ? userInputTempData.svBpmTo : userInputTempData.svTo;
+            Common.SetLabelText(btnSetSvFrom, userInputTempData.isSvBpm ? "LBL_SET_BPM_FROM" : "LBL_SET_SV_FROM");
+            Common.SetLabelText(btnSetSvTo, userInputTempData.isSvBpm ? "LBL_SET_BPM_TO" : "LBL_SET_SV_TO");
+            UpdateSvBpmControls();
         }
         private void btnSwapSv_Click(object sender, EventArgs e)
         {
@@ -1333,13 +1399,25 @@ namespace osu_taiko_Mapping_Helper
         {
             userInputTempData.isEnableRedLines = chkApplyRedLines.Checked;
         }
-        private void rdoArithmetic_CheckedChanged(object sender, EventArgs e)
+        private void rdoArithmetic_CheckedChanged(object? sender, EventArgs? e)
         {
             userInputTempData.isArithmetic = rdoArithmetic.Checked;
+            // 選択された計算方法を設定ファイルに保存する (選択が外れた方では保存しない)
+            if (rdoArithmetic.Checked)
+            {
+                config.calculationCode = Constants.CALCULATION_ARITHMETIC;
+                config.SaveCalculationCode();
+            }
         }
-        private void rdoGeometric_CheckedChanged(object sender, EventArgs e)
+        private void rdoGeometric_CheckedChanged(object? sender, EventArgs? e)
         {
             userInputTempData.isGeometric = rdoGeometric.Checked;
+            // 選択された計算方法を設定ファイルに保存する (選択が外れた方では保存しない)
+            if (rdoGeometric.Checked)
+            {
+                config.calculationCode = Constants.CALCULATION_GEOMETRIC;
+                config.SaveCalculationCode();
+            }
         }
         private void chkRelative_CheckedChanged(object sender, EventArgs e)
         {
@@ -1470,6 +1548,7 @@ namespace osu_taiko_Mapping_Helper
                 default:
                     break;
             }
+            UpdateSvBpmControls();
         }
         private void tabSetType_DrawItem(object sender, DrawItemEventArgs e)
         {
@@ -1616,6 +1695,7 @@ namespace osu_taiko_Mapping_Helper
                 default:
                     break;
             }
+            UpdateSvBpmControls();
         }
         private void rdoAllHitObjects_CheckedChanged(object sender, EventArgs e)
         {

@@ -7,7 +7,7 @@ namespace osu_taiko_Mapping_Helper.Properties
     {
         #region ファイル名
         internal const string APP_NAME = "osu!Taiko Mapping Helper";
-        internal const string APP_VERSION = "1.2.6";
+        internal const string APP_VERSION = "1.3.0";
         #endregion
         #region 言語設定
         internal static readonly string[] LANGUAGES = ["English",
@@ -56,6 +56,7 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const string GENERAL = "[General]";
         internal const string PREVIEW = "PreviewTime: ";
         internal const string MODE = "Mode:";
+        internal const string SLIDER_MULTIPLIER = "SliderMultiplier:";
         // osu!taikoのモード番号 (Mode: 1)
         internal const int MODE_TAIKO = 1;
         internal const string EDITOR = "[Editor]";
@@ -113,6 +114,7 @@ namespace osu_taiko_Mapping_Helper.Properties
         internal const int SET_BPM = 1;
         internal const int SET_SV = 2;
         internal const int SET_VOLUME = 3;
+        internal const int SET_VISUAL_BPM = 4;
         #endregion
         #region 実行コード
         internal const int EXECUTE_APPLY = 0;

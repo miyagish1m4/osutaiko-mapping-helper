@@ -282,6 +282,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     retSvTo = -1;
                     return true;
                 }
+                // SVをBPMで指定する場合 (相対速度変化オプションは使わない)
+                if (userInputTempData.isSvBpm)
+                {
+                    return ValidateSvBpm(userInputTempData, ref userInputData);
+                }
                 if (userInputTempData.isRelative)
                 {
                     switch (userInputData.relativeCode)
@@ -525,6 +530,43 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
         }
         /// <summary>
+        /// SVをBPMで指定する場合の入力チェック
+        /// </summary>
+        /// <param name="userInputTempData">ユーザー入力の一時データ</param>
+        /// <param name="userInputData">ユーザー入力データ</param>
+        /// <returns>入力が正しい場合はtrue、それ以外の場合はfalse</returns>
+        private static bool ValidateSvBpm(UserInputTempData userInputTempData,
+                                          ref UserInputData userInputData)
+        {
+            string tempBpmFrom = userInputTempData.svBpmFrom;
+            string tempBpmTo = userInputTempData.svBpmTo;
+            if (tempBpmFrom == string.Empty || tempBpmTo == string.Empty)
+            {
+                //見た目BPMが指定されていない
+                Common.ShowMessageDialog("E_V-EM-10");
+                return false;
+            }
+            if (!System.Text.RegularExpressions.Regex.IsMatch(tempBpmFrom, @"^[-+]?[0-9]*\.?[0-9]+$") ||
+                !System.Text.RegularExpressions.Regex.IsMatch(tempBpmTo, @"^[-+]?[0-9]*\.?[0-9]+$"))
+            {
+                //見た目BPMが数値で指定されていない
+                Common.ShowMessageDialog("E_V-T-17");
+                return false;
+            }
+            if (!double.TryParse(tempBpmFrom, out double retBpmFrom) || retBpmFrom <= 0 ||
+                !double.TryParse(tempBpmTo, out double retBpmTo) || retBpmTo <= 0)
+            {
+                //見た目BPMが正の数で指定されていない
+                Common.ShowMessageDialog("E_V-T-18");
+                return false;
+            }
+            userInputData.isSvBpm = true;
+            userInputData.relativeCode = Constants.RELATIVE_DISABLE;
+            userInputData.svFrom = retBpmFrom;
+            userInputData.svTo = retBpmTo;
+            return true;
+        }
+        /// <summary>
         /// BPMのバリデーションチェックをする関数
         /// </summary>
         /// <param name="userInputTempData">入力値(一時保存用)</param>
@@ -737,6 +779,44 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     throw new Exception();
                 }
                 return retBpm.ToString();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+        /// <summary>
+        /// 現地点の見た目BPMを取得する関数
+        /// </summary>
+        /// <param name="beatmap">譜面情報</param>
+        /// <param name="currentTime">タイミング</param>
+        /// <returns>見た目BPM (BPM × SV × SliderMultiplier ÷ 1.4、小数点第5位まで)。取得できない場合は空文字</returns>
+        /// <remarks>
+        /// Timing Propertyの見た目BPMと同じ計算 (SVをBPMで指定する場合のSet Start SV・Set End SVで使う)
+        /// </remarks>
+        internal static string SetCurrentVisualBpm(Beatmap? beatmap,
+                                                   int currentTime)
+        {
+            try
+            {
+                if (beatmap == null)
+                {
+                    throw new Exception();
+                }
+                var redLine = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= currentTime) && tp.isRedLine) ?? throw new Exception();
+                // 赤線のSVは1 (同じ時刻に緑線がある場合は緑線のSV)
+                double sv = beatmap.timingPoints.LastOrDefault(tp => tp.time <= currentTime)?.sv ?? 1.0;
+                // SliderMultiplierの行が無い場合は、osu!の初期値(1.4)とする (SV計算での換算と同じ)
+                double sliderMultiplier = BeatmapHelper.GetSliderMultiplier(beatmap) ?? Constants.BASE_SLIDER_MULTIPLIER;
+                double retVisualBpm = Math.Round(redLine.bpm * sv * sliderMultiplier / Constants.BASE_SLIDER_MULTIPLIER, 5, MidpointRounding.AwayFromZero);
+                string retVisualBpmStr = retVisualBpm.ToString();
+                if (retVisualBpmStr.Contains('.'))
+                {
+                    // 整数だった場合は"0"と"."を削除する
+                    retVisualBpmStr = retVisualBpmStr.TrimEnd('0');
+                    retVisualBpmStr = retVisualBpmStr.TrimEnd('.');
+                }
+                return retVisualBpmStr;
             }
             catch
             {

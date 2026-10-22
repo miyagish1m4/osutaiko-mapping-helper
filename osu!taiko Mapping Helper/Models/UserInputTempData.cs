@@ -23,6 +23,12 @@ namespace osu_taiko_Mapping_Helper.Models
         internal string svFrom { set; get; } = string.Empty;
         // SV(終了)
         internal string svTo { set; get; } = string.Empty;
+        // SVをBPMで指定する設定
+        internal bool isSvBpm { set; get; } = false;
+        // BPMで指定する場合のBPM(開始)
+        internal string svBpmFrom { set; get; } = string.Empty;
+        // BPMで指定する場合のBPM(終了)
+        internal string svBpmTo { set; get; } = string.Empty;
         // 音量有効化設定
         internal bool isVolume { set; get; } = true;
         // 音量(開始)

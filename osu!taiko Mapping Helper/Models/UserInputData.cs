@@ -22,6 +22,8 @@ namespace osu_taiko_Mapping_Helper.Models
         internal double svFrom { set; get; }
         // SV(終了)
         internal double svTo { set; get; }
+        // SVをBPMで指定する設定 (有効な場合、svFrom・svToにはBPMが入る)
+        internal bool isSvBpm { set; get; }
         // 音量有効化設定
         internal bool isVolume { set; get; }
         // 音量(開始)

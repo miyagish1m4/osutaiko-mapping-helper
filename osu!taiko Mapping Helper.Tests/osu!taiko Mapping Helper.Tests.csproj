@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Helper(WinForms)を参照するため、Helperと同じWindows用の.NETにする -->
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>osu!taiko Mapping Helper.Tests</AssemblyName>
+    <RootNamespace>osu_taiko_Mapping_Helper.Tests</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\osu!taiko Mapping Helper\osu!taiko Mapping Helper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 設定の読み書きは「実行している exe の設定ファイル」を使う。テストを実行するのは testhost なので、
+         Helper の App.config を testhost の設定ファイルとして出力先にコピーする -->
+    <None Include="..\osu!taiko Mapping Helper\App.config" Link="testhost.dll.config" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -38,9 +38,13 @@ namespace osu_taiko_Mapping_Helper.Services
         internal static bool Apply(UserInputData userInputData, Beatmap beatmap, ref List<TimingPoint> outTimingPoints)
         {
             List<TimingPoint> timingPointsBuff = [];
+            // BPMで指定した場合はSVに換算して計算するため、入力値を元に戻せるよう覚えておく
+            double inputSvFrom = userInputData.svFrom;
+            double inputSvTo = userInputData.svTo;
             try
             {
                 SetClasses(userInputData, beatmap);
+                ConvertBpmToSv();
                 if ((userInputData.applySetCode & 0x00000001) != 0)
                 {
                     // objectに緑線を置く場合
@@ -81,8 +85,31 @@ namespace osu_taiko_Mapping_Helper.Services
             }
             finally
             {
+                userInputData.svFrom = inputSvFrom;
+                userInputData.svTo = inputSvTo;
                 ClearClasses();
             }
+        }
+        /// <summary>
+        /// SVをBPMで指定した場合に、入力されたBPMをSVに換算する
+        /// </summary>
+        /// <remarks>
+        /// 始点の赤線のBPMを基準に、SV = 入力したBPM ÷ 始点の赤線のBPM × 1.4 ÷ SliderMultiplier とする<br/>
+        /// (Timing Propertyの見た目BPMと同じ値になる。範囲の中でBPMが変わる場合は、各処理の基準BPMでの補正で合わせる)<br/>
+        /// 基準のBPMは、各処理の基準BPMと同じく、始点より前の赤線が無い場合は120とする<br/>
+        /// SliderMultiplierの行が無い場合は、osu!の初期値(1.4)とする
+        /// </remarks>
+        private static void ConvertBpmToSv()
+        {
+            if (!userInputData.isSv || !userInputData.isSvBpm || (userInputData.applySetCode & 0x00000008) != 0)
+            {
+                return;
+            }
+            double baseBpm = beatmap.timingPoints.LastOrDefault(tp => tp.time <= userInputData.timingFrom && tp.isRedLine)?.bpm ?? 120;
+            double sliderMultiplier = BeatmapHelper.GetSliderMultiplier(beatmap) ?? Constants.BASE_SLIDER_MULTIPLIER;
+            double rate = Constants.BASE_SLIDER_MULTIPLIER / (baseBpm * sliderMultiplier);
+            userInputData.svFrom *= rate;
+            userInputData.svTo *= rate;
         }
         /// <summary>
         /// 適用処理 (objectsのみ)
@@ -110,6 +137,10 @@ namespace osu_taiko_Mapping_Helper.Services
                 if (!AddGreenLinesOnTimingPoints(ref outTimingPoints))
                 {
                     throw new Exception("Failed to add green lines on timing points.");
+                }
+                if (!AddGreenLinesOnStartAndEnd(ref outTimingPoints))
+                {
+                    throw new Exception("Failed to add green lines on start and end.");
                 }
                 // SVのタイミング被りを削除
                 // ToDO: 先勝ちか後勝ちかについては要検討
@@ -369,6 +400,56 @@ namespace osu_taiko_Mapping_Helper.Services
             {
                 Common.WriteErrorMessage("LOG_E-EXCEPTION");
                 Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+
+        private static bool AddGreenLinesOnStartAndEnd(ref List<TimingPoint> outTimingPoints)
+        {
+            try
+            {
+
+                if (!userInputData.isVolume) return true;
+                var startHitObject = beatmap.hitObjects.FirstOrDefault(ho => ho.time == userInputData.timingFrom);
+                // 直前の緑線のIndexを探す
+                var greenLineIndex = beatmap.timingPoints.FindLastIndex(tp => tp.time <= userInputData.timingFrom);
+                if (startHitObject == null)
+                {
+                    outTimingPoints.Add(new TimingPoint
+                    {
+                        time = userInputData.timingFrom,
+                        bpm = 0,
+                        sv = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.sv ?? 1,
+                        barLength = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.barLength ?? 2000,
+                        meter = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.meter ?? 4,
+                        sampleSet = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.sampleSet ?? 1,
+                        sampleIndex = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.sampleIndex ?? 0,
+                        volume = userInputData.volumeFrom,
+                        isRedLine = false,
+                        effect = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.effect ?? 0
+                    });
+                }
+                var endHitObject = beatmap.hitObjects.LastOrDefault(ho => ho.time == userInputData.timingTo);
+                if (endHitObject == null)
+                {
+                    outTimingPoints.Add(new TimingPoint
+                    {
+                        time = userInputData.timingTo,
+                        bpm = 0,
+                        sv = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.sv ?? 1,
+                        barLength = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.barLength ?? 2000,
+                        meter = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.meter ?? 4,
+                        sampleSet = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.sampleSet ?? 1,
+                        sampleIndex = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.sampleIndex ?? 0,
+                        volume = userInputData.volumeTo,
+                        isRedLine = false,
+                        effect = beatmap.timingPoints.SafeGetIndex(greenLineIndex)?.effect ?? 0
+                    });
+                }
+                return true;
+            }
+            catch
+            {
                 return false;
             }
         }
@@ -930,6 +1011,8 @@ namespace osu_taiko_Mapping_Helper.Services
                 {
                     throw new Exception("Failed to remove green lines.");
                 }
+                // kiaiの切り替わりの緑線は消さずに残す
+                if (!KeepKiaiTimingPoints()) throw new Exception("Failed to keep kiai timing points.");
                 // 緑線を削除してもスライダーの長さ(時間)が変わらないよう、スライダーの長さを調整する
                 if (!AdjustSliderLength([])) throw new Exception("Failed to adjust slider length.");
                 if (!DeleteTimingPoints()) throw new Exception("Failed to delete timing points.");
@@ -945,6 +1028,62 @@ namespace osu_taiko_Mapping_Helper.Services
             {
                 ClearClasses();
             }
+        }
+        /// <summary>
+        /// 削除する緑線のうち、kiaiの切り替わりの緑線を残す処理 (削除時)
+        /// </summary>
+        /// <returns>処理が<br/>・正常終了した場合はtrue<br/>・異常終了した場合はfalse</returns>
+        private static bool KeepKiaiTimingPoints()
+        {
+            try
+            {
+                // 始点(オフセット込み)より前の線から、残す緑線のSVと音量を求める
+                int referenceTime = userInputData.timingFrom + (int)GetRemoveOffset();
+                var referencePoint = beatmap.timingPoints.LastOrDefault(tp => tp.time < referenceTime);
+                double referenceSv = referencePoint == null || referencePoint.isRedLine ? 1.0 : referencePoint.sv;
+                int? referenceVolume = referencePoint?.volume;
+                // 直前に残っている線のkiaiの有無
+                int prevKiai = 0;
+                for (int i = 0; i < beatmap.timingPoints.Count; i++)
+                {
+                    var timingPoint = beatmap.timingPoints[i];
+                    int kiai = timingPoint.effect & 1;
+                    if (timingPoint.isDelete && !timingPoint.isRedLine && kiai != prevKiai)
+                    {
+                        timingPoint.isDelete = false;
+                        timingPoint.sv = referenceSv;
+                        timingPoint.volume = referenceVolume ?? timingPoint.volume;
+                    }
+                    if (!timingPoint.isDelete)
+                    {
+                        prevKiai = kiai;
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.WriteErrorMessage("LOG_E-EXCEPTION");
+                Common.WriteExceptionMessage(ex);
+                return false;
+            }
+        }
+        /// <summary>
+        /// 削除時に、kiaiの緑線のSVと音量を求める位置のオフセットを取得する
+        /// </summary>
+        /// <returns>
+        /// オフセットが無効の場合 : 0<br/>
+        /// msオフセットの場合 : 入力されたオフセット<br/>
+        /// 1/16(1/12)オフセットの場合 : 始点の赤線のBPMで求めた1/16拍(1/12オフセットが有効な場合は1/12拍)を負にした値
+        /// </returns>
+        private static double GetRemoveOffset()
+        {
+            if (!userInputData.isOffset) return 0;
+            if (userInputData.offsetMode != 0) return userInputData.offset;
+            // BPM60000以上の赤線は小節線ギミック用のため、その前の赤線のBPMで求める (GetOffsetTimingと同じ)
+            double bpm = beatmap.timingPoints.LastOrDefault(tp => tp.isRedLine && tp.time <= userInputData.timingFrom && tp.bpm < Constants.ONE_MINUTE)?.bpm ??
+                         beatmap.timingPoints.FirstOrDefault(tp => tp.isRedLine)?.bpm ?? 120;
+            return -(Constants.ONE_MINUTE / bpm / (userInputData.isDuoOffset ? Constants.DUO_SNAP : Constants.HEXA_SNAP));
         }
         #endregion
         /// <summary>

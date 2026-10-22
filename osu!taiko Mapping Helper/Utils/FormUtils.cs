@@ -19,7 +19,12 @@ namespace osu_taiko_Mapping_Helper.Utils
         {
             if (isEnable)
             {
-                if (userInputTempData.isRelative)
+                if (userInputTempData.isSvBpm)
+                {
+                    // BPMで指定する場合
+                    txtSvFrom.Text = userInputTempData.svBpmFrom;
+                }
+                else if (userInputTempData.isRelative)
                 {
                     if (userInputTempData.isRelativeMultiply)
                     {
@@ -285,8 +290,9 @@ namespace osu_taiko_Mapping_Helper.Utils
                 chkEnableSv.Enabled = true;
                 rdoArithmetic.Enabled = true;
                 rdoGeometric.Enabled = true;
-                txtSvFrom.Text = userInputTempData.svFrom;
-                txtSvTo.Text = userInputTempData.svTo;
+                // BPMで指定する場合は、BPMの値に戻す
+                txtSvFrom.Text = userInputTempData.isSvBpm ? userInputTempData.svBpmFrom : userInputTempData.svFrom;
+                txtSvTo.Text = userInputTempData.isSvBpm ? userInputTempData.svBpmTo : userInputTempData.svTo;
             }
         }
         /// <summary>
