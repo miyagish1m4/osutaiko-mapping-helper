@@ -88,7 +88,7 @@ This project is built with C# and Windows Forms.
 - SV calculation: `osu!taiko Mapping Helper/Services/SVCalculatorService.cs`
 - Resnap: `osu!taiko Mapping Helper/Services/ResnapService.cs`
 - Tests: `osu!taiko Mapping Helper.Tests/`
-- Source files use UTF-8 and CRLF line endings (do not save them in Shift_JIS or other encodings)
+- Source files use UTF-8 and CRLF line endings
 
 ## License
 

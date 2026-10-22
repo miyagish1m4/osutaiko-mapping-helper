@@ -88,7 +88,7 @@ dotnet run --project "osu!taiko Mapping Helper/osu!taiko Mapping Helper.csproj"
 - SV 計算: `osu!taiko Mapping Helper/Services/SVCalculatorService.cs`
 - 再スナップ: `osu!taiko Mapping Helper/Services/ResnapService.cs`
 - テスト: `osu!taiko Mapping Helper.Tests/`
-- ソースファイルの文字コードは UTF-8、改行は CRLF です（Shift_JIS などで保存しないでください）
+- ソースファイルの文字コードは UTF-8、改行は CRLF です
 
 ## ライセンス
 
