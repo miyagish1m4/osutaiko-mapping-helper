@@ -15,7 +15,7 @@ For the main features and usage instructions, see the following user guides.
 
 - Windows
 - .NET 10 SDK
-- Visual Studio 2022 or later, or .NET CLI
+- Visual Studio 2026 or later, or .NET CLI
 - osu! stable
 
 ## Libraries
@@ -52,6 +52,23 @@ To build the Release configuration, run:
 dotnet build -c Release
 ```
 
+## Tests
+
+Tests are in `osu!taiko Mapping Helper.Tests` (xUnit). The test project is part of the solution, so `dotnet build` also builds it.
+
+```powershell
+dotnet test
+```
+
+- The tests also use Windows Forms, so run them on Windows.
+- The tests run only inside the temporary folder (`%TEMP%`) and do not modify beatmaps in your osu! Songs folder or the Helper settings.
+- The following tests run only when the environment variable is set. Otherwise, they do nothing and pass.
+
+| Environment variable | Test |
+|---|---|
+| `OSU_SONGS_PATH` | Reads and writes every taiko beatmap in the specified Songs folder. Beatmaps are copied to the temporary folder before writing, so the originals are not modified |
+| `OSU_HELPER_GITHUB_TEST` | Set to `1` to check that the latest release information can be retrieved from GitHub Releases |
+
 ## Run
 
 ```powershell
@@ -70,6 +87,8 @@ This project is built with C# and Windows Forms.
 - Main form: `osu!taiko Mapping Helper/Views/MainForm.cs`
 - SV calculation: `osu!taiko Mapping Helper/Services/SVCalculatorService.cs`
 - Resnap: `osu!taiko Mapping Helper/Services/ResnapService.cs`
+- Tests: `osu!taiko Mapping Helper.Tests/`
+- Source files use UTF-8 and CRLF line endings (do not save them in Shift_JIS or other encodings)
 
 ## License
 

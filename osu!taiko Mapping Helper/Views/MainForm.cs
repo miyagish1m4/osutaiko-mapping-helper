@@ -1,4 +1,4 @@
-using System.Diagnostics;
+ï»¿using System.Diagnostics;
 using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Services;
@@ -14,7 +14,7 @@ namespace osu_taiko_Mapping_Helper
 {
     public partial class MainForm : Form
     {
-        #region ƒNƒ‰ƒX•Ï”
+        #region ã‚¯ãƒ©ã‚¹å¤‰æ•°
         private readonly StructuredOsuMemoryReader sreader = StructuredOsuMemoryReader.GetInstance(new("osu!"));
         private readonly OsuBaseAddresses baseAddresses = new();
         private BeatmapMetadata beatmapInfo = new();
@@ -30,25 +30,25 @@ namespace osu_taiko_Mapping_Helper
         private string songsPath = string.Empty;
         private int currentTime;
         private bool isDirectoryLoaded = false;
-        // Œ©‚Â‚¯‚½osu!‚ÌƒvƒƒZƒX (‹N“®’†‚©‚Ç‚¤‚©‚ÌŠm”F‚Ég‚¤)
+        // è¦‹ã¤ã‘ãŸosu!ã®ãƒ—ãƒ­ã‚»ã‚¹ (èµ·å‹•ä¸­ã‹ã©ã†ã‹ã®ç¢ºèªã«ä½¿ã†)
         private Process? osuProcess = null;
-        // Ÿ‚Éosu!‚ÌƒvƒƒZƒX‚ğ’T‚·
+        // æ¬¡ã«osu!ã®ãƒ—ãƒ­ã‚»ã‚¹ã‚’æ¢ã™æ™‚åˆ»
         private DateTime nextOsuProcessSearchTime = DateTime.MinValue;
-        // osu!‚ÌƒvƒƒZƒX‚ğ’T‚·ŠÔŠu(ƒ~ƒŠ•b)
+        // osu!ã®ãƒ—ãƒ­ã‚»ã‚¹ã‚’æ¢ã™é–“éš”(ãƒŸãƒªç§’)
         private const int OSU_PROCESS_SEARCH_INTERVAL = 1000;
         private bool isUpdate = true;
-        // ƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_–¼ (‹@”\‚É‚æ‚ç‚¸A.osu‚Ìƒtƒ@ƒCƒ‹–¼‚Å“ˆê‚·‚é)
+        // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€å (æ©Ÿèƒ½ã«ã‚ˆã‚‰ãšã€.osuã®ãƒ•ã‚¡ã‚¤ãƒ«åã§çµ±ä¸€ã™ã‚‹)
         private string backupDirectoryName => Path.GetFileNameWithoutExtension(beatmapInfo.beatmapPath ?? string.Empty);
-        // ˆ—‘ÎÛ‚Ì•ˆ–Êî•ñ‚ÆƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_–¼ (ˆ—‚ÌŠJn‚ÉSetTargetBeatmap‚Åİ’è‚·‚é)
+        // å‡¦ç†å¯¾è±¡ã®è­œé¢æƒ…å ±ã¨ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€å (å‡¦ç†ã®é–‹å§‹æ™‚ã«SetTargetBeatmapã§è¨­å®šã™ã‚‹)
         private BeatmapMetadata targetBeatmapInfo = new();
         private string targetBackupDirectoryName = string.Empty;
         private TimingPropertyForm? TimingPropertyForm = null;
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int updateInterval { get; set; } = 15;
         #endregion
-        #region ƒƒ\ƒbƒh
+        #region ãƒ¡ã‚½ãƒƒãƒ‰
         /// <summary>
-        /// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+        /// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
         /// </summary>
         public MainForm()
         {
@@ -86,7 +86,7 @@ namespace osu_taiko_Mapping_Helper
             return true;
         }
         /// <summary>
-        /// osu.exe‚Ìƒƒ‚ƒŠƒf[ƒ^æ“¾ˆ—
+        /// osu.exeã®ãƒ¡ãƒ¢ãƒªãƒ‡ãƒ¼ã‚¿å–å¾—å‡¦ç†
         /// </summary>
         private void UpdateMemoryData()
         {
@@ -95,7 +95,7 @@ namespace osu_taiko_Mapping_Helper
                 try
                 {
                     Thread.Sleep(updateInterval);
-                    // osu.exe‚ğ’T‚·
+                    // osu.exeã‚’æ¢ã™
                     Process? process = GetOsuProcess();
                     if (process == null)
                     {
@@ -104,11 +104,11 @@ namespace osu_taiko_Mapping_Helper
                             beatmapInfo = new();
                         }
                         isDirectoryLoaded = false;
-                        // ‘O‚Ì•ˆ–Ê‚Ìî•ñ‚ğ•\¦‚µ‘±‚¯‚È‚¢‚æ‚¤ATimingProperty‚Ì•\¦‚ğÁ‚·
+                        // å‰ã®è­œé¢ã®æƒ…å ±ã‚’è¡¨ç¤ºã—ç¶šã‘ãªã„ã‚ˆã†ã€TimingPropertyã®è¡¨ç¤ºã‚’æ¶ˆã™
                         TimingPropertyForm?.SetOsuData(string.Empty, currentTime);
-                        throw new Exception("osu!‚ª‹N“®‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+                        throw new Exception("osu!ãŒèµ·å‹•ã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
                     }
-                    // osuƒtƒHƒ‹ƒ_æ“¾ˆ—
+                    // osuãƒ•ã‚©ãƒ«ãƒ€å–å¾—å‡¦ç†
                     if (!isDirectoryLoaded)
                     {
                         string? fileName = process.MainModule?.FileName;
@@ -123,56 +123,56 @@ namespace osu_taiko_Mapping_Helper
                             isDirectoryLoaded = !isDirectoryLoaded;
                         }
                     }
-                    // ƒƒ‚ƒŠ‚©‚ç•ˆ–Ê‚Ìî•ñ‚ğæ“¾‚·‚é
+                    // ãƒ¡ãƒ¢ãƒªã‹ã‚‰è­œé¢ã®æƒ…å ±ã‚’å–å¾—ã™ã‚‹
                     sreader.TryRead(baseAddresses.Beatmap);
                     sreader.TryRead(baseAddresses.GeneralData);
                     currentTime = baseAddresses.GeneralData.AudioTime;
-                    // •ˆ–Ê‚ÌƒtƒHƒ‹ƒ_‚ğæ“¾
+                    // è­œé¢ã®ãƒ•ã‚©ãƒ«ãƒ€ã‚’å–å¾—
                     string osuBeatmapPath = Path.Combine(songsPath ?? "",
                                                          baseAddresses.Beatmap.FolderName ?? "",
                                                          baseAddresses.Beatmap.OsuFileName ?? "");
-                    // ŠO•”ƒc[ƒ‹‚ª .osu ‚ğXV‚µ‚Ä‚¢‚È‚¢‚©Šm”F‚·‚é‚½‚ßAÅIXV“ú‚ğæ“¾‚·‚é
+                    // å¤–éƒ¨ãƒ„ãƒ¼ãƒ«ãŒ .osu ã‚’æ›´æ–°ã—ã¦ã„ãªã„ã‹ç¢ºèªã™ã‚‹ãŸã‚ã€æœ€çµ‚æ›´æ–°æ—¥æ™‚ã‚’å–å¾—ã™ã‚‹
                     DateTime lastWriteTime = File.GetLastWriteTime(osuBeatmapPath);
 
                     currentTime = baseAddresses.GeneralData.AudioTime;
-                    // TimingProperty‚É‚Í‘I‘ğ‚µ‚Ä‚¢‚é•ˆ–Ê‚ÌƒpƒX‚ğ“n‚· (•ˆ–Ê‚Ì“Ç‚İ‚İ‚ÍTimingProperty‘¤‚Ås‚¤)
+                    // TimingPropertyã«ã¯é¸æŠã—ã¦ã„ã‚‹è­œé¢ã®ãƒ‘ã‚¹ã‚’æ¸¡ã™ (è­œé¢ã®èª­ã¿è¾¼ã¿ã¯TimingPropertyå´ã§è¡Œã†)
                     TimingPropertyForm?.SetOsuData(osuBeatmapPath, currentTime);
 
-                    // •ˆ–ÊƒpƒX‚ÆXV“ú‚ª•Ï‚í‚Á‚Ä‚¢‚È‚¢ê‡A.osu‚ÌDecode‚ğs‚í‚È‚¢
-                    // ‚±‚ê‚É‚æ‚èUpdateMemoryData‚ª’ZüŠú‚Å.osu‚ğ“Ç‚İ‘±‚¯‚é‚±‚Æ‚ğ–h‚®
+                    // è­œé¢ãƒ‘ã‚¹ã¨æ›´æ–°æ—¥æ™‚ãŒå¤‰ã‚ã£ã¦ã„ãªã„å ´åˆã€.osuã®Decodeã‚’è¡Œã‚ãªã„
+                    // ã“ã‚Œã«ã‚ˆã‚ŠUpdateMemoryDataãŒçŸ­å‘¨æœŸã§.osuã‚’èª­ã¿ç¶šã‘ã‚‹ã“ã¨ã‚’é˜²ã
                     if (beatmapInfo.beatmapPath == osuBeatmapPath &&
                         beatmapInfo.lastUpdate == lastWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fff"))
                     {
                         continue;
                     }
-                    // •ˆ–Ê‚Ìƒf[ƒ^‚ğæ“¾
+                    // è­œé¢ã®ãƒ‡ãƒ¼ã‚¿ã‚’å–å¾—
                     var beatmapData = Common.TryDecodeBeatmap(osuBeatmapPath);
-                    // ŠO•”ƒc[ƒ‹‚ª‘‚«‚İ’†‚Ì‰Â”\«‚ª‚ ‚é‚½‚ßA¡‰ñ‚ÌXV‚ÍŒ©‘—‚é
+                    // å¤–éƒ¨ãƒ„ãƒ¼ãƒ«ãŒæ›¸ãè¾¼ã¿ä¸­ã®å¯èƒ½æ€§ãŒã‚ã‚‹ãŸã‚ã€ä»Šå›ã®æ›´æ–°ã¯è¦‹é€ã‚‹
                     if (beatmapData == null) continue;
                     //OsuParsers.Beatmaps.Beatmap beatmapData = BeatmapDecoder.Decode(osuBeatmapPath);
 
-                    // ƒ^ƒCƒgƒ‹
+                    // ã‚¿ã‚¤ãƒˆãƒ«
                     beatmapInfo.title = beatmapData.MetadataSection.Title;
                     beatmapInfo.titleUnicode = beatmapData.Version <= 9 ? beatmapData.MetadataSection.Title : beatmapData.MetadataSection.TitleUnicode;
-                    // ƒA[ƒeƒBƒXƒg
+                    // ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆ
                     beatmapInfo.artist = beatmapData.MetadataSection.Artist;
                     beatmapInfo.artistUnicode = beatmapData.Version <= 9 ? beatmapData.MetadataSection.Artist : beatmapData.MetadataSection.ArtistUnicode;
-                    // ƒ}ƒbƒp[–¼
+                    // ãƒãƒƒãƒ‘ãƒ¼å
                     beatmapInfo.creator = beatmapData.MetadataSection.Creator;
-                    // Diff–¼
+                    // Diffå
                     beatmapInfo.version = beatmapData.MetadataSection.Version;
                     beatmapInfo.source = beatmapData.MetadataSection.Source;
                     beatmapInfo.tags = beatmapData.MetadataSection.Tags;
                     beatmapInfo.previewTime = beatmapData.GeneralSection.PreviewTime;
-                    // •ˆ–Ê‚ÌƒpƒX
+                    // è­œé¢ã®ãƒ‘ã‚¹
                     beatmapInfo.beatmapPath = osuBeatmapPath;
-                    // BG‚ÌƒpƒX
+                    // BGã®ãƒ‘ã‚¹
                     string backgroundPath = beatmapData.EventsSection.BackgroundImage != null ?
                                                          Path.Combine(songsPath ?? "",
                                                          baseAddresses.Beatmap.FolderName ?? "",
                                                          beatmapData.EventsSection.BackgroundImage) : "";
                     beatmapInfo.backgroundPath = backgroundPath ?? "";
-                    // “Ç‚İ‚İ’†‚ÉXV‚³‚ê‚½ê‡‚ÉŸ‚Ìü‰ñ‚Å“Ç‚İ‚İ’¼‚¹‚é‚æ‚¤A“Ç‚İ‚Ş‘O‚Éæ“¾‚µ‚½XV“ú‚ğg‚¤
+                    // èª­ã¿è¾¼ã¿ä¸­ã«æ›´æ–°ã•ã‚ŒãŸå ´åˆã«æ¬¡ã®å‘¨å›ã§èª­ã¿è¾¼ã¿ç›´ã›ã‚‹ã‚ˆã†ã€èª­ã¿è¾¼ã‚€å‰ã«å–å¾—ã—ãŸæ›´æ–°æ—¥æ™‚ã‚’ä½¿ã†
                     beatmapInfo.lastUpdate = lastWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
                     if (beatmapInfo.backgroundPath != "")
                     {
@@ -188,16 +188,16 @@ namespace osu_taiko_Mapping_Helper
                 }
                 catch (Exception ex)
                 {
-                    // ‚±‚ÌException‚ÍErrorƒƒO‚É‘‚«‚Ş‚Æ—e—Ê‚ª–c‘å‚É‚È‚Á‚Ä‚µ‚Ü‚¤‚½‚ßA
-                    // ErrorƒƒO‚É‚Í‘‚©‚¸ConsoleƒƒO‚Éo—Í
+                    // ã“ã®Exceptionã¯Errorãƒ­ã‚°ã«æ›¸ãè¾¼ã‚€ã¨å®¹é‡ãŒè†¨å¤§ã«ãªã£ã¦ã—ã¾ã†ãŸã‚ã€
+                    // Errorãƒ­ã‚°ã«ã¯æ›¸ã‹ãšConsoleãƒ­ã‚°ã«å‡ºåŠ›
                     Console.WriteLine(ex);
                 }
             }
         }
         /// <summary>
-        /// ‹N“®’†‚Ìosu!‚ÌƒvƒƒZƒX‚ğæ“¾‚·‚é
+        /// èµ·å‹•ä¸­ã®osu!ã®ãƒ—ãƒ­ã‚»ã‚¹ã‚’å–å¾—ã™ã‚‹
         /// </summary>
-        /// <returns>osu!‚ÌƒvƒƒZƒX (‹N“®‚µ‚Ä‚¢‚È‚¢ê‡‚Ínull)</returns>
+        /// <returns>osu!ã®ãƒ—ãƒ­ã‚»ã‚¹ (èµ·å‹•ã—ã¦ã„ãªã„å ´åˆã¯null)</returns>
         private Process? GetOsuProcess()
         {
             if (osuProcess != null)
@@ -211,12 +211,12 @@ namespace osu_taiko_Mapping_Helper
                 }
                 catch (Exception ex)
                 {
-                    // I—¹‚µ‚½‚©Šm”F‚Å‚«‚È‚¢ê‡‚ÍA’T‚µ’¼‚·
+                    // çµ‚äº†ã—ãŸã‹ç¢ºèªã§ããªã„å ´åˆã¯ã€æ¢ã—ç›´ã™
                     Console.WriteLine(ex);
                 }
                 osuProcess.Dispose();
                 osuProcess = null;
-                // I—¹‚µ‚½’¼Œã‚ÍA‚·‚®‚É’T‚µ’¼‚·
+                // çµ‚äº†ã—ãŸç›´å¾Œã¯ã€ã™ãã«æ¢ã—ç›´ã™
                 nextOsuProcessSearchTime = DateTime.MinValue;
             }
             if (DateTime.Now < nextOsuProcessSearchTime)
@@ -230,7 +230,7 @@ namespace osu_taiko_Mapping_Helper
                 return null;
             }
             osuProcess = processes[0];
-            // g‚í‚È‚¢ƒvƒƒZƒX‚Í”jŠü‚·‚é
+            // ä½¿ã‚ãªã„ãƒ—ãƒ­ã‚»ã‚¹ã¯ç ´æ£„ã™ã‚‹
             foreach (var other in processes.Skip(1))
             {
                 other.Dispose();
@@ -238,8 +238,8 @@ namespace osu_taiko_Mapping_Helper
             return osuProcess;
         }
         /// <summary>
-        /// UpdateMemoryData‚Åæ“¾‚µ‚½osu‚Ìƒƒ‚ƒŠƒf[ƒ^‚ğg—p‚µA
-        /// •ˆ–Ê‚ÌBG‚âMetadata‚ğƒRƒ“ƒgƒ[ƒ‹‚Éİ’è‚·‚é
+        /// UpdateMemoryDataã§å–å¾—ã—ãŸosuã®ãƒ¡ãƒ¢ãƒªãƒ‡ãƒ¼ã‚¿ã‚’ä½¿ç”¨ã—ã€
+        /// è­œé¢ã®BGã‚„Metadataã‚’ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã«è¨­å®šã™ã‚‹
         /// </summary>
         private async void UpdateBeatmapInfo()
         {
@@ -253,7 +253,7 @@ namespace osu_taiko_Mapping_Helper
                     {
                         continue;
                     }
-                    // ‘O‰ñæ“¾‚µ‚½ƒf[ƒ^‚Æ“¯‚¶ê‡‚Íˆ—‚ğs‚í‚È‚¢
+                    // å‰å›å–å¾—ã—ãŸãƒ‡ãƒ¼ã‚¿ã¨åŒã˜å ´åˆã¯å‡¦ç†ã‚’è¡Œã‚ãªã„
                     if (preBeatmapInfo.version == beatmapInfo.version &&
                         preBeatmapInfo.beatmapPath == beatmapInfo.beatmapPath &&
                         preBeatmapInfo.lastUpdate == beatmapInfo.lastUpdate)
@@ -264,7 +264,7 @@ namespace osu_taiko_Mapping_Helper
                     preBeatmapInfo.artistUnicode = beatmapInfo.artistUnicode;
                     preBeatmapInfo.titleUnicode = beatmapInfo.titleUnicode;
                     preBeatmapInfo.creator = beatmapInfo.creator;
-                    // ƒeƒLƒXƒgƒ‰ƒxƒ‹‚É•ˆ–Ê‚Ìî•ñ‚ğ‘‚«‚Ş
+                    // ãƒ†ã‚­ã‚¹ãƒˆãƒ©ãƒ™ãƒ«ã«è­œé¢ã®æƒ…å ±ã‚’æ›¸ãè¾¼ã‚€
                     lblFileName.Text = config.unicodeSupport == 1 ?
                                        (beatmapInfo.artistUnicode.Replace("&", "&&") +
                                        (beatmapInfo.artistUnicode == string.Empty ? "" : " - ") +
@@ -288,14 +288,14 @@ namespace osu_taiko_Mapping_Helper
                 }
                 catch (Exception ex)
                 {
-                    // ‚±‚ÌException‚ÍErrorƒƒO‚É‘‚«‚Ş‚Æ—e—Ê‚ª–c‘å‚É‚È‚Á‚Ä‚µ‚Ü‚¤‚½‚ßA
-                    // ErrorƒƒO‚É‚Í‘‚©‚¸ConsoleƒƒO‚Éo—Í
+                    // ã“ã®Exceptionã¯Errorãƒ­ã‚°ã«æ›¸ãè¾¼ã‚€ã¨å®¹é‡ãŒè†¨å¤§ã«ãªã£ã¦ã—ã¾ã†ãŸã‚ã€
+                    // Errorãƒ­ã‚°ã«ã¯æ›¸ã‹ãšConsoleãƒ­ã‚°ã«å‡ºåŠ›
                     Console.WriteLine(ex);
                 }
             }
         }
         /// <summary>
-        /// ƒRƒ“ƒgƒ[ƒ‹‚Ì‰Šú‰»ˆ—
+        /// ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã®åˆæœŸåŒ–å‡¦ç†
         /// </summary>
         private void InitializeControls()
         {
@@ -371,17 +371,17 @@ namespace osu_taiko_Mapping_Helper
             tabSetType.ItemSize = new Size(Constants.TAB_MAX_ITEM_SIZE / tabSetType.Controls.Count, tabSetType.ItemSize.Height);
         }
         /// <summary>
-        /// ŒvZ•û–@(“™·E“™”ä)‚ÌƒRƒ“ƒgƒ[ƒ‹‚Ì‰Šú‰»ˆ—
+        /// è¨ˆç®—æ–¹æ³•(ç­‰å·®ãƒ»ç­‰æ¯”)ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã®åˆæœŸåŒ–å‡¦ç†
         /// </summary>
         /// <remarks>
-        /// İ’èƒtƒ@ƒCƒ‹‚É•Û‘¶‚³‚ê‚Ä‚¢‚é‘O‰ñ‚Ìó‘Ô‚É–ß‚·
+        /// è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«ä¿å­˜ã•ã‚Œã¦ã„ã‚‹å‰å›ã®çŠ¶æ…‹ã«æˆ»ã™
         /// </remarks>
         private void InitializeCalculationControls()
         {
-            // ‰Šú‰»’†‚Éİ’èƒtƒ@ƒCƒ‹‚Öã‘‚«•Û‘¶‚³‚ê‚È‚¢‚æ‚¤AƒCƒxƒ“ƒg‚ğˆê“I‚ÉŠO‚·
+            // åˆæœŸåŒ–ä¸­ã«è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã¸ä¸Šæ›¸ãä¿å­˜ã•ã‚Œãªã„ã‚ˆã†ã€ã‚¤ãƒ™ãƒ³ãƒˆã‚’ä¸€æ™‚çš„ã«å¤–ã™
             rdoArithmetic.CheckedChanged -= rdoArithmetic_CheckedChanged;
             rdoGeometric.CheckedChanged -= rdoGeometric_CheckedChanged;
-            // “™”äˆÈŠO‚Ì’l‚Ìê‡‚Í“™·‚É‚·‚é
+            // ç­‰æ¯”ä»¥å¤–ã®å€¤ã®å ´åˆã¯ç­‰å·®ã«ã™ã‚‹
             bool isGeometric = config.calculationCode == Constants.CALCULATION_GEOMETRIC;
             rdoGeometric.Checked = isGeometric;
             rdoArithmetic.Checked = !isGeometric;
@@ -391,16 +391,16 @@ namespace osu_taiko_Mapping_Helper
             rdoGeometric.CheckedChanged += rdoGeometric_CheckedChanged;
         }
         /// <summary>
-        /// ƒIƒtƒZƒbƒgŠÖ˜A‚ÌƒRƒ“ƒgƒ[ƒ‹‚Ì‰Šú‰»ˆ—
+        /// ã‚ªãƒ•ã‚»ãƒƒãƒˆé–¢é€£ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã®åˆæœŸåŒ–å‡¦ç†
         /// </summary>
         /// <remarks>
-        /// ˆê’U‚·‚×‚Ä‚ÌƒIƒtƒZƒbƒg‚Ìƒ`ƒFƒbƒN‚ğŠO‚µAİ’è‰æ–Ê‚Å‘I‘ğ‚µ‚Ä‚¢‚éƒIƒtƒZƒbƒgƒ‚[ƒh‚Ìƒ`ƒFƒbƒN‚Ì‚İ
-        /// İ’èƒtƒ@ƒCƒ‹‚É•Û‘¶‚³‚ê‚Ä‚¢‚é‘O‰ñ‚Ìó‘Ô‚É–ß‚·
+        /// ä¸€æ—¦ã™ã¹ã¦ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã®ãƒã‚§ãƒƒã‚¯ã‚’å¤–ã—ã€è¨­å®šç”»é¢ã§é¸æŠã—ã¦ã„ã‚‹ã‚ªãƒ•ã‚»ãƒƒãƒˆãƒ¢ãƒ¼ãƒ‰ã®ãƒã‚§ãƒƒã‚¯ã®ã¿
+        /// è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«ä¿å­˜ã•ã‚Œã¦ã„ã‚‹å‰å›ã®çŠ¶æ…‹ã«æˆ»ã™
         /// </remarks>
         private void InitializeOffsetControls()
         {
-            // ‰Šú‰»’†‚ÉCheckedChanged/TextChanged‚ªŒÄ‚Î‚ê‚é‚ÆA‘I‘ğ‚µ‚Ä‚¢‚È‚¢ƒ‚[ƒh‚Ìó‘Ô‚Ü‚Å
-            // İ’èƒtƒ@ƒCƒ‹‚Éã‘‚«•Û‘¶‚³‚ê‚Ä‚µ‚Ü‚¤‚½‚ßAƒCƒxƒ“ƒg‚ğˆê“I‚ÉŠO‚·
+            // åˆæœŸåŒ–ä¸­ã«CheckedChanged/TextChangedãŒå‘¼ã°ã‚Œã‚‹ã¨ã€é¸æŠã—ã¦ã„ãªã„ãƒ¢ãƒ¼ãƒ‰ã®çŠ¶æ…‹ã¾ã§
+            // è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«ä¸Šæ›¸ãä¿å­˜ã•ã‚Œã¦ã—ã¾ã†ãŸã‚ã€ã‚¤ãƒ™ãƒ³ãƒˆã‚’ä¸€æ™‚çš„ã«å¤–ã™
             chkEnableHexaOffset.CheckedChanged -= chkEnableHexaOffset_CheckedChanged;
             chkEnableDuoOffset.CheckedChanged -= chkEnableDuoOffset_CheckedChanged;
             chkEnableOffset.CheckedChanged -= chkEnableOffset_CheckedChanged;
@@ -408,13 +408,13 @@ namespace osu_taiko_Mapping_Helper
             bool isHexaMode = config.offsetMode == 0;
             // 1/16(1/12) offset
             chkEnableHexaOffset.Checked = isHexaMode && config.offsetHexa == 1;
-            // 1/12 offset‚Í1/16 offset‚ª—LŒø‚Èê‡‚Ì‚İ—LŒø‚É‚·‚é
+            // 1/12 offsetã¯1/16 offsetãŒæœ‰åŠ¹ãªå ´åˆã®ã¿æœ‰åŠ¹ã«ã™ã‚‹
             chkEnableDuoOffset.Checked = chkEnableHexaOffset.Checked && config.offsetDuo == 1;
-            // msw’è‚Ìoffset
+            // msæŒ‡å®šã®offset
             chkEnableOffset.Checked = !isHexaMode && config.offsetMs == 1;
             txtOffset.Text = config.offsetMsValue ?? string.Empty;
             FormUtils.SetChkEnableOffset(chkEnableOffset.Checked, txtOffset);
-            // “ü—Í’l‚É”½‰f‚·‚é (ƒIƒtƒZƒbƒg‚Ì—LŒø‰»İ’è‚Í‘I‘ğ‚µ‚Ä‚¢‚éƒ‚[ƒh‚Ìƒ`ƒFƒbƒN‚ÅŒˆ‚ß‚é)
+            // å…¥åŠ›å€¤ã«åæ˜ ã™ã‚‹ (ã‚ªãƒ•ã‚»ãƒƒãƒˆã®æœ‰åŠ¹åŒ–è¨­å®šã¯é¸æŠã—ã¦ã„ã‚‹ãƒ¢ãƒ¼ãƒ‰ã®ãƒã‚§ãƒƒã‚¯ã§æ±ºã‚ã‚‹)
             userInputTempData.isOffset = isHexaMode ? chkEnableHexaOffset.Checked : chkEnableOffset.Checked;
             userInputTempData.isDuoOffset = chkEnableDuoOffset.Checked;
             userInputTempData.offset = txtOffset.Text;
@@ -424,7 +424,7 @@ namespace osu_taiko_Mapping_Helper
             txtOffset.TextChanged += txtOffset_TextChanged;
         }
         /// <summary>
-        /// ˆ—€–Úƒ^ƒu‚ª"Objects‚Ì‚İ"‚Ì‚ÌƒRƒ“ƒgƒ[ƒ‹‚Ì‰Šú‰»ˆ—
+        /// å‡¦ç†é …ç›®ã‚¿ãƒ–ãŒ"Objectsã®ã¿"ã®æ™‚ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã®åˆæœŸåŒ–å‡¦ç†
         /// </summary>
         private void InitializeHitObjectsControls()
         {
@@ -460,7 +460,7 @@ namespace osu_taiko_Mapping_Helper
                                       chkEnableSvTo);
         }
         /// <summary>
-        /// ˆ—€–Úƒ^ƒu‚ª"ƒr[ƒgƒXƒiƒbƒvŠÔŠu"‚Ì‚ÌƒRƒ“ƒgƒ[ƒ‹‚Ì‰Šú‰»ˆ—
+        /// å‡¦ç†é …ç›®ã‚¿ãƒ–ãŒ"ãƒ“ãƒ¼ãƒˆã‚¹ãƒŠãƒƒãƒ—é–“éš”"ã®æ™‚ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã®åˆæœŸåŒ–å‡¦ç†
         /// </summary>
         private void InitializeBeatSnapControls()
         {
@@ -478,7 +478,7 @@ namespace osu_taiko_Mapping_Helper
                                       chkEnableSvTo);
         }
         /// <summary>
-        /// ˆ—€–Úƒ^ƒu‚ª"—Îü"‚Ì‚ÌƒRƒ“ƒgƒ[ƒ‹‚Ì‰Šú‰»ˆ—
+        /// å‡¦ç†é …ç›®ã‚¿ãƒ–ãŒ"ç·‘ç·š"ã®æ™‚ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã®åˆæœŸåŒ–å‡¦ç†
         /// </summary>
         private void InitializeGreenLineControls()
         {
@@ -496,7 +496,7 @@ namespace osu_taiko_Mapping_Helper
                                       chkEnableSvTo);
         }
         /// <summary>
-        /// ˆ—€–Úƒ^ƒu‚ª"Ôü"‚Ì‚ÌƒRƒ“ƒgƒ[ƒ‹‚Ì‰Šú‰»ˆ—
+        /// å‡¦ç†é …ç›®ã‚¿ãƒ–ãŒ"èµ¤ç·š"ã®æ™‚ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã®åˆæœŸåŒ–å‡¦ç†
         /// </summary>
         private void InitializeRedLineControls()
         {
@@ -516,26 +516,26 @@ namespace osu_taiko_Mapping_Helper
 
         }
         /// <summary>
-        /// ƒƒCƒ“ˆ—(SV Editor)
+        /// ãƒ¡ã‚¤ãƒ³å‡¦ç†(SV Editor)
         /// </summary>
-        /// <param name="executeCode">ÀsƒR[ƒh</param>
+        /// <param name="executeCode">å®Ÿè¡Œã‚³ãƒ¼ãƒ‰</param>
         private void ExecuteSvEditProcess(int executeCode)
         {
             bool isSvCalculation = false;
-            // “ü—Í’l‚Æ•ˆ–Êî•ñ‚ªæ“¾‚Å‚«‚Ä‚¢‚È‚¢ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+            // å…¥åŠ›å€¤ã¨è­œé¢æƒ…å ±ãŒå–å¾—ã§ãã¦ã„ãªã„å ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
             if (userInputData == null || beatmapData == null)
             {
                 Common.ShowMessageDialog("E_A-D-1");
                 return;
             }
-            // ÀsƒR[ƒh‚ÉSVˆ—‚ğs‚¤
+            // å®Ÿè¡Œã‚³ãƒ¼ãƒ‰ã«SVå‡¦ç†ã‚’è¡Œã†
             switch (executeCode)
             {
-                // “K—p
+                // é©ç”¨
                 case Constants.EXECUTE_APPLY:
                     isSvCalculation = SVCalculatorService.Apply(userInputData, beatmapData, ref timingPoints);
-                    // ŒvZŒã‚ÌSV‚ª0ˆÈ‰º‚É‚È‚é—Îü(’Ç‰Á‚·‚é—ÎüA‚Ü‚½‚Í•ÏX‚µ‚½”ÍˆÍ“à‚Ì—Îü)‚ª‚ ‚éê‡‚ÍA•ˆ–Ê‚ğ‘‚«Š·‚¦‚¸‚É’†~‚·‚é
-                    // (‘Š‘Î‘¬“x•Ï‰»‚Ì‰ÁZ‚È‚Ç‚Å0ˆÈ‰º‚É‚È‚é‚ÆA—Îü‚Ì’l‚ª-‡‚â³‚Ì’l‚É‚È‚è•ˆ–Ê‚ª‰ó‚ê‚é‚½‚ß)
+                    // è¨ˆç®—å¾Œã®SVãŒ0ä»¥ä¸‹ã«ãªã‚‹ç·‘ç·š(è¿½åŠ ã™ã‚‹ç·‘ç·šã€ã¾ãŸã¯å¤‰æ›´ã—ãŸç¯„å›²å†…ã®ç·‘ç·š)ãŒã‚ã‚‹å ´åˆã¯ã€è­œé¢ã‚’æ›¸ãæ›ãˆãšã«ä¸­æ­¢ã™ã‚‹
+                    // (ç›¸å¯¾é€Ÿåº¦å¤‰åŒ–ã®åŠ ç®—ãªã©ã§0ä»¥ä¸‹ã«ãªã‚‹ã¨ã€ç·‘ç·šã®å€¤ãŒ-âˆã‚„æ­£ã®å€¤ã«ãªã‚Šè­œé¢ãŒå£Šã‚Œã‚‹ãŸã‚)
                     if (isSvCalculation &&
                         (timingPoints.Any(tp => !(tp.sv > 0)) ||
                          beatmapData.timingPoints.Any(tp => !tp.isRedLine &&
@@ -551,18 +551,18 @@ namespace osu_taiko_Mapping_Helper
                     beatmapData.timingPoints = beatmapData.timingPoints.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0).ToList();
                     timingPoints.Clear();
                     break;
-                // íœ
+                // å‰Šé™¤
                 case Constants.EXECUTE_REMOVE:
                     isSvCalculation = SVCalculatorService.Remove(userInputData, beatmapData);
                     break;
             }
             if (!isSvCalculation)
             {
-                // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                 Common.ShowMessageDialog("E_A-P-1");
                 return;
             }
-            // ƒoƒbƒNƒAƒbƒv‚ğì¬‚·‚é
+            // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ã‚’ä½œæˆã™ã‚‹
             if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
             {
                 Common.ShowMessageDialog("E_A-P-1");
@@ -572,42 +572,42 @@ namespace osu_taiko_Mapping_Helper
             {
                 if (!SettingHelper.ResetBackupFile(config))
                 {
-                    // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                    // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                     Common.ShowMessageDialog("E_A-P-1");
                     return;
                 }
             }
-            // ƒfƒoƒbƒO—pCSVo—Í
-            // “à—eŠm”F‚È‚Ç‚Ég‚Á‚Ä‚Ë
+            // ãƒ‡ãƒãƒƒã‚°ç”¨CSVå‡ºåŠ›
+            // å†…å®¹ç¢ºèªãªã©ã«ä½¿ã£ã¦ã­
             //if (!Utils.Helper.Debug.ExportToCsvFile(beatmapData, this.backupDirectoryName))
-            // osuƒtƒ@ƒCƒ‹‚Éã‘‚«‚·‚é
+            // osuãƒ•ã‚¡ã‚¤ãƒ«ã«ä¸Šæ›¸ãã™ã‚‹
             if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath))
             {
-                // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                 Common.ShowMessageDialog("E_A-P-1");
                 return;
             }
 #if DEBUG
-            // ƒfƒoƒbƒO—pƒ†[ƒU[“ü—Íƒf[ƒ^o—Í
+            // ãƒ‡ãƒãƒƒã‚°ç”¨ãƒ¦ãƒ¼ã‚¶ãƒ¼å…¥åŠ›ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
             if (!Utils.Helper.Debug.ExportToUserInputData(userInputData))
             {
-                // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                 Common.ShowMessageDialog("E_A-P-1");
                 return;
             }
 #endif
-            // ¬Œ÷‚µ‚½ê‡‚ÍƒƒbƒZ[ƒWƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+            // æˆåŠŸã—ãŸå ´åˆã¯ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
             Common.ShowMessageDialog("I_A-P-1", Constants.DIALOG_OPTION_MODELESS);
             this.Activate();
             return;
         }
         /// <summary>
-        /// ƒƒCƒ“ˆ—(Utility)
+        /// ãƒ¡ã‚¤ãƒ³å‡¦ç†(Utility)
         /// </summary>
-        /// <returns>ˆ—‚ª<br/>E³íI—¹‚µ‚½ê‡‚Ítrue<br/>EˆÙíI—¹‚µ‚½ê‡‚Ífalse</returns>
+        /// <returns>å‡¦ç†ãŒ<br/>ãƒ»æ­£å¸¸çµ‚äº†ã—ãŸå ´åˆã¯true<br/>ãƒ»ç•°å¸¸çµ‚äº†ã—ãŸå ´åˆã¯false</returns>
         private void ExecuteUtilityProcess()
         {
-            // •ˆ–Êî•ñ‚ªƒŠƒAƒ‹ƒ^ƒCƒ€‚Åæ“¾‚Å‚«‚Ä‚¢‚È‚¢ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+            // è­œé¢æƒ…å ±ãŒãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ ã§å–å¾—ã§ãã¦ã„ãªã„å ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
             if (targetBeatmapInfo.beatmapPath == null || targetBeatmapInfo.beatmapPath == string.Empty)
             {
                 return;
@@ -629,14 +629,14 @@ namespace osu_taiko_Mapping_Helper
                     switch (BeatmapHelper.ExportToAllOsuFiles(beatmapsPath, userInputUtilityData, targetBeatmapInfo))
                     {
                         case 0:
-                            // ³íI—¹‚µ‚½ê‡Aæ‚Ìˆ—‚ğ‘±s
+                            // æ­£å¸¸çµ‚äº†ã—ãŸå ´åˆã€å…ˆã®å‡¦ç†ã‚’ç¶šè¡Œ
                             break;
                         case 1:
-                            // “Ç‚İ‚İ‚É¸”s‚µ‚½diff‚ª‚ ‚Á‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                            // èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ãŸdiffãŒã‚ã£ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                             Common.ShowMessageDialog("E_A-D-1");
                             return;
                         default:
-                            // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                            // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                             Common.ShowMessageDialog("E_A-P-1");
                             return;
                     }
@@ -648,7 +648,7 @@ namespace osu_taiko_Mapping_Helper
                     break;
                 case Constants.UTILITY_TAG_EDIT:
                 case Constants.UTILITY_SETTING_COPIER:
-                    // ƒ^ƒO“à‚Ì‰üsƒR[ƒh‚ğæ‚èœ‚­
+                    // ã‚¿ã‚°å†…ã®æ”¹è¡Œã‚³ãƒ¼ãƒ‰ã‚’å–ã‚Šé™¤ã
                     userInputUtilityData.tags = txtTags.Text.Replace("\r", string.Empty).Replace("\n", string.Empty);
                     if (string.IsNullOrEmpty(beatmapDirectory) ||
                         (userInputUtilityData.utilityCode == Constants.UTILITY_SETTING_COPIER && beatmapData == null))
@@ -659,14 +659,14 @@ namespace osu_taiko_Mapping_Helper
                     switch (BeatmapHelper.ExportToAllOsuFiles(beatmapsPath, userInputUtilityData, targetBeatmapInfo, timingPoints))
                     {
                         case 0:
-                            // ³íI—¹‚µ‚½ê‡Aæ‚Ìˆ—‚ğ‘±s
+                            // æ­£å¸¸çµ‚äº†ã—ãŸå ´åˆã€å…ˆã®å‡¦ç†ã‚’ç¶šè¡Œ
                             break;
                         case 1:
-                            // “Ç‚İ‚İ‚É¸”s‚µ‚½diff‚ª‚ ‚Á‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                            // èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ãŸdiffãŒã‚ã£ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                             Common.ShowMessageDialog("E_A-D-1");
                             return;
                         default:
-                            // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                            // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                             Common.ShowMessageDialog("E_A-P-1");
                             return;
                     }
@@ -677,13 +677,13 @@ namespace osu_taiko_Mapping_Helper
                     }
                     break;
                 case Constants.UTILITY_HITSOUND:
-                    // •ˆ–Êî•ñ‚ªæ“¾‚Å‚«‚Ä‚¢‚È‚¢ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                    // è­œé¢æƒ…å ±ãŒå–å¾—ã§ãã¦ã„ãªã„å ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                     if (beatmapData == null)
                     {
                         Common.ShowMessageDialog("E_A-D-1");
                         return;
                     }
-                    // ƒoƒbƒNƒAƒbƒv‚ğì¬‚·‚é
+                    // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ã‚’ä½œæˆã™ã‚‹
                     if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
                     {
                         Common.ShowMessageDialog("E_A-P-1");
@@ -693,20 +693,20 @@ namespace osu_taiko_Mapping_Helper
                     {
                         if (!SettingHelper.ResetBackupFile(config))
                         {
-                            // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                            // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                             Common.ShowMessageDialog("E_A-P-1");
                             return;
                         }
                     }
                     if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath, userInputUtilityData))
                     {
-                        // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                        // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
                     }
                     break;
                 case Constants.UTILITY_NOTES_POSITION:
-                    // •ˆ–Êî•ñ‚ªæ“¾‚Å‚«‚Ä‚¢‚È‚¢ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                    // è­œé¢æƒ…å ±ãŒå–å¾—ã§ãã¦ã„ãªã„å ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                     if (beatmapData == null)
                     {
                         Common.ShowMessageDialog("E_A-D-1");
@@ -721,7 +721,7 @@ namespace osu_taiko_Mapping_Helper
                     userInputUtilityData.finisherDonY = config.finisherDonY;
                     userInputUtilityData.finisherKatX = config.finisherKatX;
                     userInputUtilityData.finisherKatY = config.finisherKatY;
-                    // ƒoƒbƒNƒAƒbƒv‚ğì¬‚·‚é
+                    // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ã‚’ä½œæˆã™ã‚‹
                     if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
                     {
                         Common.ShowMessageDialog("E_A-P-1");
@@ -731,44 +731,44 @@ namespace osu_taiko_Mapping_Helper
                     {
                         if (!SettingHelper.ResetBackupFile(config))
                         {
-                            // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                            // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                             Common.ShowMessageDialog("E_A-P-1");
                             return;
                         }
                     }
                     if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath, userInputUtilityData))
                     {
-                        // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                        // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
                     }
                     break;
                 case Constants.UTILITY_RESNAP:
-                    // •ˆ–Êî•ñ‚ªæ“¾‚Å‚«‚Ä‚¢‚È‚¢ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                    // è­œé¢æƒ…å ±ãŒå–å¾—ã§ãã¦ã„ãªã„å ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                     if (beatmapData == null)
                     {
                         Common.ShowMessageDialog("E_A-D-1");
                         return;
                     }
-                    // “ü—Í’l‚ğUserInputDataƒNƒ‰ƒX‚ÉŠi”[
+                    // å…¥åŠ›å€¤ã‚’UserInputDataã‚¯ãƒ©ã‚¹ã«æ ¼ç´
                     switch (UserInputUtilityDataHelper.SetResnapTimingData(userInputUtilityData,
                                                                            txtResnapTimingFrom.Text,
                                                                            txtResnapTimingTo.Text))
                     {
                         case 1:
-                            // ³íI—¹‚µ‚½ê‡Aæ‚Ìˆ—‚ğ‘±s
+                            // æ­£å¸¸çµ‚äº†ã—ãŸå ´åˆã€å…ˆã®å‡¦ç†ã‚’ç¶šè¡Œ
                             break;
                         default:
-                            // €³í/ˆÙíI—¹‚µ‚½ê‡‚ÍAˆ—‚ğI—¹
+                            // æº–æ­£å¸¸/ç•°å¸¸çµ‚äº†ã—ãŸå ´åˆã¯ã€å‡¦ç†ã‚’çµ‚äº†
                             return;
                     }
                     if (!ResnapService.Apply(userInputUtilityData, beatmapData))
                     {
-                        // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                        // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
                     }
-                    // ƒoƒbƒNƒAƒbƒv‚ğì¬‚·‚é
+                    // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ã‚’ä½œæˆã™ã‚‹
                     if (!BeatmapHelper.CreateBackup(targetBeatmapInfo.beatmapPath, targetBackupDirectoryName))
                     {
                         Common.ShowMessageDialog("E_A-P-1");
@@ -778,43 +778,43 @@ namespace osu_taiko_Mapping_Helper
                     {
                         if (!SettingHelper.ResetBackupFile(config))
                         {
-                            // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                            // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                             Common.ShowMessageDialog("E_A-P-1");
                             return;
                         }
                     }
                     if (!BeatmapHelper.ExportToOsuFile(beatmapData, targetBeatmapInfo.beatmapPath, userInputUtilityData))
                     {
-                        // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                        // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                         Common.ShowMessageDialog("E_A-P-1");
                         return;
                     }
                     break;
             }
-            // ¬Œ÷‚µ‚½ê‡‚ÍƒƒbƒZ[ƒWƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+            // æˆåŠŸã—ãŸå ´åˆã¯ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
             Common.ShowMessageDialog("I_A-P-1", Constants.DIALOG_OPTION_MODELESS);
             this.Activate();
             return;
         }
         /// <summary>
-        /// •ˆ–Êî•ñ‚Ìæ“¾ˆ—
+        /// è­œé¢æƒ…å ±ã®å–å¾—å‡¦ç†
         /// </summary>
-        /// <returns>ˆ—‚ª<br/>E³íI—¹‚µ‚½ê‡‚Ítrue<br/>EˆÙíI—¹‚µ‚½ê‡‚Ífalse</returns>
+        /// <returns>å‡¦ç†ãŒ<br/>ãƒ»æ­£å¸¸çµ‚äº†ã—ãŸå ´åˆã¯true<br/>ãƒ»ç•°å¸¸çµ‚äº†ã—ãŸå ´åˆã¯false</returns>
         private bool GetBeatmap()
         {
-            // ˆ—‘ÎÛ‚Ì•ˆ–Ê‚ğAˆ—‚ğn‚ß‚½“_‚Ì•ˆ–Ê‚ÉŒÅ’è‚·‚é
+            // å‡¦ç†å¯¾è±¡ã®è­œé¢ã‚’ã€å‡¦ç†ã‚’å§‹ã‚ãŸæ™‚ç‚¹ã®è­œé¢ã«å›ºå®šã™ã‚‹
             SetTargetBeatmap();
-            // •ˆ–Êî•ñ‚ªƒŠƒAƒ‹ƒ^ƒCƒ€‚Åæ“¾‚Å‚«‚Ä‚¢‚È‚¢ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+            // è­œé¢æƒ…å ±ãŒãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ ã§å–å¾—ã§ãã¦ã„ãªã„å ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
             if (targetBeatmapInfo.beatmapPath == null || targetBeatmapInfo.beatmapPath == string.Empty)
             {
                 return false;
             }
-            // •ˆ–Ê‚Ì“à—e‚ğæ“¾‚·‚é
+            // è­œé¢ã®å†…å®¹ã‚’å–å¾—ã™ã‚‹
             beatmapData = BeatmapHelper.GetBeatmapData(targetBeatmapInfo.beatmapPath);
 #if DEBUG
             Utils.Helper.Debug.ExportHitObejcts(beatmapData);
 #endif
-            // æ“¾‚Å‚«‚È‚©‚Á‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+            // å–å¾—ã§ããªã‹ã£ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
             if (beatmapData.version == string.Empty)
             {
                 return false;
@@ -822,11 +822,11 @@ namespace osu_taiko_Mapping_Helper
             return true;
         }
         /// <summary>
-        /// ˆ—‘ÎÛ‚Ì•ˆ–Êî•ñ‚ğİ’è‚·‚é
+        /// å‡¦ç†å¯¾è±¡ã®è­œé¢æƒ…å ±ã‚’è¨­å®šã™ã‚‹
         /// </summary>
         /// <remarks>
-        /// beatmapInfo‚Íosu!‚ÌŠÄ‹ƒXƒŒƒbƒh‚ª‘‚«Š·‚¦‚é‚½‚ßAˆ—’†‚Éosu!‚Å•ˆ–Ê‚ğØ‚è‘Ö‚¦‚Ä‚à
-        /// ˆ—‚ğn‚ß‚½“_‚Ì•ˆ–Ê‚É‘‚«‚Ş‚æ‚¤Aˆ—‚ÌŠJn‚ÉƒRƒs[‚ğæ‚é
+        /// beatmapInfoã¯osu!ã®ç›£è¦–ã‚¹ãƒ¬ãƒƒãƒ‰ãŒæ›¸ãæ›ãˆã‚‹ãŸã‚ã€å‡¦ç†ä¸­ã«osu!ã§è­œé¢ã‚’åˆ‡ã‚Šæ›¿ãˆã¦ã‚‚
+        /// å‡¦ç†ã‚’å§‹ã‚ãŸæ™‚ç‚¹ã®è­œé¢ã«æ›¸ãè¾¼ã‚€ã‚ˆã†ã€å‡¦ç†ã®é–‹å§‹æ™‚ã«ã‚³ãƒ”ãƒ¼ã‚’å–ã‚‹
         /// </remarks>
         private void SetTargetBeatmap()
         {
@@ -847,14 +847,14 @@ namespace osu_taiko_Mapping_Helper
                 tags = info.tags,
                 lastUpdate = info.lastUpdate
             };
-            // ƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_–¼‚ÍAƒRƒs[‚µ‚½•ˆ–Ê‚ÌƒpƒX‚©‚ç‹‚ß‚é (ƒpƒX‚Æ‚¸‚ê‚È‚¢‚æ‚¤‚É‚·‚é‚½‚ß)
+            // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€åã¯ã€ã‚³ãƒ”ãƒ¼ã—ãŸè­œé¢ã®ãƒ‘ã‚¹ã‹ã‚‰æ±‚ã‚ã‚‹ (ãƒ‘ã‚¹ã¨ãšã‚Œãªã„ã‚ˆã†ã«ã™ã‚‹ãŸã‚)
             targetBackupDirectoryName = Path.GetFileNameWithoutExtension(info.beatmapPath ?? string.Empty);
         }
         /// <summary>
-        /// Œ»’n“_‚Ìî•ñ‚ğæ“¾‚·‚éˆ—
+        /// ç¾åœ°ç‚¹ã®æƒ…å ±ã‚’å–å¾—ã™ã‚‹å‡¦ç†
         /// </summary>
-        /// <param name="control">İ’è‘ÎÛ‚ÌƒRƒ“ƒgƒ[ƒ‹</param>
-        /// <param name="setCode">ƒZƒbƒgƒR[ƒh(0:Timing 1:SV 2:Volume)</param>
+        /// <param name="control">è¨­å®šå¯¾è±¡ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«</param>
+        /// <param name="setCode">ã‚»ãƒƒãƒˆã‚³ãƒ¼ãƒ‰(0:Timing 1:SV 2:Volume)</param>
         private void SetCurrentTimeInfo(Control control, int setCode)
         {
             try
@@ -886,7 +886,7 @@ namespace osu_taiko_Mapping_Helper
             }
         }
         /// <summary>
-        /// ƒRƒ“ƒtƒBƒO‚Ì‰Šú‰»ˆ—
+        /// ã‚³ãƒ³ãƒ•ã‚£ã‚°ã®åˆæœŸåŒ–å‡¦ç†
         /// </summary>
         private void InitializeConfig()
         {
@@ -896,11 +896,11 @@ namespace osu_taiko_Mapping_Helper
             this.Text = Constants.APP_NAME + " ver" + Constants.APP_VERSION;
         }
         /// <summary>
-        /// ƒ‰ƒxƒ‹ƒeƒLƒXƒg‚Ì‰Šú‰»ˆ—
+        /// ãƒ©ãƒ™ãƒ«ãƒ†ã‚­ã‚¹ãƒˆã®åˆæœŸåŒ–å‡¦ç†
         /// </summary>
         private void InitializeLabelText()
         {
-            // MainForm(‹¤’Ê)
+            // MainForm(å…±é€š)
             Common.SetLabelText(btnBackup, "LBL_BACKUPS");
             Common.SetLabelText(btnViewSetting, "LBL_SETTINGS");
             // MainForm(SVEditor)
@@ -967,7 +967,7 @@ namespace osu_taiko_Mapping_Helper
             Common.SetLabelText(btnApplyResnap, "LBL_UTILITY_APPLY");
         }
         /// <summary>
-        /// "BPM‚Åw’è"‚Ìƒ`ƒFƒbƒN‚ÆA‘Š‘Î‘¬“x•Ï‰»ƒIƒvƒVƒ‡ƒ“‚Ìƒ`ƒFƒbƒN‚Ì—LŒø/–³Œø‚ğİ’è‚·‚é
+        /// "BPMã§æŒ‡å®š"ã®ãƒã‚§ãƒƒã‚¯ã¨ã€ç›¸å¯¾é€Ÿåº¦å¤‰åŒ–ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã®ãƒã‚§ãƒƒã‚¯ã®æœ‰åŠ¹/ç„¡åŠ¹ã‚’è¨­å®šã™ã‚‹
         /// </summary>
         private void UpdateSvBpmControls()
         {
@@ -975,17 +975,17 @@ namespace osu_taiko_Mapping_Helper
             chkRelative.Enabled = !chkSvBpm.Checked;
         }
         #endregion
-        #region ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
-        #region ‹¤’Ê‹@”\‚ÌƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
+        #region ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
+        #region å…±é€šæ©Ÿèƒ½ã®ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
         private void osu_taiko_Mapping_Helper_Load(object sender, EventArgs e)
         {
             Common.InitializeDirectoryAndFiles();
             Common.WriteInfoMessage("LOG_I-START");
-            // ApplicationExitƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰‚ğ’Ç‰Á
+            // ApplicationExitã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©ã‚’è¿½åŠ 
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
-            // Configƒtƒ@ƒCƒ‹İ’è“Ç‚İ‚İ
+            // Configãƒ•ã‚¡ã‚¤ãƒ«è¨­å®šèª­ã¿è¾¼ã¿
             InitializeConfig();
-            // ‚»‚ê‚¼‚ê‚ÌƒRƒ“ƒgƒ[ƒ‹‚Ì‰Šú‰»ˆ—
+            // ãã‚Œãã‚Œã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã®åˆæœŸåŒ–å‡¦ç†
             InitializeControls();
             InitializeLabelText();
             picDisplayBg.Controls.Add(lblFileName);
@@ -995,7 +995,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void osu_taiko_Mapping_Helper_Shown(object sender, EventArgs e)
         {
-            // ‰æ–Ê‚ªƒ^ƒXƒNƒo[‚Æ”í‚ç‚È‚¢‚æ‚¤‚ÉˆÊ’u‚Ì•ÏX‚ğ‚·‚é
+            // ç”»é¢ãŒã‚¿ã‚¹ã‚¯ãƒãƒ¼ã¨è¢«ã‚‰ãªã„ã‚ˆã†ã«ä½ç½®ã®å¤‰æ›´ã‚’ã™ã‚‹
             if (this.WindowState == System.Windows.Forms.FormWindowState.Normal)
             {
                 var rect = System.Windows.Forms.Screen.GetWorkingArea(this);
@@ -1010,7 +1010,7 @@ namespace osu_taiko_Mapping_Helper
             string backupPath = BeatmapHelper.GetBackupDirectoryPath(this.backupDirectoryName);
             switch (e.KeyData)
             {
-                //mCtrln+mSn‚ª‰Ÿ‚³‚ê‚½‚çSV“K—p/íœ‚ğÀs‚·‚é
+                //ï¼»Ctrlï¼½+ï¼»Sï¼½ãŒæŠ¼ã•ã‚ŒãŸã‚‰SVé©ç”¨/å‰Šé™¤ã‚’å®Ÿè¡Œã™ã‚‹
                 case (Keys.S | Keys.Control):
                     if (pnlGroupSvEditor.Visible)
                     {
@@ -1027,34 +1027,34 @@ namespace osu_taiko_Mapping_Helper
                         }
                     }
                     break;
-                //mCtrln+mZn‚ª‰Ÿ‚³‚ê‚½‚çÀs‘O‚Ì•ˆ–Ê‚É‚·‚é
+                //ï¼»Ctrlï¼½+ï¼»Zï¼½ãŒæŠ¼ã•ã‚ŒãŸã‚‰å®Ÿè¡Œå‰ã®è­œé¢ã«ã™ã‚‹
                 case (Keys.Z | Keys.Control):
-                    // SV Editor‚ğ•\¦‚µ‚Ä‚¢‚éê‡‚Ì‚İÀs‚·‚é
+                    // SV Editorã‚’è¡¨ç¤ºã—ã¦ã„ã‚‹å ´åˆã®ã¿å®Ÿè¡Œã™ã‚‹
                     if (!pnlGroupSvEditor.Visible)
                     {
                         break;
                     }
-                    // ƒeƒLƒXƒgƒ{ƒbƒNƒX‚Ì“ü—Í‚Ìæ‚èÁ‚µ(Ctrl+Z)‚ªˆê‚És‚í‚ê‚È‚¢‚æ‚¤AƒL[‚ğq‚ÌƒRƒ“ƒgƒ[ƒ‹‚É“n‚³‚È‚¢
+                    // ãƒ†ã‚­ã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã®å…¥åŠ›ã®å–ã‚Šæ¶ˆã—(Ctrl+Z)ãŒä¸€ç·’ã«è¡Œã‚ã‚Œãªã„ã‚ˆã†ã€ã‚­ãƒ¼ã‚’å­ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã«æ¸¡ã•ãªã„
                     e.SuppressKeyPress = true;
-                    // •ˆ–Êî•ñ‚ªƒŠƒAƒ‹ƒ^ƒCƒ€‚Åæ“¾‚Å‚«‚Ä‚¢‚È‚¢ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                    // è­œé¢æƒ…å ±ãŒãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ ã§å–å¾—ã§ãã¦ã„ãªã„å ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                     if (this.beatmapInfo.beatmapPath == null || this.beatmapInfo.beatmapPath == string.Empty)
                     {
                         Common.ShowMessageDialog("E_A-D-1");
                         return;
                     }
-                    // ƒoƒbƒNƒAƒbƒvƒfƒBƒŒƒNƒgƒŠ‚ªŒ©‚Â‚©‚ç‚È‚¢ê‡‚Í‰½‚à‚µ‚È‚¢
+                    // ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãŒè¦‹ã¤ã‹ã‚‰ãªã„å ´åˆã¯ä½•ã‚‚ã—ãªã„
                     if (!Directory.Exists(backupPath))
                     {
                         break;
                     }
                     if (BeatmapHelper.ExportToPreviousOsuFile(this.beatmapInfo.beatmapPath, this.backupDirectoryName))
                     {
-                        // ¬Œ÷‚µ‚½ê‡‚ÍŠ®—¹ƒƒbƒZ[ƒW‚ğ•\¦‚·‚é
+                        // æˆåŠŸã—ãŸå ´åˆã¯å®Œäº†ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è¡¨ç¤ºã™ã‚‹
                         Common.ShowMessageDialog("I_A-P-2", Constants.DIALOG_OPTION_MODELESS);
                     }
                     else
                     {
-                        // ¸”s‚µ‚½ê‡‚ÍƒGƒ‰[ƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é
+                        // å¤±æ•—ã—ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹
                         Common.ShowMessageDialog("E_A-P-1");
                     }
                     break;
@@ -1063,15 +1063,15 @@ namespace osu_taiko_Mapping_Helper
         }
         private void Application_ApplicationExit(object? sender, EventArgs e)
         {
-            //ApplicationExitƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰‚ğíœ
+            //ApplicationExitã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©ã‚’å‰Šé™¤
             Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
             config.ConfigSave();
             Common.WriteInfoMessage("LOG_I-END");
         }
         private void btnBackup_Click(object sender, EventArgs e)
         {
-            // ‘I‘ğ‚µ‚Ä‚¢‚é•ˆ–Ê‚ÌƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_‚ª‚ ‚éê‡‚Í‚»‚ÌƒtƒHƒ‹ƒ_‚ğA
-            // –³‚¢ê‡(•ˆ–Ê‚ğ‘I‘ğ‚µ‚Ä‚¢‚È‚¢A‚Ü‚¾ƒoƒbƒNƒAƒbƒv‚ğì‚Á‚Ä‚¢‚È‚¢)‚ÍƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_‘S‘Ì‚ğƒGƒNƒXƒvƒ[ƒ‰‚ÅŠJ‚­
+            // é¸æŠã—ã¦ã„ã‚‹è­œé¢ã®ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€ãŒã‚ã‚‹å ´åˆã¯ãã®ãƒ•ã‚©ãƒ«ãƒ€ã‚’ã€
+            // ç„¡ã„å ´åˆ(è­œé¢ã‚’é¸æŠã—ã¦ã„ãªã„ã€ã¾ã ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ã‚’ä½œã£ã¦ã„ãªã„)ã¯ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€å…¨ä½“ã‚’ã‚¨ã‚¯ã‚¹ãƒ—ãƒ­ãƒ¼ãƒ©ã§é–‹ã
             string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY;
             if (!string.IsNullOrEmpty(beatmapInfo.beatmapPath))
             {
@@ -1085,7 +1085,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnViewSetting_Click(object sender, EventArgs e)
         {
-            // İ’è‰æ–Ê‚ğ•\¦‚·‚é
+            // è¨­å®šç”»é¢ã‚’è¡¨ç¤ºã™ã‚‹
             Form settingForm = new SettingForm(config);
             settingForm.ShowDialog();
             InitializeLabelText();
@@ -1098,7 +1098,7 @@ namespace osu_taiko_Mapping_Helper
             }
             if (preUnicodeSupport != config.unicodeSupport)
             {
-                // ƒeƒLƒXƒgƒ‰ƒxƒ‹‚É•ˆ–Ê‚Ìî•ñ‚ğ‘‚«‚Ş
+                // ãƒ†ã‚­ã‚¹ãƒˆãƒ©ãƒ™ãƒ«ã«è­œé¢ã®æƒ…å ±ã‚’æ›¸ãè¾¼ã‚€
                 lblFileName.Text = config.unicodeSupport == 1 ?
                                    (beatmapInfo.artistUnicode.Replace("&", "&&") +
                                    (beatmapInfo.artistUnicode == string.Empty ? "" : " - ") +
@@ -1115,11 +1115,11 @@ namespace osu_taiko_Mapping_Helper
                                    (beatmapInfo.version == string.Empty ? "" : "]"));
             }
             userInputTempData.offsetMode = config.offsetMode;
-            // İ’è‰æ–Ê‚ÅƒIƒtƒZƒbƒgƒ‚[ƒh‚ª•ÏX‚³‚ê‚Ä‚¢‚éê‡‚ª‚ ‚é‚½‚ßAƒIƒtƒZƒbƒg‚Ìƒ`ƒFƒbƒN‚ğ‰Šú‰»‚·‚é
-            // (íœƒ^ƒu‚ğŠJ‚¢‚Ä‚¢‚éê‡‚ÍtabExecuteType_SelectedIndexChanged‚ÅƒIƒtƒZƒbƒg‚ª–³Œø‚É‚È‚é‚½‚ßAæ‚ÉŒÄ‚Ô)
+            // è¨­å®šç”»é¢ã§ã‚ªãƒ•ã‚»ãƒƒãƒˆãƒ¢ãƒ¼ãƒ‰ãŒå¤‰æ›´ã•ã‚Œã¦ã„ã‚‹å ´åˆãŒã‚ã‚‹ãŸã‚ã€ã‚ªãƒ•ã‚»ãƒƒãƒˆã®ãƒã‚§ãƒƒã‚¯ã‚’åˆæœŸåŒ–ã™ã‚‹
+            // (å‰Šé™¤ã‚¿ãƒ–ã‚’é–‹ã„ã¦ã„ã‚‹å ´åˆã¯tabExecuteType_SelectedIndexChangedã§ã‚ªãƒ•ã‚»ãƒƒãƒˆãŒç„¡åŠ¹ã«ãªã‚‹ãŸã‚ã€å…ˆã«å‘¼ã¶)
             InitializeOffsetControls();
             tabSetType_SelectedIndexChanged(sender, e);
-            // ˆ—€–Úƒ^ƒu‚ğì‚è’¼‚·‚Ææ“ª‚Ìƒ^ƒu‚É–ß‚é‚½‚ßAì‚è’¼‚·‘O‚É‘I‘ğ‚µ‚Ä‚¢‚½ƒ^ƒu‚ğŠo‚¦‚Ä‚¨‚­
+            // å‡¦ç†é …ç›®ã‚¿ãƒ–ã‚’ä½œã‚Šç›´ã™ã¨å…ˆé ­ã®ã‚¿ãƒ–ã«æˆ»ã‚‹ãŸã‚ã€ä½œã‚Šç›´ã™å‰ã«é¸æŠã—ã¦ã„ãŸã‚¿ãƒ–ã‚’è¦šãˆã¦ãŠã
             int selectedSetTypeIndex = tabSetType.SelectedIndex;
             menuStrip1.Items.Clear();
             tabSetType.Controls.Clear();
@@ -1141,10 +1141,10 @@ namespace osu_taiko_Mapping_Helper
                 tabSetType.Controls.Add(tabBeatSnap);
             }
             tabSetType.ItemSize = new Size(Constants.TAB_MAX_ITEM_SIZE / tabSetType.Controls.Count, tabSetType.ItemSize.Height);
-            // ì‚è’¼‚·‘O‚É‘I‘ğ‚µ‚Ä‚¢‚½ˆ—€–Úƒ^ƒu‚É–ß‚· (Ú×ƒ‚[ƒh‚Ì•ÏX‚Åƒ^ƒu‚ª–³‚­‚È‚Á‚½ê‡‚Íæ“ª‚Ìƒ^ƒu‚É‚·‚é)
+            // ä½œã‚Šç›´ã™å‰ã«é¸æŠã—ã¦ã„ãŸå‡¦ç†é …ç›®ã‚¿ãƒ–ã«æˆ»ã™ (è©³ç´°ãƒ¢ãƒ¼ãƒ‰ã®å¤‰æ›´ã§ã‚¿ãƒ–ãŒç„¡ããªã£ãŸå ´åˆã¯å…ˆé ­ã®ã‚¿ãƒ–ã«ã™ã‚‹)
             tabSetType.SelectedIndex = (selectedSetTypeIndex >= 0 && selectedSetTypeIndex < tabSetType.TabCount) ? selectedSetTypeIndex : 0;
             tabSetType_SelectedIndexChanged(sender, e);
-            // ˆ—€–Úƒ^ƒu‚Ì‰Šú‰»‚ÅSV‚ÌƒRƒ“ƒgƒ[ƒ‹‚ª—LŒø‚É‚È‚é‚½‚ßAÅŒã‚É“K—p/íœƒ^ƒu‚É‡‚í‚¹‚Ä—LŒø/–³Œø‚ğİ’è‚µ’¼‚·
+            // å‡¦ç†é …ç›®ã‚¿ãƒ–ã®åˆæœŸåŒ–ã§SVã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãŒæœ‰åŠ¹ã«ãªã‚‹ãŸã‚ã€æœ€å¾Œã«é©ç”¨/å‰Šé™¤ã‚¿ãƒ–ã«åˆã‚ã›ã¦æœ‰åŠ¹/ç„¡åŠ¹ã‚’è¨­å®šã—ç›´ã™
             tabExecuteType_SelectedIndexChanged(sender, e);
             preUnicodeSupport = config.unicodeSupport;
         }
@@ -1180,7 +1180,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void bGSetterToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // BG‚Ì‰æ‘œ‚ÆABG‚Ìs(À•W)‚Ì—¼•û‚ªæ“¾‚Å‚«‚Ä‚¢‚éê‡‚Ì‚İBGİ’è‰æ–Ê‚ğ•\¦‚·‚é
+            // BGã®ç”»åƒã¨ã€BGã®è¡Œ(åº§æ¨™)ã®ä¸¡æ–¹ãŒå–å¾—ã§ãã¦ã„ã‚‹å ´åˆã®ã¿BGè¨­å®šç”»é¢ã‚’è¡¨ç¤ºã™ã‚‹
             if (!string.IsNullOrEmpty(beatmapInfo.backgroundPath) && !string.IsNullOrEmpty(beatmapInfo.background))
             {
                 BGSetterForm bgSetterForm = new(config,
@@ -1197,7 +1197,7 @@ namespace osu_taiko_Mapping_Helper
 
         }
         #endregion
-        #region SV Editorƒ^ƒu‚ÌƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
+        #region SV Editorã‚¿ãƒ–ã®ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
         private void txtTimingFrom_Enter(object sender, EventArgs e)
         {
             this.txtTimingFrom.SelectAll();
@@ -1224,7 +1224,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnSwapTiming_Click(object sender, EventArgs e)
         {
-            // Timing‚Ìn“_‚ÆI“_‚ğ“ü‚ê‘Ö‚¦‚é
+            // Timingã®å§‹ç‚¹ã¨çµ‚ç‚¹ã‚’å…¥ã‚Œæ›¿ãˆã‚‹
             string timingBuff = "";
             timingBuff = txtTimingFrom.Text;
             txtTimingFrom.Text = txtTimingTo.Text;
@@ -1242,7 +1242,7 @@ namespace osu_taiko_Mapping_Helper
         {
             if (userInputTempData.isSvBpm)
             {
-                // BPM‚Åw’è‚·‚éê‡‚ÍASV‚Æ‚Í•Ê‚ÉŠo‚¦‚é
+                // BPMã§æŒ‡å®šã™ã‚‹å ´åˆã¯ã€SVã¨ã¯åˆ¥ã«è¦šãˆã‚‹
                 userInputTempData.svBpmFrom = txtSvFrom.Text;
             }
             else if (userInputTempData.isRelative)
@@ -1269,7 +1269,7 @@ namespace osu_taiko_Mapping_Helper
         {
             if (userInputTempData.isSvBpm)
             {
-                // BPM‚Åw’è‚·‚éê‡‚ÍASV‚Æ‚Í•Ê‚ÉŠo‚¦‚é
+                // BPMã§æŒ‡å®šã™ã‚‹å ´åˆã¯ã€SVã¨ã¯åˆ¥ã«è¦šãˆã‚‹
                 userInputTempData.svBpmTo = txtSvTo.Text;
             }
             else if (chkRelative.Checked)
@@ -1294,7 +1294,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnSetSvFrom_Click(object sender, EventArgs e)
         {
-            // BPM‚Åw’è‚·‚éê‡‚ÍAŒ»’n“_‚ÌŒ©‚½–ÚBPM‚ğ“ü‚ê‚é
+            // BPMã§æŒ‡å®šã™ã‚‹å ´åˆã¯ã€ç¾åœ°ç‚¹ã®è¦‹ãŸç›®BPMã‚’å…¥ã‚Œã‚‹
             SetCurrentTimeInfo(txtSvFrom, userInputTempData.isSvBpm ? Constants.SET_VISUAL_BPM : Constants.SET_SV);
         }
         private void btnSetSvTo_Click(object sender, EventArgs e)
@@ -1326,10 +1326,10 @@ namespace osu_taiko_Mapping_Helper
             userInputTempData.isSvBpm = chkSvBpm.Checked;
             if (chkSvBpm.Checked)
             {
-                // BPM‚Åw’è‚·‚éê‡‚Í‘Š‘Î‘¬“x•Ï‰»ƒIƒvƒVƒ‡ƒ“‚ğg‚í‚È‚¢‚½‚ßAƒ`ƒFƒbƒN‚ğŠO‚·
+                // BPMã§æŒ‡å®šã™ã‚‹å ´åˆã¯ç›¸å¯¾é€Ÿåº¦å¤‰åŒ–ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã‚’ä½¿ã‚ãªã„ãŸã‚ã€ãƒã‚§ãƒƒã‚¯ã‚’å¤–ã™
                 chkRelative.Checked = false;
             }
-            // SV‚Ì“ü—Í—“‚ğA‘I‚ñ‚¾w’è•û–@‚Å‘O‰ñ“ü—Í‚µ‚½’l‚É–ß‚·
+            // SVã®å…¥åŠ›æ¬„ã‚’ã€é¸ã‚“ã æŒ‡å®šæ–¹æ³•ã§å‰å›å…¥åŠ›ã—ãŸå€¤ã«æˆ»ã™
             txtSvFrom.Text = chkSvBpm.Checked ? userInputTempData.svBpmFrom : userInputTempData.svFrom;
             txtSvTo.Text = chkSvBpm.Checked ? userInputTempData.svBpmTo : userInputTempData.svTo;
             Common.SetLabelText(btnSetSvFrom, userInputTempData.isSvBpm ? "LBL_SET_BPM_FROM" : "LBL_SET_SV_FROM");
@@ -1338,7 +1338,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnSwapSv_Click(object sender, EventArgs e)
         {
-            // SV‚Ìn“_‚ÆI“_‚ğ“ü‚ê‘Ö‚¦‚é
+            // SVã®å§‹ç‚¹ã¨çµ‚ç‚¹ã‚’å…¥ã‚Œæ›¿ãˆã‚‹
             string SVBuff = "";
             SVBuff = txtSvFrom.Text;
             txtSvFrom.Text = txtSvTo.Text;
@@ -1370,7 +1370,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnSwapVolume_Click(object sender, EventArgs e)
         {
-            // Volume‚Ìn“_‚ÆI“_‚ğ“ü‚ê‘Ö‚¦‚é
+            // Volumeã®å§‹ç‚¹ã¨çµ‚ç‚¹ã‚’å…¥ã‚Œæ›¿ãˆã‚‹
             string volumeBuff = "";
             volumeBuff = txtVolumeFrom.Text;
             txtVolumeFrom.Text = txtVolumeTo.Text;
@@ -1402,7 +1402,7 @@ namespace osu_taiko_Mapping_Helper
         private void rdoArithmetic_CheckedChanged(object? sender, EventArgs? e)
         {
             userInputTempData.isArithmetic = rdoArithmetic.Checked;
-            // ‘I‘ğ‚³‚ê‚½ŒvZ•û–@‚ğİ’èƒtƒ@ƒCƒ‹‚É•Û‘¶‚·‚é (‘I‘ğ‚ªŠO‚ê‚½•û‚Å‚Í•Û‘¶‚µ‚È‚¢)
+            // é¸æŠã•ã‚ŒãŸè¨ˆç®—æ–¹æ³•ã‚’è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«ä¿å­˜ã™ã‚‹ (é¸æŠãŒå¤–ã‚ŒãŸæ–¹ã§ã¯ä¿å­˜ã—ãªã„)
             if (rdoArithmetic.Checked)
             {
                 config.calculationCode = Constants.CALCULATION_ARITHMETIC;
@@ -1412,7 +1412,7 @@ namespace osu_taiko_Mapping_Helper
         private void rdoGeometric_CheckedChanged(object? sender, EventArgs? e)
         {
             userInputTempData.isGeometric = rdoGeometric.Checked;
-            // ‘I‘ğ‚³‚ê‚½ŒvZ•û–@‚ğİ’èƒtƒ@ƒCƒ‹‚É•Û‘¶‚·‚é (‘I‘ğ‚ªŠO‚ê‚½•û‚Å‚Í•Û‘¶‚µ‚È‚¢)
+            // é¸æŠã•ã‚ŒãŸè¨ˆç®—æ–¹æ³•ã‚’è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«ä¿å­˜ã™ã‚‹ (é¸æŠãŒå¤–ã‚ŒãŸæ–¹ã§ã¯ä¿å­˜ã—ãªã„)
             if (rdoGeometric.Checked)
             {
                 config.calculationCode = Constants.CALCULATION_GEOMETRIC;
@@ -1552,75 +1552,75 @@ namespace osu_taiko_Mapping_Helper
         }
         private void tabSetType_DrawItem(object sender, DrawItemEventArgs e)
         {
-            //‘ÎÛ‚ÌTabControl‚ğæ“¾
+            //å¯¾è±¡ã®TabControlã‚’å–å¾—
             TabControl tab = (TabControl)sender;
-            //ƒ^ƒuƒy[ƒW‚ÌƒeƒLƒXƒg‚ğæ“¾
+            //ã‚¿ãƒ–ãƒšãƒ¼ã‚¸ã®ãƒ†ã‚­ã‚¹ãƒˆã‚’å–å¾—
             string txt = tab.TabPages[e.Index].Text;
 
-            //ƒ^ƒu‚ÌƒeƒLƒXƒg‚Æ”wŒi‚ğ•`‰æ‚·‚é‚½‚ß‚Ìƒuƒ‰ƒV‚ğŒˆ’è‚·‚é
+            //ã‚¿ãƒ–ã®ãƒ†ã‚­ã‚¹ãƒˆã¨èƒŒæ™¯ã‚’æç”»ã™ã‚‹ãŸã‚ã®ãƒ–ãƒ©ã‚·ã‚’æ±ºå®šã™ã‚‹
             Brush foreBrush, backBrush;
             if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
             {
-                //‘I‘ğ‚³‚ê‚Ä‚¢‚éƒ^ƒu‚ÌƒeƒLƒXƒg‚ğ•A”wŒi‚ğƒ‰ƒCƒgƒOƒŒ[‚Æ‚·‚é
+                //é¸æŠã•ã‚Œã¦ã„ã‚‹ã‚¿ãƒ–ã®ãƒ†ã‚­ã‚¹ãƒˆã‚’é»’ã€èƒŒæ™¯ã‚’ãƒ©ã‚¤ãƒˆã‚°ãƒ¬ãƒ¼ã¨ã™ã‚‹
                 foreBrush = Brushes.Black;
                 backBrush = Brushes.LightGray;
             }
             else
             {
-                //‘I‘ğ‚³‚ê‚Ä‚¢‚È‚¢ƒ^ƒu‚ÌƒeƒLƒXƒg‚Í•A”wŒi‚ğ”’‚Æ‚·‚é
+                //é¸æŠã•ã‚Œã¦ã„ãªã„ã‚¿ãƒ–ã®ãƒ†ã‚­ã‚¹ãƒˆã¯é»’ã€èƒŒæ™¯ã‚’ç™½ã¨ã™ã‚‹
                 foreBrush = Brushes.Black;
                 backBrush = Brushes.White;
             }
 
-            //StringFormat‚ğì¬
+            //StringFormatã‚’ä½œæˆ
             StringFormat sf = new StringFormat();
-            //’†‰›‚É•\¦‚·‚é
+            //ä¸­å¤®ã«è¡¨ç¤ºã™ã‚‹
             sf.Alignment = StringAlignment.Center;
             sf.LineAlignment = StringAlignment.Center;
 
-            //”wŒi‚Ì•`‰æ
+            //èƒŒæ™¯ã®æç”»
             e.Graphics.FillRectangle(backBrush, e.Bounds);
-            //Text‚Ì•`‰æ
-#pragma warning disable CS8604 // Null QÆˆø”‚Ì‰Â”\«‚ª‚ ‚è‚Ü‚·B
+            //Textã®æç”»
+#pragma warning disable CS8604 // Null å‚ç…§å¼•æ•°ã®å¯èƒ½æ€§ãŒã‚ã‚Šã¾ã™ã€‚
             e.Graphics.DrawString(txt, e.Font, foreBrush, e.Bounds, sf);
-#pragma warning restore CS8604 // Null QÆˆø”‚Ì‰Â”\«‚ª‚ ‚è‚Ü‚·B
+#pragma warning restore CS8604 // Null å‚ç…§å¼•æ•°ã®å¯èƒ½æ€§ãŒã‚ã‚Šã¾ã™ã€‚
 #if DEBUG
             System.Diagnostics.Debug.WriteLine(e.Font);
 #endif
         }
         private void tabExecuteType_DrawItem(object sender, DrawItemEventArgs e)
         {
-            //‘ÎÛ‚ÌTabControl‚ğæ“¾
+            //å¯¾è±¡ã®TabControlã‚’å–å¾—
             TabControl tab = (TabControl)sender;
-            //ƒ^ƒuƒy[ƒW‚ÌƒeƒLƒXƒg‚ğæ“¾
+            //ã‚¿ãƒ–ãƒšãƒ¼ã‚¸ã®ãƒ†ã‚­ã‚¹ãƒˆã‚’å–å¾—
             string txt = tab.TabPages[e.Index].Text;
 
-            //ƒ^ƒu‚ÌƒeƒLƒXƒg‚Æ”wŒi‚ğ•`‰æ‚·‚é‚½‚ß‚Ìƒuƒ‰ƒV‚ğŒˆ’è‚·‚é
+            //ã‚¿ãƒ–ã®ãƒ†ã‚­ã‚¹ãƒˆã¨èƒŒæ™¯ã‚’æç”»ã™ã‚‹ãŸã‚ã®ãƒ–ãƒ©ã‚·ã‚’æ±ºå®šã™ã‚‹
             Brush foreBrush, backBrush;
             if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
             {
-                //‘I‘ğ‚³‚ê‚Ä‚¢‚éƒ^ƒu‚ÌƒeƒLƒXƒg‚ğ•A”wŒi‚ğƒ‰ƒCƒgƒOƒŒ[‚Æ‚·‚é
+                //é¸æŠã•ã‚Œã¦ã„ã‚‹ã‚¿ãƒ–ã®ãƒ†ã‚­ã‚¹ãƒˆã‚’é»’ã€èƒŒæ™¯ã‚’ãƒ©ã‚¤ãƒˆã‚°ãƒ¬ãƒ¼ã¨ã™ã‚‹
                 foreBrush = Brushes.Black;
                 backBrush = Brushes.LightGray;
             }
             else
             {
-                //‘I‘ğ‚³‚ê‚Ä‚¢‚È‚¢ƒ^ƒu‚ÌƒeƒLƒXƒg‚Í•A”wŒi‚ğ”’‚Æ‚·‚é
+                //é¸æŠã•ã‚Œã¦ã„ãªã„ã‚¿ãƒ–ã®ãƒ†ã‚­ã‚¹ãƒˆã¯é»’ã€èƒŒæ™¯ã‚’ç™½ã¨ã™ã‚‹
                 foreBrush = Brushes.Black;
                 backBrush = Brushes.White;
             }
 
-            //StringFormat‚ğì¬
+            //StringFormatã‚’ä½œæˆ
             StringFormat sf = new StringFormat();
-            //’†‰›‚É•\¦‚·‚é
+            //ä¸­å¤®ã«è¡¨ç¤ºã™ã‚‹
             sf.Alignment = StringAlignment.Center;
             sf.LineAlignment = StringAlignment.Center;
 
-            //”wŒi‚Ì•`‰æ
+            //èƒŒæ™¯ã®æç”»
             e.Graphics.FillRectangle(backBrush, e.Bounds);
-#pragma warning disable CS8604 // Null QÆˆø”‚Ì‰Â”\«‚ª‚ ‚è‚Ü‚·B
+#pragma warning disable CS8604 // Null å‚ç…§å¼•æ•°ã®å¯èƒ½æ€§ãŒã‚ã‚Šã¾ã™ã€‚
             e.Graphics.DrawString(txt, e.Font, foreBrush, e.Bounds, sf);
-#pragma warning restore CS8604 // Null QÆˆø”‚Ì‰Â”\«‚ª‚ ‚è‚Ü‚·B
+#pragma warning restore CS8604 // Null å‚ç…§å¼•æ•°ã®å¯èƒ½æ€§ãŒã‚ã‚Šã¾ã™ã€‚
 #if DEBUG
             System.Diagnostics.Debug.WriteLine(e.Font);
 #endif
@@ -1629,20 +1629,20 @@ namespace osu_taiko_Mapping_Helper
         {
             try
             {
-                // “ü—Í’l‚ğUserInputDataƒNƒ‰ƒX‚ÉŠi”[
+                // å…¥åŠ›å€¤ã‚’UserInputDataã‚¯ãƒ©ã‚¹ã«æ ¼ç´
                 if (!UserInputDataHelper.SetUserInputData(userInputTempData,
                                                           Constants.EXECUTE_APPLY,
                                                           ref userInputData))
                 {
                     return;
                 }
-                // •ˆ–Êî•ñ‚Ìæ“¾
+                // è­œé¢æƒ…å ±ã®å–å¾—
                 if (!GetBeatmap())
                 {
                     Common.ShowMessageDialog("E_A-D-1");
                     return;
                 }
-                // ’Ç‰Áˆ—‚ÌÀs
+                // è¿½åŠ å‡¦ç†ã®å®Ÿè¡Œ
                 ExecuteSvEditProcess(Constants.EXECUTE_APPLY);
             }
             catch (Exception ex)
@@ -1701,7 +1701,7 @@ namespace osu_taiko_Mapping_Helper
         {
             if (rdoAllHitObjects.Checked)
             {
-                // ‚·‚×‚Ä‚ÌobjectŠÖ˜A‚ÌƒRƒ“ƒgƒ[ƒ‹‚ğ—LŒø‰»
+                // ã™ã¹ã¦ã®objecté–¢é€£ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã‚’æœ‰åŠ¹åŒ–
                 rdoOnlyOnNotes.Visible = false;
                 rdoOnlyOffNotes.Visible = false;
             }
@@ -1731,7 +1731,7 @@ namespace osu_taiko_Mapping_Helper
         {
             if (rdoOnlyBookMark.Checked)
             {
-                // ƒuƒbƒNƒ}[ƒN‚Ì‚İ‚Ìê‡‚ÍƒIƒtƒZƒbƒg‚ÌƒRƒ“ƒgƒ[ƒ‹‚ğ”ñ•\¦‚É‚·‚é
+                // ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯ã®ã¿ã®å ´åˆã¯ã‚ªãƒ•ã‚»ãƒƒãƒˆã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã‚’éè¡¨ç¤ºã«ã™ã‚‹
                 chkEnableOffset.Visible = false;
                 txtOffset.Visible = false;
                 lblMiliSecond.Visible = false;
@@ -1749,7 +1749,7 @@ namespace osu_taiko_Mapping_Helper
             }
             else
             {
-                // ƒIƒtƒZƒbƒg‚ÌƒRƒ“ƒgƒ[ƒ‹‚ğ•\¦‚·‚é
+                // ã‚ªãƒ•ã‚»ãƒƒãƒˆã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã‚’è¡¨ç¤ºã™ã‚‹
                 chkEnableOffset.Visible = true;
                 txtOffset.Visible = true;
                 lblMiliSecond.Visible = true;
@@ -1787,7 +1787,7 @@ namespace osu_taiko_Mapping_Helper
         {
             if (rdoOnlySpecificHitObject.Checked)
             {
-                // “Á’è‚ÌobjectŠÖ˜A‚ÌƒRƒ“ƒgƒ[ƒ‹‚ğ—LŒø‰»
+                // ç‰¹å®šã®objecté–¢é€£ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã‚’æœ‰åŠ¹åŒ–
                 picSpecificNormalDong.Visible = true;
                 picSpecificFinisherDong.Visible = true;
                 picSpecificNormalKa.Visible = true;
@@ -1799,7 +1799,7 @@ namespace osu_taiko_Mapping_Helper
                 lblSpecificFinisher.Visible = true;
                 lblSpecificGridLine.Visible = true;
                 lblSpecificGridLine2.Visible = true;
-                // pictureBox‚Éİ’è‚³‚ê‚Ä‚¢‚éMouseDownƒCƒxƒ“ƒg‚ğİ’è‚·‚é
+                // pictureBoxã«è¨­å®šã•ã‚Œã¦ã„ã‚‹MouseDownã‚¤ãƒ™ãƒ³ãƒˆã‚’è¨­å®šã™ã‚‹
                 picSpecificNormalDong.MouseDown += picSpecificNormalDong_MouseDown;
                 picSpecificFinisherDong.MouseDown += picSpecificFinisherDong_MouseDown;
                 picSpecificNormalKa.MouseDown += picSpecificNormalKa_MouseDown;
@@ -1812,7 +1812,7 @@ namespace osu_taiko_Mapping_Helper
             }
             else
             {
-                // “Á’è‚ÌobjectŠÖ˜A‚ÌƒRƒ“ƒgƒ[ƒ‹‚ğ–³Œø‰»
+                // ç‰¹å®šã®objecté–¢é€£ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã‚’ç„¡åŠ¹åŒ–
                 picSpecificNormalDong.Visible = false;
                 picSpecificFinisherDong.Visible = false;
                 picSpecificNormalKa.Visible = false;
@@ -1824,7 +1824,7 @@ namespace osu_taiko_Mapping_Helper
                 lblSpecificFinisher.Visible = false;
                 lblSpecificGridLine.Visible = false;
                 lblSpecificGridLine2.Visible = false;
-                // pictureBox‚Éİ’è‚³‚ê‚Ä‚¢‚éMouseDownƒCƒxƒ“ƒg‚ğŠO‚·
+                // pictureBoxã«è¨­å®šã•ã‚Œã¦ã„ã‚‹MouseDownã‚¤ãƒ™ãƒ³ãƒˆã‚’å¤–ã™
                 picSpecificNormalDong.MouseDown -= picSpecificNormalDong_MouseDown;
                 picSpecificFinisherDong.MouseDown -= picSpecificFinisherDong_MouseDown;
                 picSpecificNormalKa.MouseDown -= picSpecificNormalKa_MouseDown;
@@ -1894,20 +1894,20 @@ namespace osu_taiko_Mapping_Helper
         {
             try
             {
-                // “ü—Í’l‚ğUserInputDataƒNƒ‰ƒX‚ÉŠi”[
+                // å…¥åŠ›å€¤ã‚’UserInputDataã‚¯ãƒ©ã‚¹ã«æ ¼ç´
                 if (!UserInputDataHelper.SetUserInputData(userInputTempData,
                                                           Constants.EXECUTE_REMOVE,
                                                           ref userInputData))
                 {
                     return;
                 }
-                // •ˆ–Êî•ñ‚Ìæ“¾
+                // è­œé¢æƒ…å ±ã®å–å¾—
                 if (!GetBeatmap())
                 {
                     Common.ShowMessageDialog("E_A-D-1");
                     return;
                 }
-                // íœˆ—‚ÌÀs
+                // å‰Šé™¤å‡¦ç†ã®å®Ÿè¡Œ
                 ExecuteSvEditProcess(Constants.EXECUTE_REMOVE);
             }
             catch (Exception ex)
@@ -1923,14 +1923,14 @@ namespace osu_taiko_Mapping_Helper
             }
         }
         #endregion
-        #region utilityƒ^ƒu‚ÌƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
+        #region utilityã‚¿ãƒ–ã®ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
         private void cmbHitsoundTool_SelectedIndexChanged(object sender, EventArgs e)
         {
             userInputUtilityData.hitSoundCode = cmbHitsoundTool.SelectedIndex;
         }
         private void btnApplyOffset_Click(object sender, EventArgs e)
         {
-            // •ˆ–Êî•ñ‚Ìæ“¾
+            // è­œé¢æƒ…å ±ã®å–å¾—
             if (!GetBeatmap())
             {
                 Common.ShowMessageDialog("E_A-D-1");
@@ -1941,7 +1941,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnApplyHitsound_Click(object sender, EventArgs e)
         {
-            // •ˆ–Êî•ñ‚Ìæ“¾
+            // è­œé¢æƒ…å ±ã®å–å¾—
             if (!GetBeatmap())
             {
                 Common.ShowMessageDialog("E_A-D-1");
@@ -1956,7 +1956,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnApplyNotesPosition_Click(object sender, EventArgs e)
         {
-            // •ˆ–Êî•ñ‚Ìæ“¾
+            // è­œé¢æƒ…å ±ã®å–å¾—
             if (!GetBeatmap())
             {
                 Common.ShowMessageDialog("E_A-D-1");
@@ -1972,17 +1972,17 @@ namespace osu_taiko_Mapping_Helper
         }
         private void txtTags_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // EnterƒL[‚ª‰Ÿ‚³‚ê‚½ê‡
+            // Enterã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸå ´åˆ
             if (e.KeyChar == (char)Keys.Enter)
             {
-                // “ü—Í‚ğ–³Œø‰»‚·‚é
+                // å…¥åŠ›ã‚’ç„¡åŠ¹åŒ–ã™ã‚‹
                 e.Handled = true;
             }
         }
         private void btnApplyTags_Click(object sender, EventArgs e)
         {
             userInputUtilityData.utilityCode = Constants.UTILITY_TAG_EDIT;
-            // ˆ—‘ÎÛ‚Ì•ˆ–Ê‚ğAˆ—‚ğn‚ß‚½“_‚Ì•ˆ–Ê‚ÉŒÅ’è‚·‚é
+            // å‡¦ç†å¯¾è±¡ã®è­œé¢ã‚’ã€å‡¦ç†ã‚’å§‹ã‚ãŸæ™‚ç‚¹ã®è­œé¢ã«å›ºå®šã™ã‚‹
             SetTargetBeatmap();
             ExecuteUtilityProcess();
         }
@@ -1992,7 +1992,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnApplySettingCopier_Click(object sender, EventArgs e)
         {
-            // •ˆ–Êî•ñ‚Ìæ“¾
+            // è­œé¢æƒ…å ±ã®å–å¾—
             if (!GetBeatmap())
             {
                 Common.ShowMessageDialog("E_A-D-1");
@@ -2029,7 +2029,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnSwapResnapTiming_Click(object sender, EventArgs e)
         {
-            // Timing‚Ìn“_‚ÆI“_‚ğ“ü‚ê‘Ö‚¦‚é
+            // Timingã®å§‹ç‚¹ã¨çµ‚ç‚¹ã‚’å…¥ã‚Œæ›¿ãˆã‚‹
             string timingBuff = "";
             timingBuff = txtResnapTimingFrom.Text;
             txtResnapTimingFrom.Text = txtResnapTimingTo.Text;
@@ -2042,7 +2042,7 @@ namespace osu_taiko_Mapping_Helper
         }
         private void btnApplyResnap_Click(object sender, EventArgs e)
         {
-            // •ˆ–Êî•ñ‚Ìæ“¾
+            // è­œé¢æƒ…å ±ã®å–å¾—
             if (!GetBeatmap())
             {
                 Common.ShowMessageDialog("E_A-D-1");

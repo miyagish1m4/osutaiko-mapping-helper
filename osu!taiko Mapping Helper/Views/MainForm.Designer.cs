@@ -1,4 +1,4 @@
-using System.Windows.Forms;
+Ôªøusing System.Windows.Forms;
 
 namespace osu_taiko_Mapping_Helper
 {
@@ -316,7 +316,7 @@ namespace osu_taiko_Mapping_Helper
             chkSvBpm.Size = new Size(80, 21);
             chkSvBpm.TabIndex = 43;
             chkSvBpm.TabStop = false;
-            chkSvBpm.Text = "BPMÇ≈éwíË";
+            chkSvBpm.Text = "BPM„ÅßÊåáÂÆö";
             chkSvBpm.UseVisualStyleBackColor = true;
             chkSvBpm.CheckedChanged += chkSvBpm_CheckedChanged;
             // 
@@ -330,7 +330,7 @@ namespace osu_taiko_Mapping_Helper
             rdoArithmetic.Size = new Size(90, 24);
             rdoArithmetic.TabIndex = 0;
             rdoArithmetic.TabStop = true;
-            rdoArithmetic.Text = "ìôç∑";
+            rdoArithmetic.Text = "Á≠âÂ∑Æ";
             rdoArithmetic.UseVisualStyleBackColor = true;
             rdoArithmetic.CheckedChanged += rdoArithmetic_CheckedChanged;
             // 
@@ -342,7 +342,7 @@ namespace osu_taiko_Mapping_Helper
             rdoGeometric.Name = "rdoGeometric";
             rdoGeometric.Size = new Size(90, 24);
             rdoGeometric.TabIndex = 1;
-            rdoGeometric.Text = "ìôî‰";
+            rdoGeometric.Text = "Á≠âÊØî";
             rdoGeometric.UseVisualStyleBackColor = true;
             rdoGeometric.CheckedChanged += rdoGeometric_CheckedChanged;
             // 
@@ -384,7 +384,7 @@ namespace osu_taiko_Mapping_Helper
             btnApply.Size = new Size(181, 39);
             btnApply.TabIndex = 0;
             btnApply.TabStop = false;
-            btnApply.Text = "é¿çs";
+            btnApply.Text = "ÂÆüË°å";
             btnApply.UseVisualStyleBackColor = false;
             btnApply.Click += btnApply_Click;
             // 
@@ -400,7 +400,7 @@ namespace osu_taiko_Mapping_Helper
             chkEnableOffset.Size = new Size(75, 21);
             chkEnableOffset.TabIndex = 3;
             chkEnableOffset.TabStop = false;
-            chkEnableOffset.Text = "ÉIÉtÉZÉbÉg";
+            chkEnableOffset.Text = "„Ç™„Éï„Çª„ÉÉ„Éà";
             chkEnableOffset.UseVisualStyleBackColor = true;
             chkEnableOffset.CheckedChanged += chkEnableOffset_CheckedChanged;
             // 
@@ -438,7 +438,7 @@ namespace osu_taiko_Mapping_Helper
             btnSwapTiming.Size = new Size(65, 23);
             btnSwapTiming.TabIndex = 7;
             btnSwapTiming.TabStop = false;
-            btnSwapTiming.Text = "ÅÃ";
+            btnSwapTiming.Text = "‚áî";
             btnSwapTiming.UseVisualStyleBackColor = true;
             btnSwapTiming.Click += btnSwapTiming_Click;
             // 
@@ -454,7 +454,7 @@ namespace osu_taiko_Mapping_Helper
             btnSwapSv.Size = new Size(65, 23);
             btnSwapSv.TabIndex = 6;
             btnSwapSv.TabStop = false;
-            btnSwapSv.Text = "ÅÃ";
+            btnSwapSv.Text = "‚áî";
             btnSwapSv.UseVisualStyleBackColor = true;
             btnSwapSv.Click += btnSwapSv_Click;
             // 
@@ -470,7 +470,7 @@ namespace osu_taiko_Mapping_Helper
             btnSwapVolume.Size = new Size(65, 23);
             btnSwapVolume.TabIndex = 5;
             btnSwapVolume.TabStop = false;
-            btnSwapVolume.Text = "ÅÃ";
+            btnSwapVolume.Text = "‚áî";
             btnSwapVolume.UseVisualStyleBackColor = true;
             btnSwapVolume.Click += btnSwapVolume_Click;
             // 
@@ -487,7 +487,7 @@ namespace osu_taiko_Mapping_Helper
             btnRemove.Size = new Size(181, 39);
             btnRemove.TabIndex = 10;
             btnRemove.TabStop = false;
-            btnRemove.Text = "é¿çs";
+            btnRemove.Text = "ÂÆüË°å";
             btnRemove.UseVisualStyleBackColor = false;
             btnRemove.Click += btnRemove_Click;
             // 
@@ -562,7 +562,7 @@ namespace osu_taiko_Mapping_Helper
             lblSpecificFinisher.Name = "lblSpecificFinisher";
             lblSpecificFinisher.Size = new Size(26, 42);
             lblSpecificFinisher.TabIndex = 9;
-            lblSpecificFinisher.Text = "ëÂâπïÑ";
+            lblSpecificFinisher.Text = "Â§ßÈü≥Á¨¶";
             lblSpecificFinisher.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblSpecificNormal
@@ -574,7 +574,7 @@ namespace osu_taiko_Mapping_Helper
             lblSpecificNormal.Name = "lblSpecificNormal";
             lblSpecificNormal.Size = new Size(26, 42);
             lblSpecificNormal.TabIndex = 7;
-            lblSpecificNormal.Text = "í èÌ";
+            lblSpecificNormal.Text = "ÈÄöÂ∏∏";
             lblSpecificNormal.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // picSpecificNormalSlider
@@ -642,7 +642,7 @@ namespace osu_taiko_Mapping_Helper
             tabApplyPage.RightToLeft = RightToLeft.No;
             tabApplyPage.Size = new Size(385, 289);
             tabApplyPage.TabIndex = 0;
-            tabApplyPage.Text = "ìKóp";
+            tabApplyPage.Text = "ÈÅ©Áî®";
             // 
             // pnlHexaAndDecaOffset
             // 
@@ -739,7 +739,7 @@ namespace osu_taiko_Mapping_Helper
             tabHitObjectsPage.RightToLeft = RightToLeft.No;
             tabHitObjectsPage.Size = new Size(379, 120);
             tabHitObjectsPage.TabIndex = 0;
-            tabHitObjectsPage.Text = "ObjectsÇÃÇ›";
+            tabHitObjectsPage.Text = "Objects„ÅÆ„Åø";
             // 
             // rdoOnlyOffNotes
             // 
@@ -750,7 +750,7 @@ namespace osu_taiko_Mapping_Helper
             rdoOnlyOffNotes.Name = "rdoOnlyOffNotes";
             rdoOnlyOffNotes.Size = new Size(97, 19);
             rdoOnlyOffNotes.TabIndex = 0;
-            rdoOnlyOffNotes.Text = "è¨êﬂê¸è„à»äO";
+            rdoOnlyOffNotes.Text = "Â∞èÁØÄÁ∑ö‰∏ä‰ª•Â§ñ";
             rdoOnlyOffNotes.UseVisualStyleBackColor = true;
             // 
             // rdoOnlyOnNotes
@@ -762,7 +762,7 @@ namespace osu_taiko_Mapping_Helper
             rdoOnlyOnNotes.Name = "rdoOnlyOnNotes";
             rdoOnlyOnNotes.Size = new Size(94, 19);
             rdoOnlyOnNotes.TabIndex = 1;
-            rdoOnlyOnNotes.Text = "è¨êﬂê¸è„ÇÃÇ›";
+            rdoOnlyOnNotes.Text = "Â∞èÁØÄÁ∑ö‰∏ä„ÅÆ„Åø";
             rdoOnlyOnNotes.UseVisualStyleBackColor = true;
             // 
             // pnlSpecificGroup
@@ -785,7 +785,7 @@ namespace osu_taiko_Mapping_Helper
             rdoAllHitObjects.Name = "rdoAllHitObjects";
             rdoAllHitObjects.Size = new Size(115, 19);
             rdoAllHitObjects.TabIndex = 0;
-            rdoAllHitObjects.Text = "Ç∑Ç◊ÇƒÇÃHitObject";
+            rdoAllHitObjects.Text = "„Åô„Åπ„Å¶„ÅÆHitObject";
             rdoAllHitObjects.UseVisualStyleBackColor = true;
             rdoAllHitObjects.CheckedChanged += rdoAllHitObjects_CheckedChanged;
             // 
@@ -798,7 +798,7 @@ namespace osu_taiko_Mapping_Helper
             rdoOnlyBarline.Name = "rdoOnlyBarline";
             rdoOnlyBarline.Size = new Size(61, 19);
             rdoOnlyBarline.TabIndex = 1;
-            rdoOnlyBarline.Text = "è¨êﬂê¸";
+            rdoOnlyBarline.Text = "Â∞èÁØÄÁ∑ö";
             rdoOnlyBarline.UseVisualStyleBackColor = true;
             rdoOnlyBarline.CheckedChanged += rdoOnlyBarline_CheckedChanged;
             // 
@@ -824,7 +824,7 @@ namespace osu_taiko_Mapping_Helper
             rdoOnlySpecificHitObject.Name = "rdoOnlySpecificHitObject";
             rdoOnlySpecificHitObject.Size = new Size(132, 19);
             rdoOnlySpecificHitObject.TabIndex = 3;
-            rdoOnlySpecificHitObject.Text = "ì¡íËÇÃÉIÉuÉWÉFÉNÉgÇÃÇ›";
+            rdoOnlySpecificHitObject.Text = "ÁâπÂÆö„ÅÆ„Ç™„Éñ„Ç∏„Çß„ÇØ„Éà„ÅÆ„Åø";
             rdoOnlySpecificHitObject.UseVisualStyleBackColor = true;
             rdoOnlySpecificHitObject.CheckedChanged += rdoOnlySpecificHitObject_CheckedChanged;
             // 
@@ -947,7 +947,7 @@ namespace osu_taiko_Mapping_Helper
             lblScrollSpeed.Name = "lblScrollSpeed";
             lblScrollSpeed.Size = new Size(90, 15);
             lblScrollSpeed.TabIndex = 8;
-            lblScrollSpeed.Text = "å©ÇΩñ⁄BPMê›íË";
+            lblScrollSpeed.Text = "Ë¶ã„ÅüÁõÆBPMË®≠ÂÆö";
             // 
             // txtScrollSpeed
             // 
@@ -993,7 +993,7 @@ namespace osu_taiko_Mapping_Helper
             tabRemovePage.Padding = new Padding(3);
             tabRemovePage.Size = new Size(385, 289);
             tabRemovePage.TabIndex = 1;
-            tabRemovePage.Text = "çÌèú";
+            tabRemovePage.Text = "ÂâäÈô§";
             // 
             // chkApplyEndObject
             // 
@@ -1007,7 +1007,7 @@ namespace osu_taiko_Mapping_Helper
             chkApplyEndObject.Size = new Size(84, 19);
             chkApplyEndObject.TabIndex = 2;
             chkApplyEndObject.TabStop = false;
-            chkApplyEndObject.Text = "èIì_Ç…ìKóp";
+            chkApplyEndObject.Text = "ÁµÇÁÇπ„Å´ÈÅ©Áî®";
             chkApplyEndObject.UseVisualStyleBackColor = true;
             chkApplyEndObject.CheckedChanged += chkApplyEndObject_CheckedChanged;
             // 
@@ -1023,7 +1023,7 @@ namespace osu_taiko_Mapping_Helper
             chkApplyStartObject.Size = new Size(84, 19);
             chkApplyStartObject.TabIndex = 3;
             chkApplyStartObject.TabStop = false;
-            chkApplyStartObject.Text = "énì_Ç…ìKóp";
+            chkApplyStartObject.Text = "ÂßãÁÇπ„Å´ÈÅ©Áî®";
             chkApplyStartObject.UseVisualStyleBackColor = true;
             chkApplyStartObject.CheckedChanged += chkApplyStartObject_CheckedChanged;
             // 
@@ -1036,7 +1036,7 @@ namespace osu_taiko_Mapping_Helper
             lblCalculationType.Name = "lblCalculationType";
             lblCalculationType.Size = new Size(69, 20);
             lblCalculationType.TabIndex = 2;
-            lblCalculationType.Text = "åvéZï˚ñ@";
+            lblCalculationType.Text = "Ë®àÁÆóÊñπÊ≥ï";
             // 
             // btnSetTimingFrom
             // 
@@ -1109,7 +1109,7 @@ namespace osu_taiko_Mapping_Helper
             lblRelativeBaseSv.Name = "lblRelativeBaseSv";
             lblRelativeBaseSv.Size = new Size(46, 15);
             lblRelativeBaseSv.TabIndex = 14;
-            lblRelativeBaseSv.Text = "äÓèÄSV";
+            lblRelativeBaseSv.Text = "Âü∫Ê∫ñSV";
             // 
             // rdoRelativeMultiply
             // 
@@ -1121,7 +1121,7 @@ namespace osu_taiko_Mapping_Helper
             rdoRelativeMultiply.Size = new Size(121, 24);
             rdoRelativeMultiply.TabIndex = 0;
             rdoRelativeMultiply.TabStop = true;
-            rdoRelativeMultiply.Text = "èÊéZ";
+            rdoRelativeMultiply.Text = "‰πóÁÆó";
             rdoRelativeMultiply.UseVisualStyleBackColor = true;
             rdoRelativeMultiply.CheckedChanged += rdoRelativeMultiply_CheckedChanged;
             // 
@@ -1133,7 +1133,7 @@ namespace osu_taiko_Mapping_Helper
             rdoRelativeSum.Name = "rdoRelativeSum";
             rdoRelativeSum.Size = new Size(117, 24);
             rdoRelativeSum.TabIndex = 1;
-            rdoRelativeSum.Text = "â¡éZ";
+            rdoRelativeSum.Text = "Âä†ÁÆó";
             rdoRelativeSum.UseVisualStyleBackColor = true;
             rdoRelativeSum.CheckedChanged += rdoRelativeSum_CheckedChanged;
             // 
@@ -1146,7 +1146,7 @@ namespace osu_taiko_Mapping_Helper
             chkRelative.Name = "chkRelative";
             chkRelative.Size = new Size(118, 24);
             chkRelative.TabIndex = 13;
-            chkRelative.Text = "ëäëŒë¨ìxïœâª";
+            chkRelative.Text = "Áõ∏ÂØæÈÄüÂ∫¶Â§âÂåñ";
             chkRelative.UseVisualStyleBackColor = true;
             chkRelative.CheckedChanged += chkRelative_CheckedChanged;
             // 
@@ -1163,7 +1163,7 @@ namespace osu_taiko_Mapping_Helper
             btnViewSetting.Size = new Size(181, 39);
             btnViewSetting.TabIndex = 14;
             btnViewSetting.TabStop = false;
-            btnViewSetting.Text = "ê›íË";
+            btnViewSetting.Text = "Ë®≠ÂÆö";
             btnViewSetting.UseVisualStyleBackColor = false;
             btnViewSetting.Click += btnViewSetting_Click;
             // 
@@ -1176,7 +1176,7 @@ namespace osu_taiko_Mapping_Helper
             chkEnableSvTo.Name = "chkEnableSvTo";
             chkEnableSvTo.Size = new Size(96, 19);
             chkEnableSvTo.TabIndex = 15;
-            chkEnableSvTo.Text = "èIì_ÇÃóLå¯âª";
+            chkEnableSvTo.Text = "ÁµÇÁÇπ„ÅÆÊúâÂäπÂåñ";
             chkEnableSvTo.UseVisualStyleBackColor = true;
             chkEnableSvTo.Visible = false;
             chkEnableSvTo.CheckedChanged += chkEnableSvTo_CheckedChanged;
@@ -1348,7 +1348,7 @@ namespace osu_taiko_Mapping_Helper
             chkApplyRedLines.Size = new Size(79, 49);
             chkApplyRedLines.TabIndex = 20;
             chkApplyRedLines.TabStop = false;
-            chkApplyRedLines.Text = "ê‘ê¸Ç…VolumeÇìKóp";
+            chkApplyRedLines.Text = "Ëµ§Á∑ö„Å´Volume„ÇíÈÅ©Áî®";
             chkApplyRedLines.TextAlign = ContentAlignment.TopLeft;
             chkApplyRedLines.UseVisualStyleBackColor = true;
             chkApplyRedLines.CheckedChanged += chkApplyRedLines_CheckedChanged;
@@ -1701,7 +1701,7 @@ namespace osu_taiko_Mapping_Helper
             btnSwapResnapTiming.Size = new Size(65, 23);
             btnSwapResnapTiming.TabIndex = 17;
             btnSwapResnapTiming.TabStop = false;
-            btnSwapResnapTiming.Text = "ÅÃ";
+            btnSwapResnapTiming.Text = "‚áî";
             btnSwapResnapTiming.UseVisualStyleBackColor = true;
             btnSwapResnapTiming.Click += btnSwapResnapTiming_Click;
             // 
@@ -1752,7 +1752,7 @@ namespace osu_taiko_Mapping_Helper
             btnBackup.Size = new Size(181, 39);
             btnBackup.TabIndex = 23;
             btnBackup.TabStop = false;
-            btnBackup.Text = "ÉoÉbÉNÉAÉbÉv";
+            btnBackup.Text = "„Éê„ÉÉ„ÇØ„Ç¢„ÉÉ„Éó";
             btnBackup.UseVisualStyleBackColor = false;
             btnBackup.Click += btnBackup_Click;
             // 

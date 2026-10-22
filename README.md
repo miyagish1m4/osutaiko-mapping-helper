@@ -15,7 +15,7 @@ osu!taiko の譜面編集を補助する Windows 向けツールです。
 
 - Windows
 - .NET 10 SDK
-- Visual Studio 2022 以降、または .NET CLI
+- Visual Studio 2026 以降、または .NET CLI
 - osu! stable
 
 ## 使用ライブラリ
@@ -52,6 +52,23 @@ Release 構成でビルドする場合は次のコマンドを使用します。
 dotnet build -c Release
 ```
 
+## テスト
+
+テストは `osu!taiko Mapping Helper.Tests`（xUnit）にあります。ソリューションに含まれているため、`dotnet build` でテストのプロジェクトも一緒にビルドされます。
+
+```powershell
+dotnet test
+```
+
+- テストは Windows Forms の画面も使うため、Windows で実行してください。
+- テストは一時フォルダ（`%TEMP%`）の中だけで動き、osu! の Songs フォルダの譜面や Helper の設定は書き換えません。
+- 次のテストは、環境変数を設定したときだけ動きます。設定しない場合は、何もせずに成功になります。
+
+| 環境変数 | テストの内容 |
+|---|---|
+| `OSU_SONGS_PATH` | 指定した Songs フォルダの全譜面（太鼓）で、読み込みと書き出しを確かめます。譜面は一時フォルダにコピーしてから書き出すため、元の譜面は書き換えません |
+| `OSU_HELPER_GITHUB_TEST` | `1` を指定すると、GitHub の Releases から最新版の情報を取得できるかを確かめます |
+
 ## 実行
 
 ```powershell
@@ -70,6 +87,8 @@ dotnet run --project "osu!taiko Mapping Helper/osu!taiko Mapping Helper.csproj"
 - メイン画面: `osu!taiko Mapping Helper/Views/MainForm.cs`
 - SV 計算: `osu!taiko Mapping Helper/Services/SVCalculatorService.cs`
 - 再スナップ: `osu!taiko Mapping Helper/Services/ResnapService.cs`
+- テスト: `osu!taiko Mapping Helper.Tests/`
+- ソースファイルの文字コードは UTF-8、改行は CRLF です（Shift_JIS などで保存しないでください）
 
 ## ライセンス
 
