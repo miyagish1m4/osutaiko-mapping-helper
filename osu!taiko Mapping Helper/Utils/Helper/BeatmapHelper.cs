@@ -97,6 +97,48 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
         }
         /// <summary>
+        /// beatmapのTimingPointsとDifficultyだけを取得する (TimingProperty用)
+        /// </summary>
+        /// <param name="path">beatmapのパス</param>
+        /// <returns>TimingPointsとDifficultyだけを格納した譜面情報 (取得に失敗した場合はnull)</returns>
+        internal static Beatmap? GetTimingPointsData(string path)
+        {
+            try
+            {
+                var lines = Common.ReadAllLinesShared(path);
+                var beatmap = new Beatmap();
+                string section = string.Empty;
+                foreach (var line in lines)
+                {
+                    var trimmedLine = line.Trim();
+                    // セクションの見出しで、今どのセクションの中かを切り替える
+                    if (trimmedLine.StartsWith('[') && trimmedLine.EndsWith(']'))
+                    {
+                        section = trimmedLine;
+                        continue;
+                    }
+                    if (trimmedLine == "" || trimmedLine.StartsWith("//"))
+                    {
+                        continue;
+                    }
+                    if (section == Constants.TIMING_POINTS)
+                    {
+                        beatmap.timingPoints.Add(new TimingPoint(trimmedLine));
+                    }
+                    else if (section == Constants.DIFFICULTY)
+                    {
+                        beatmap.difficulty.Add(trimmedLine);
+                    }
+                }
+                return beatmap;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
+        }
+        /// <summary>
         /// 譜面情報をセクションに区切りに変換する
         /// </summary>
         /// <param name="lines">osuファイルの中身</param>
@@ -129,8 +171,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 if (lines.Length <= 0) throw new Exception("Failed to get beatmap");
                 foreach (var line in lines)
                 {
-                    // 空白行は何もしない
-                    if (line == "")
+                    // 空白行(空白だけの行も含む)は何もしない
+                    if (string.IsNullOrWhiteSpace(line))
                     {
                         continue;
                     }
@@ -291,7 +333,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     else
                     {
                         // ある場合はオブジェクトコードにBookmarkを追加
-                        hitObjectOnBookmark.hitObjectCode += 0x00000800;
+                        hitObjectOnBookmark.hitObjectCode |= 0x00000800;
                     }
                 }
                 foreach (var hitObject in hitObjectList)
@@ -301,21 +343,25 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     {
                         // オブジェクトコードにbookmarkがない場合は
                         // オブジェクトコードにbookmark以外を追加
-                        hitObject.hitObjectCode += unchecked((int)0x00000400);
+                        hitObject.hitObjectCode |= unchecked((int)0x00000400);
                     }
-                    if ((hitObject.hitObjectCode & 0x00000200) == 0)
+                }
+                // 小節線以外の印を付ける対象
+                List<HitObject> offBarlineTargets = [.. hitObjectList];
+                void AddOffBarlineCode()
+                {
+                    foreach (var hitObject in offBarlineTargets)
                     {
-                        // オブジェクトコードに小節線がない場合は
-                        // オブジェクトコードに小節線以外を追加
-                        hitObject.hitObjectCode += 0x00000100;
+                        if ((hitObject.hitObjectCode & 0x00000200) == 0)
+                        {
+                            // オブジェクトコードに小節線がない場合は
+                            // オブジェクトコードに小節線以外を追加
+                            hitObject.hitObjectCode |= 0x00000100;
+                        }
                     }
                 }
                 hitObjectList.AddRange(tempHitObjects);
                 hitObjectList = [.. hitObjectList.OrderBy(a => a.time)];
-
-                // 最終ノーツを取る(これ以上は見ない)
-                hitObjectList.Sort((a, b) => a.time.CompareTo(b.time));
-                HitObject lastHitObject = hitObjectList.Last();
 
                 foreach (var timingPoint in timingPointList)
                 {
@@ -326,7 +372,17 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         uninheritedTimingPointList.Last().sv = 1;
                     }
                 }
-                double limit = lastHitObject.time + 1;
+                // ノーツが無い、または赤線が無い場合は小節線を算出できないため、ソートだけして終了する
+                if (hitObjectList.Count == 0 || uninheritedTimingPointList.Count == 0)
+                {
+                    AddOffBarlineCode();
+                    timingPointList = [.. timingPointList.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0)];
+                    return true;
+                }
+                // 最終ノーツと最後の赤線の遅い方まで小節線を算出する(これ以上は見ない)
+                // (最終ノーツより後ろの赤線にも小節線を置き、赤線の区切りとして使えるようにする)
+                HitObject lastHitObject = hitObjectList.Last();
+                double limit = Math.Max(lastHitObject.time, uninheritedTimingPointList.Last().time) + 1;
                 int j = 0;
                 double t = uninheritedTimingPointList[0].time
                     - Math.Truncate(uninheritedTimingPointList[0].time / uninheritedTimingPointList[0].barLength) * uninheritedTimingPointList[0].barLength;
@@ -358,8 +414,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     {
                         lazerTiming = (int)Math.Floor(t);
                     }
-                    // omitされている小節線以外を算出
-                    if (!(t <= uninheritedTimingPointList[j].time &&
+                    // 小節線を算出
+                    if (!(t < uninheritedTimingPointList[j].time - 1e-7 &&
                         (uninheritedTimingPointList[j].effect & 8) > 0))
                     {
                         var hitObjectOnBarLine = hitObjectList.FirstOrDefault(h => h.time == (lazerTiming != stableTiming ? lazerTiming : stableTiming));
@@ -370,7 +426,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         } else
                         {
                             // オブジェクトコードに小節線を追加
-                            hitObjectOnBarLine.hitObjectCode += unchecked((int)0x00000200);
+                            hitObjectOnBarLine.hitObjectCode |= unchecked((int)0x00000200);
                             if (lazerTiming != stableTiming)
                             {
                                 hitObjectOnBarLine.isSeparateBarline = true;
@@ -386,6 +442,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         t = uninheritedTimingPointList[j].time;
                     }
                 }
+                AddOffBarlineCode();
                 // ソートする
                 timingPointList = [.. timingPointList.OrderBy(a => a.time).ThenByDescending(b => b.isRedLine ? 1 : 0)];
                 hitObjectList = [.. hitObjectList.OrderBy(a => a.time)];
@@ -468,7 +525,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             try
             {
                 // 赤線リストの取得
-                var timingPoints = beatmap.timingPoints.Where(tp => tp.isRedLine).ToList();
+                // (BPM60000以上の赤線は小節線ギミック用のため、スナップの基準にしない)
+                var timingPoints = beatmap.timingPoints.Where(tp => tp.isRedLine && tp.bpm < Constants.ONE_MINUTE).ToList();
                 // タイミングポイントでループする
                 for (int i = 0, hoIndex = 0; i < timingPoints.Count; i++)
                 {
@@ -548,8 +606,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         {
             try
             {
-                string escapedBackupFile = Regex.Replace(backupFile, Constants.ESCAPE_CHARACTER, " ");
-                string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + escapedBackupFile;
+                string backupPath = GetBackupDirectoryPath(backupFile);
                 DateTime now = DateTime.Now;
                 string backupFileName = $"{now:yyyy_MM_dd_HH_mm_ss_fff}" + Constants.OSU_EXTENSION;
                 // バックアップフォルダがない場合は作成する
@@ -569,6 +626,37 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
         }
         /// <summary>
+        /// バックアップフォルダのパスを取得する
+        /// </summary>
+        /// <param name="backupDirectoryName">バックアップフォルダ名(.osuのファイル名)</param>
+        /// <returns>バックアップフォルダのパス</returns>
+        /// <remarks>
+        /// フォルダ名に使えない記号は空白に置き換える
+        /// バックアップの作成とCtrl+Zの復元で同じフォルダを参照するため、バックアップフォルダのパスは必ずこの関数で取得する
+        /// </remarks>
+        internal static string GetBackupDirectoryPath(string backupDirectoryName)
+        {
+            string escapedBackupDirectoryName = Regex.Replace(backupDirectoryName, Constants.ESCAPE_CHARACTER, " ");
+            return Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + escapedBackupDirectoryName;
+        }
+        /// <summary>
+        /// バックアップフォルダ内のバックアップファイルを新しい順に取得する
+        /// </summary>
+        /// <param name="backupPath">バックアップフォルダのパス</param>
+        /// <returns>バックアップファイルのパス(新しい順)</returns>
+        /// <remarks>
+        /// ファイル名がバックアップの形式(yyyy_MM_dd_HH_mm_ss_fff.osu)ではないファイル(手動でコピーしたファイルなど)は対象にしない<br/>
+        /// 以前のバージョンはOSの地域設定の暦でファイル名を作成していた(タイ語の設定では仏暦)ため、新しい順はファイル名ではなく更新日時で決める
+        /// </remarks>
+        internal static List<string> GetBackupFiles(string backupPath)
+        {
+            return [.. Directory.GetFiles(backupPath, "*" + Constants.OSU_EXTENSION)
+                                .Where(file => Regex.IsMatch(Path.GetFileNameWithoutExtension(file),
+                                                             "^[0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{2}_[0-9]{2}_[0-9]{2}_[0-9]{3}$"))
+                                .OrderByDescending(File.GetLastWriteTime)
+                                .ThenByDescending(file => file)];
+        }
+        /// <summary>
         /// osuファイルを作成する (SVEditor,Utility)
         /// </summary>
         /// <param name="beatmapPath">ファイル名</param>
@@ -581,18 +669,18 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             return Path.Combine(directory, $".{fileName}.{Guid.NewGuid():N}.tmp");
         }
         /// <summary>
-        /// 指定された一時ファイルパスから一時ディレクトリを取得し、存在する場合はディレクトリごと削除します
+        /// 指定された一時ファイルを削除します
         /// </summary>
         /// <param name="tempPath">削除対象の一時ファイルパス</param>
         /// <remarks>
-        /// 削除中に発生した例外は無視されます。
+        /// 削除中に発生した例外は無視されます。<br/>
+        /// 同時に起動している別のHelperの一時ファイルを消さないよう、一時ディレクトリごとは削除しません。
         /// </remarks>
         private static void DeleteTemporaryFile(string tempPath)
         {
             try
             {
-                var tempDirectory = Path.GetDirectoryName(tempPath);
-                if (Directory.Exists(tempDirectory)) Directory.Delete(tempDirectory, true);
+                if (File.Exists(tempPath)) File.Delete(tempPath);
             }
             catch
             {
@@ -635,14 +723,14 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             bool isWriteCompleted = false;
             try
             {
-                file = new(tempPath, false, Encoding.GetEncoding("utf-8"));
+                file = new(tempPath, false, new UTF8Encoding(false));
                 // 設定されている譜面データをすべて出力する
                 file.WriteLine(beatmap.version);
                 file.WriteLine("");
                 file.WriteLine(Constants.GENERAL);
                 foreach (var line in beatmap.general)
                 {
-                    if (line.Contains(Constants.PREVIEW) && userInputUtilityData != null)
+                    if (line.StartsWith(Constants.PREVIEW.TrimEnd()) && userInputUtilityData != null)
                     {
                         if (userInputUtilityData?.utilityCode == Constants.UTILITY_SETTING_COPIER &&
                             userInputUtilityData?.settingCopierCode == Constants.SETTING_COPIER_PREVIEW)
@@ -672,18 +760,21 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 {
                     if (edit.StartsWith(Constants.BOOKMARKS) && userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET)
                     {
-                        string retBookmarkLine = Constants.BOOKMARKS + ": ";
-                        var bookmarks = edit.Substring(11).Split(',');
-                        for (int i = 0; i < bookmarks.Length; i++)
+                        // ":"の後ろを値として取得する
+                        var bookmarks = edit[(edit.IndexOf(':') + 1)..].Split(',')
+                                                                       .Select(bookmark => bookmark.Trim())
+                                                                       .Where(bookmark => bookmark != string.Empty)
+                                                                       .ToList();
+                        if (bookmarks.Count == 0)
                         {
-                            var retBookmark = (int.Parse(bookmarks[i]) + userInputUtilityData.offset).ToString();
-                            retBookmarkLine += retBookmark;
-                            if (i < bookmarks.Length - 1)
-                            {
-                                retBookmarkLine += ",";
-                            }
+                            // ブックマークが無い場合はそのまま出力する
+                            file.WriteLine(edit);
                         }
-                        file.WriteLine(retBookmarkLine);
+                        else
+                        {
+                            file.WriteLine(Constants.BOOKMARKS + ": " +
+                                           string.Join(",", bookmarks.Select(bookmark => int.Parse(bookmark) + userInputUtilityData.offset)));
+                        }
                     }
                     else
                     {
@@ -695,7 +786,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 for (int i = 0; i < beatmap.metadata.Count; i++)
                 {
                     // タグ編集ユーティリティが選択されている場合は入力されているタグを上書きする
-                    if (beatmap.metadata[i].Contains(Constants.TAGS) && userInputUtilityData?.utilityCode == Constants.UTILITY_TAG_EDIT)
+                    if (beatmap.metadata[i].StartsWith(Constants.TAGS) && userInputUtilityData?.utilityCode == Constants.UTILITY_TAG_EDIT)
                     {
                         file.WriteLine(Constants.TAGS + userInputUtilityData?.tags);
                     }
@@ -703,27 +794,27 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     else if (userInputUtilityData?.utilityCode == Constants.UTILITY_SETTING_COPIER &&
                              userInputUtilityData?.settingCopierCode == Constants.SETTING_COPIER_METADATA)
                     {
-                        if (beatmap.metadata[i].Contains(Constants.TITLE))
+                        if (beatmap.metadata[i].StartsWith(Constants.TITLE))
                         {
                             file.WriteLine(Constants.TITLE + beatmapInfo?.title);
                         }
-                        else if (beatmap.metadata[i].Contains(Constants.TITLE_UNICODE))
+                        else if (beatmap.metadata[i].StartsWith(Constants.TITLE_UNICODE))
                         {
                             file.WriteLine(Constants.TITLE_UNICODE + beatmapInfo?.titleUnicode);
                         }
-                        else if (beatmap.metadata[i].Contains(Constants.ARTIST))
+                        else if (beatmap.metadata[i].StartsWith(Constants.ARTIST))
                         {
                             file.WriteLine(Constants.ARTIST + beatmapInfo?.artist);
                         }
-                        else if (beatmap.metadata[i].Contains(Constants.ARTIST_UNICODE))
+                        else if (beatmap.metadata[i].StartsWith(Constants.ARTIST_UNICODE))
                         {
                             file.WriteLine(Constants.ARTIST_UNICODE + beatmapInfo?.artistUnicode);
                         }
-                        else if (beatmap.metadata[i].Contains(Constants.CREATOR))
+                        else if (beatmap.metadata[i].StartsWith(Constants.CREATOR))
                         {
                             file.WriteLine(Constants.CREATOR + beatmapInfo?.creator);
                         }
-                        else if (beatmap.metadata[i].Contains(Constants.SOURCE))
+                        else if (beatmap.metadata[i].StartsWith(Constants.SOURCE))
                         {
                             file.WriteLine(Constants.SOURCE + beatmapInfo?.source);
                         }
@@ -777,6 +868,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         beatLength = beatLength.TrimEnd('0');
                         beatLength = beatLength.TrimEnd('.');
                     }
+                    // 極端に小さいbeatLengthの赤線は、計算し直すと0になってしまうため、元の値のまま出力する
+                    if (timingPoint.isRedLine && beatLength == "0" && timingPoint.rawBeatLength != null)
+                    {
+                        beatLength = timingPoint.rawBeatLength;
+                    }
                     int time = userInputUtilityData?.utilityCode == Constants.UTILITY_OFFSET ?
                                (timingPoint.time + userInputUtilityData.offset) : timingPoint.time;
                     string timingPointLine = time + "," +
@@ -826,10 +922,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
             catch (Exception ex)
             {
-                DeleteTemporaryFile(tempPath);
                 Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
                 Common.WriteExceptionMessage(ex);
-                return false;
             }
             finally
             {
@@ -838,12 +932,63 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     file.Close();
                 }
             }
+            // 書き込みに失敗した場合は、一時ファイルを閉じてから消す
             if (!isWriteCompleted)
             {
                 DeleteTemporaryFile(tempPath);
                 return false;
             }
             return CommitTemporaryBeatmapFile(tempPath, beatmapPath);
+        }
+        /// <summary>
+        /// マップセット内の全diffを書き換える (オフセット、タグ編集、設定コピー)
+        /// </summary>
+        /// <param name="beatmapsPath">書き換え対象のosuファイルのパス</param>
+        /// <param name="userInputUtilityData">ユーティリティタブの入力データ</param>
+        /// <param name="beatmapInfo">選択している譜面情報</param>
+        /// <param name="timingPoints">設定コピーで使う赤線(それ以外はnull)</param>
+        /// <returns>
+        /// 0 : 正常終了<br/>
+        /// 1 : 読み込みに失敗したdiffがあったため、何も書き換えずに中止した<br/>
+        /// 2 : バックアップの作成、または書き出しに失敗した</returns>
+        internal static int ExportToAllOsuFiles(string[] beatmapsPath,
+                                                UserInputUtilityData userInputUtilityData,
+                                                BeatmapMetadata beatmapInfo,
+                                                List<TimingPoint>? timingPoints = null)
+        {
+            // 先に全diffを読み込む。1つでも読み込めない場合は何も書き換えない
+            // (途中までのデータで上書きしたり、一部のdiffだけ書き換わるのを防ぐため)
+            List<(string path, Beatmap beatmap)> targets = [];
+            foreach (var beatmapPath in beatmapsPath)
+            {
+                // マップセットの内容を取得する
+                var tempBeatmap = GetBeatmapData(beatmapPath);
+                // osu!taiko以外のdiffは対象外のため書き換えない
+                var mode = GetMode(tempBeatmap);
+                if (mode != null && mode != Constants.MODE_TAIKO)
+                {
+                    continue;
+                }
+                // 読み込みに失敗した場合 (エラーログはGetBeatmapDataで出力済み)
+                if (tempBeatmap.version == string.Empty)
+                {
+                    return 1;
+                }
+                targets.Add((beatmapPath, tempBeatmap));
+            }
+            // バックアップを作成してから出力する (エラーログはそれぞれの処理で出力済み)
+            foreach (var (beatmapPath, tempBeatmap) in targets)
+            {
+                if (!CreateBackup(beatmapPath, Path.GetFileNameWithoutExtension(beatmapPath)))
+                {
+                    return 2;
+                }
+                if (!ExportToOsuFile(tempBeatmap, beatmapPath, userInputUtilityData, beatmapInfo, timingPoints))
+                {
+                    return 2;
+                }
+            }
+            return 0;
         }
         /// <summary>
         /// イベントの行を作成する (SVEditor,Utility)
@@ -1102,7 +1247,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             bool isWriteCompleted = false;
             try
             {
-                file = new(tempPath, false, Encoding.GetEncoding("utf-8"));
+                file = new(tempPath, false, new UTF8Encoding(false));
                 // 設定されている譜面データをすべて出力する
                 file.WriteLine(beatmap.version);
                 file.WriteLine("");
@@ -1140,6 +1285,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                         beatLength = beatLength.TrimEnd('0');
                         beatLength = beatLength.TrimEnd('.');
                     }
+                    // 極端に小さいbeatLengthの赤線は、計算し直すと0になってしまうため、元の値のまま出力する
+                    if (timingPoint.isRedLine && beatLength == "0" && timingPoint.rawBeatLength != null)
+                    {
+                        beatLength = timingPoint.rawBeatLength;
+                    }
                     string timingPointLine = timingPoint.time + "," +
                                              beatLength + "," +
                                              timingPoint.meter + "," +
@@ -1173,10 +1323,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
             catch (Exception ex)
             {
-                DeleteTemporaryFile(tempPath);
                 Common.WriteErrorMessage("LOG_E-EXPORT-OSU");
                 Common.WriteExceptionMessage(ex);
-                return false;
             }
             finally
             {
@@ -1185,6 +1333,7 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                     file.Close();
                 }
             }
+            // 書き込みに失敗した場合は、一時ファイルを閉じてから消す
             if (!isWriteCompleted)
             {
                 DeleteTemporaryFile(tempPath);
@@ -1409,42 +1558,21 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         {
             try
             {
-                string backupPath = Directory.GetCurrentDirectory() + Constants.BACKUP_DIRECTORY + "\\" + backupDirectory;
+                string backupPath = GetBackupDirectoryPath(backupDirectory);
                 // バックアップディレクトリが見つからない場合はfalseで返す
                 if (!Directory.Exists(backupPath))
                 {
                     return false;
                 }
-                // バックアップファイルを探す
-                string[] files = Directory.GetFiles(backupPath, "*" + Constants.OSU_EXTENSION);
-                // バックアップファイルが見つからない場合はfalseで返す
-                if (files.Length == 0)
-                {
-                    return false;
-                }
-                List<long> fileDate = [];
-                // ファイル名の_を消し、数値にする
-                foreach (var file in files)
-                {
-                    string deletedPath = file.Replace(backupPath + "\\", "");
-                    string deletedExtension = deletedPath.Replace(Constants.OSU_EXTENSION, "");
-                    string deletedUnderScore = deletedExtension.Replace("_", "");
-                    fileDate.Add(Convert.ToInt64(deletedUnderScore));
-                }
-                // 数値を降順にソートする
-                fileDate.Sort();
-                fileDate.Reverse();
                 // 最後の実行で作成されたバックアップファイルを探す
-                long currentDate = Convert.ToInt64(DateTime.Now.ToString("yyyyMMddHHmmssfff"));
-                var targetFile = fileDate.FirstOrDefault(f => f <= currentDate);
-                if (targetFile == 0)
+                string? targetFile = GetBackupFiles(backupPath).FirstOrDefault();
+                // バックアップファイルが見つからない場合はfalseで返す
+                if (targetFile == null)
                 {
                     return false;
                 }
-                string targetFileString = targetFile.ToString("0000_00_00_00_00_00_000");
-                targetFileString = Path.Combine(backupPath, targetFileString + Constants.OSU_EXTENSION);
                 // Songsフォルダにコピーの作成
-                File.Copy(targetFileString, path, true);
+                File.Copy(targetFile, path, true);
                 return true;
             }
             catch (Exception ex)
@@ -1463,30 +1591,26 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         {
             try
             {
-                int bgAndVideoSectionIndex = -1;
-                int storyboardSectionIndex = -1;
+                // BGの行は、見出しのコメントではなく行の先頭の値("0")で探す
+                bool isEvents = false;
                 var lines = Common.ReadAllLinesShared(beatmapInfo.beatmapPath);
-                for (global::System.Int32 i = 0; i < lines.Length; i++)
+                foreach (var line in lines)
                 {
-                    if (lines[i] == Constants.BG_AND_VIDEO)
+                    var trimmedLine = line.Trim();
+                    if (trimmedLine.StartsWith('[') && trimmedLine.EndsWith(']'))
                     {
-                        bgAndVideoSectionIndex = i;
+                        isEvents = trimmedLine == Constants.EVENTS;
                         continue;
                     }
-                    if (lines[i] == Constants.STORYBOARD_LAYER_0)
+                    if (isEvents &&
+                        line.Split(',')[0].Trim() == "0" &&
+                        // 拡張子は大文字の場合もあるため (BG.JPG など)、大文字小文字を区別せずに判定する
+                        (line.Contains(Constants.JPG_EXTENSION, StringComparison.OrdinalIgnoreCase) ||
+                         line.Contains(Constants.JPEG_EXTENSION, StringComparison.OrdinalIgnoreCase) ||
+                         line.Contains(Constants.PNG_EXTENSION, StringComparison.OrdinalIgnoreCase) ||
+                         line.Contains(Constants.WEBP_EXTENSION, StringComparison.OrdinalIgnoreCase)))
                     {
-                        storyboardSectionIndex = i;
-                        continue;
-                    }
-                    if (bgAndVideoSectionIndex != -1 &&
-                        storyboardSectionIndex == -1 &&
-                        (lines[i].Contains(Constants.JPG_EXTENSION) ||
-                         lines[i].Contains(Constants.JPEG_EXTENSION) ||
-                         lines[i].Contains(Constants.PNG_EXTENSION) ||
-                         lines[i].Contains(Constants.WEBP_EXTENSION)))
-                    {
-                        beatmapInfo.background = lines[i];
-                        i++;
+                        beatmapInfo.background = line;
                         return true;
                     }
                 }
@@ -1499,6 +1623,47 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 Common.WriteExceptionMessage(ex);
                 return false;
             }
+        }
+        /// <summary>
+        /// 譜面のモードを取得する
+        /// </summary>
+        /// <param name="beatmap">譜面情報</param>
+        /// <returns>
+        /// Generalセクションが読み込めている場合 : モード番号(Modeの行が無い場合はosu!standardの0)<br/>
+        /// Generalセクションが読み込めていない場合 : null</returns>
+        /// <remarks>
+        /// Generalセクションはファイルの先頭にあるため、途中で読み込みに失敗した譜面でも判定できる
+        /// </remarks>
+        internal static int? GetMode(Beatmap beatmap)
+        {
+            if (beatmap.general.Count == 0)
+            {
+                return null;
+            }
+            var modeLine = beatmap.general.FirstOrDefault(line => line.StartsWith(Constants.MODE));
+            if (modeLine == null)
+            {
+                return 0;
+            }
+            return int.TryParse(modeLine[Constants.MODE.Length..].Trim(), out int mode) ? mode : null;
+        }
+        /// <summary>
+        /// 譜面のSliderMultiplierを取得する
+        /// </summary>
+        /// <param name="beatmap">譜面情報</param>
+        /// <returns>
+        /// Difficultyセクションに正の値がある場合 : SliderMultiplierの値<br/>
+        /// 行が無い・値が読めない場合 : null</returns>
+        internal static double? GetSliderMultiplier(Beatmap beatmap)
+        {
+            var line = beatmap.difficulty.FirstOrDefault(line => line.StartsWith(Constants.SLIDER_MULTIPLIER));
+            if (line == null ||
+                !double.TryParse(line[Constants.SLIDER_MULTIPLIER.Length..].Trim(), out double sliderMultiplier) ||
+                sliderMultiplier <= 0)
+            {
+                return null;
+            }
+            return sliderMultiplier;
         }
         /// <summary>
         /// osu側で丸められたTimingの正確な値を算出する
@@ -1523,11 +1688,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                 // 手前のTimingPointを算出する
                 var applyTimingPoint = timingPoints.LastOrDefault(tp => (tp.time <= timing) && tp.isRedLine) ?? throw new Exception();
                 // それぞれのノーツ間隔を算出する
-                snapPerMs[0] = 60 / applyTimingPoint.bpm / 16;
-                snapPerMs[1] = 60 / applyTimingPoint.bpm / 12;
-                snapPerMs[2] = 60 / applyTimingPoint.bpm / 9;
-                snapPerMs[3] = 60 / applyTimingPoint.bpm / 7;
-                snapPerMs[4] = 60 / applyTimingPoint.bpm / 5;
+                snapPerMs[0] = Constants.ONE_MINUTE / applyTimingPoint.bpm / 16;
+                snapPerMs[1] = Constants.ONE_MINUTE / applyTimingPoint.bpm / 12;
+                snapPerMs[2] = Constants.ONE_MINUTE / applyTimingPoint.bpm / 9;
+                snapPerMs[3] = Constants.ONE_MINUTE / applyTimingPoint.bpm / 7;
+                snapPerMs[4] = Constants.ONE_MINUTE / applyTimingPoint.bpm / 5;
 
                 // 細かいスナップ間隔から指定されたタイミングの正確なタイミングを算出する
                 foreach (var snap in snapPerMs)

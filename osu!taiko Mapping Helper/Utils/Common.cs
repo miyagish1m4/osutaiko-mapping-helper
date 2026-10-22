@@ -115,22 +115,30 @@ namespace osu_taiko_Mapping_Helper.Utils
         /// <returns>songsフォルダパス</returns>
         internal static string GetSongsFolderLocation(string osuDirectory)
         {
-            // ユーザー名の取得
+            // songsフォルダが指定されていない場合はosuフォルダ直下のsongsフォルダを参照する
+            string defaultPath = Path.Combine(osuDirectory, "Songs");
             string userName = Environment.UserName;
+            foreach (char c in Path.GetInvalidFileNameChars())
+            {
+                userName = userName.Replace(c.ToString(), string.Empty);
+            }
+            userName = userName.Replace(".", string.Empty);
             // osuのユーザー設定ファイルの取得
             string file = Path.Combine(osuDirectory, "osu!." + userName + ".cfg");
-            // osuのユーザー設定ファイルが存在しない場合はosuフォルダ直下のsongsフォルダを参照する
-            if (!File.Exists(file)) return Path.Combine(osuDirectory, "Songs");
-            // ユーザー設定を読み込む
-            foreach (string readLine in File.ReadLines(file))
+            if (!File.Exists(file)) return defaultPath;
+            string? beatmapDirectory = null;
+            foreach (string readLine in ReadAllLinesShared(file))
             {
-                if (!readLine.StartsWith("BeatmapDirectory")) continue;
-                // songsフォルダが指定されていた場合はそのsongsフォルダのパスを取得する
-                string path = readLine.Split('=')[1].Trim(' ');
-                return path == "Songs" ? Path.Combine(osuDirectory, "Songs") : path;
+                // "キー = 値" の形式 (値に"="が含まれていても切れないよう、最初の"="で分ける)
+                int index = readLine.IndexOf('=');
+                if (readLine.Length == 0 || readLine[0] == '#' || index < 0) continue;
+                if (readLine[..index].Trim() != "BeatmapDirectory") continue;
+                beatmapDirectory = readLine[(index + 1)..].Trim();
             }
-            // songsフォルダが指定されていない場合はosuフォルダ直下のsongsフォルダを参照する
-            return Path.Combine(osuDirectory, "Songs");
+            if (string.IsNullOrEmpty(beatmapDirectory)) return defaultPath;
+            // 相対パスはosuフォルダ基準にする (絶対パスの場合はそのまま)
+            string path = Path.Combine(osuDirectory, beatmapDirectory.Replace('/', '\\').TrimEnd('\\'));
+            return Directory.Exists(path) ? path : defaultPath;
         }
         /// <summary>
         /// ラベルテキスト設定処理
@@ -184,6 +192,12 @@ namespace osu_taiko_Mapping_Helper.Utils
         /// <param name="isOptional">オプションコード</param>
         internal static bool ShowMessageDialog(string messageCode, int isOptional = 0, params object[] formatArgs)
         {
+            // テスト中はダイアログを表示せず、表示しようとしたメッセージコードを記録する
+            if (isTestMode)
+            {
+                testMessageCodes.Add(messageCode);
+                return testDialogResult;
+            }
             bool isModeless = (isOptional & Constants.DIALOG_OPTION_MODELESS) != 0;
             MessageBoxButtons messageBoxButton = GetMessageBoxButtons(isOptional);
             if (isModeless)
@@ -215,6 +229,14 @@ namespace osu_taiko_Mapping_Helper.Utils
 
             return MessageBoxButtons.OK;
         }
+        #region テスト用
+        // テスト中かどうか (trueの場合はShowMessageDialogでダイアログを表示しない)
+        internal static bool isTestMode = false;
+        // テスト中に表示しようとしたメッセージコード
+        internal static List<string> testMessageCodes = [];
+        // テスト中のダイアログの戻り値 (OK・キャンセルのダイアログでOKを押した場合はtrue)
+        internal static bool testDialogResult = true;
+        #endregion
         /// <summary>
         /// ダイアログメッセージ設定処理
         /// </summary>

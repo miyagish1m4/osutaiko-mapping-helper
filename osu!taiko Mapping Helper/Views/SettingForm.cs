@@ -110,17 +110,11 @@ namespace osu_taiko_Mapping_Helper.Views
             {
                 Common.LoadConfig(config);
                 // 設定値に応じてバックアップの保持数を変更する
-                if (SettingHelper.ResetBackupFile(config))
-                {
-                    // 成功した場合はメッセージダイアログを表示する
-                    Common.ShowMessageDialog("I_A-P-3");
-                    this.Close();
-                }
-                else
-                {
-                    // 失敗した場合はエラーダイアログを表示する
-                    Common.ShowMessageDialog("E_A-P-2");
-                }
+                // (設定は保存済みのため、バックアップの整理に失敗した場合もエラーログに残して保存完了とする)
+                SettingHelper.ResetBackupFile(config);
+                // メッセージダイアログを表示する
+                Common.ShowMessageDialog("I_A-P-3");
+                this.Close();
             }
         }
         private void chkAdvanceMode_CheckedChanged(object? sender, EventArgs? e)

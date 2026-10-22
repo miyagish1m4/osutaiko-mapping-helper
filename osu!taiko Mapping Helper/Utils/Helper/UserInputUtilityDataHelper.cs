@@ -61,6 +61,8 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             {
                 int retTimingFrom = 0;
                 int retTimingTo = 0;
+                // 前回の実行時の設定が残らないよう、全体指定を解除してから判定する
+                userInputUtilityData.isAllNotes = false;
                 if ((timingFrom == string.Empty) && (timingTo == string.Empty))
                 {
                     //タイミングの入力がない

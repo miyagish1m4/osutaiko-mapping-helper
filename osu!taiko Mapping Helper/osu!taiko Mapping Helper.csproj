@@ -54,6 +54,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- テスト用プロジェクトからinternalのクラスを呼べるようにする -->
+    <InternalsVisibleTo Include="osu!taiko Mapping Helper.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="OsuMemoryDataProvider" Version="0.12.1" />
     <PackageReference Include="OsuParsers" Version="1.7.2" />
   </ItemGroup>

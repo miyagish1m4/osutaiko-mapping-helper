@@ -27,6 +27,8 @@
         internal int effect { set; get; }
         // 削除フラグ
         internal bool isDelete { set; get; }
+        // beatLength
+        internal string? rawBeatLength { set; get; } = null;
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -82,6 +84,7 @@
             sampleIndex = int.Parse(buff[4]);   //サンプルインデックス?
             volume = int.Parse(buff[5]);        //音量
             effect = int.Parse(buff[7]);        //エフェクト(kiai有無,小節線有無 等)
+            rawBeatLength = buff[1];
             //赤線か緑線か判定する
             if (int.Parse(buff[6]) == 1)
             {

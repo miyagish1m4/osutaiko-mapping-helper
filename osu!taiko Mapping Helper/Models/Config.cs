@@ -29,6 +29,7 @@ namespace osu_taiko_Mapping_Helper.Models
         internal int offsetDuo { get; set; }
         internal int offsetMs { get; set; }
         internal string? offsetMsValue { get; set; }
+        internal int calculationCode { get; set; }
 
         /// <summary>
         /// configファイルの読み込み処理
@@ -55,6 +56,7 @@ namespace osu_taiko_Mapping_Helper.Models
             offsetDuo = Convert.ToInt32(config.AppSettings.Settings["offsetDuo"].Value);
             offsetMs = Convert.ToInt32(config.AppSettings.Settings["offsetMs"].Value);
             offsetMsValue = config.AppSettings.Settings["offsetMsValue"].Value;
+            calculationCode = Convert.ToInt32(config.AppSettings.Settings["calculationCode"].Value);
         }
         /// <summary>
         /// configファイルの書き込み処理
@@ -110,6 +112,14 @@ namespace osu_taiko_Mapping_Helper.Models
 
             // config書き込み
             config.AppSettings.Settings["offsetMsValue"].Value = offsetMsValue;
+            config.Save();
+        }
+        internal void SaveCalculationCode()
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+            // config書き込み
+            config.AppSettings.Settings["calculationCode"].Value = calculationCode.ToString();
             config.Save();
         }
     }

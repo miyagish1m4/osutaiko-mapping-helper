@@ -1,5 +1,6 @@
 ﻿using osu_taiko_Mapping_Helper.Models;
 using osu_taiko_Mapping_Helper.Utils;
+using osu_taiko_Mapping_Helper.Properties;
 
 namespace osu_taiko_Mapping_Helper.Services
 {
@@ -163,7 +164,8 @@ namespace osu_taiko_Mapping_Helper.Services
                 }
 
                 // 始点の直前のタイミングポイントより前にノーツがある場合は、最初のタイミングポイントを基準にリスナップする
-                if (timingPointIndexes[currentIndex] == 0 && beatmap.hitObjects[0].time < beatmap.timingPoints[timingPointIndexes[currentIndex]].time)
+                if (timingPointIndexes[currentIndex] == 0 && beatmap.hitObjects[0].time < beatmap.timingPoints[timingPointIndexes[currentIndex]].time &&
+                    beatmap.timingPoints[timingPointIndexes[currentIndex]].bpm < Constants.ONE_MINUTE)
                 {
                     beatSnapLength = beatmap.timingPoints[timingPointIndexes[currentIndex]].barLength / userInputUtilityData.beatSnap / beatmap.timingPoints[timingPointIndexes[currentIndex]].meter;
                     var diffTime = beatmap.timingPoints[timingPointIndexes[currentIndex]].time - beatmap.hitObjects[0].time;
@@ -177,7 +179,9 @@ namespace osu_taiko_Mapping_Helper.Services
                             break;
                         }
                         var notesInCurrentSnapIndexes = beatmap.hitObjects.Select((ho, index) => new { ho, Index = index })
-                                                                          .Where(x => x.ho.time >= (int)(currentTime - beatSnapLength / 2) && x.ho.time < (int)(currentTime + beatSnapLength / 2))
+                                                                          .Where(x => x.ho.time >= (int)(currentTime - beatSnapLength / 2) && x.ho.time < (int)(currentTime + beatSnapLength / 2) &&
+                                                                                 // 範囲(始点〜終点)の外のノーツは動かさない
+                                                                                 x.ho.time >= userInputUtilityData.resnapTimingFrom && x.ho.time <= userInputUtilityData.resnapTimingTo)
                                                                           .Select(x => x.Index)
                                                                           .ToList();
                         // もし現在のスナップの範囲にノーツがない場合は、次のスナップ位置に移動する
@@ -197,10 +201,18 @@ namespace osu_taiko_Mapping_Helper.Services
                 // 始点以降のノーツをリスナップする
                 for (int i = currentIndex; i < timingPointIndexes.Count; i++)
                 {
-                    var nextTiming = i == timingPointIndexes.Count - 1 ? beatmap.hitObjects[^1].time + 1 : beatmap.timingPoints[timingPointIndexes[i + 1]].time;
+                    // BPM60000以上の赤線の区間はスナップの間隔がほぼ0になり処理が終わらないため、リスナップしない
+                    if (beatmap.timingPoints[timingPointIndexes[i]].bpm >= Constants.ONE_MINUTE)
+                    {
+                        continue;
+                    }
+                    // 最後の赤線の区間は終点の判定で抜ける (最後のノーツより後ろのスナップ位置にも、そのノーツを合わせるため)
+                    var nextTiming = i == timingPointIndexes.Count - 1 ? int.MaxValue : beatmap.timingPoints[timingPointIndexes[i + 1]].time;
                     beatSnapLength = beatmap.timingPoints[timingPointIndexes[i]].barLength / userInputUtilityData.beatSnap / beatmap.timingPoints[timingPointIndexes[i]].meter;
                     baseTime = beatmap.timingPoints[timingPointIndexes[i]].time;
                     currentTime = beatmap.timingPoints[timingPointIndexes[i]].time;
+                    double sectionStart = i == 0 ? double.MinValue :
+                        baseTime - Math.Min(beatSnapLength / 2, (baseTime - beatmap.timingPoints[timingPointIndexes[i - 1]].time) / 2.0);
                     for (int j = 0; ; j++)
                     {
                         // もし現在のスナップ位置が始点より前の場合は、次のスナップ位置に移動する
@@ -214,13 +226,14 @@ namespace osu_taiko_Mapping_Helper.Services
                         {
                             break;
                         }
-                        // もし現在のスナップ位置が終点を超えている場合は、このメソッドを終了する
-                        if ((int)(currentTime + beatSnapLength / 2) > userInputUtilityData.resnapTimingTo)
+                        if ((int)(currentTime - beatSnapLength / 2) > userInputUtilityData.resnapTimingTo)
                         {
                             return true;
                         }
                         var notesInCurrentSnapIndexes = beatmap.hitObjects.Select((ho, index) => new { ho, Index = index })
-                                                                          .Where(x => x.ho.time >= (int)(currentTime - beatSnapLength / 2) && x.ho.time < (int)(currentTime + beatSnapLength / 2))
+                                                                          .Where(x => x.ho.time >= (int)(currentTime - beatSnapLength / 2) && x.ho.time < (int)(currentTime + beatSnapLength / 2) &&
+                                                                                 x.ho.time >= userInputUtilityData.resnapTimingFrom && x.ho.time <= userInputUtilityData.resnapTimingTo &&
+                                                                                 x.ho.time >= (int)sectionStart && x.ho.time < nextTiming)
                                                                           .Select(x => x.Index)
                                                                           .ToList();
                         // もし現在のスナップの範囲にノーツがない場合は、次のスナップ位置に移動する
