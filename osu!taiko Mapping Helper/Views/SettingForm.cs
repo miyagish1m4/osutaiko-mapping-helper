@@ -26,6 +26,8 @@ namespace osu_taiko_Mapping_Helper.Views
             SetChkAdvanceMode(config.advanceMode);
             SetChkUnicodeSupport(config.unicodeSupport);
             SetNotesPosition();
+            // 画面の大きさを Windows の拡大率とメインモニターに合わせる (WinForms の自動の拡大は使わない。AutoScaleMode は None)
+            FormScaleUtils.FitToPrimaryScreen(this);
         }
         /// <summary>
         /// ラベルテキストの初期化設定

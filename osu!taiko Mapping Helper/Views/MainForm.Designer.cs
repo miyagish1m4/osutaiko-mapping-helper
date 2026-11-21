@@ -309,7 +309,7 @@ namespace osu_taiko_Mapping_Helper
             // 
             // chkSvBpm
             // 
-            chkSvBpm.Font = new Font("Yu Gothic UI", 8.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            chkSvBpm.Font = new Font("Yu Gothic UI", 7.5F, FontStyle.Bold, GraphicsUnit.Point, 128);
             chkSvBpm.ForeColor = Color.White;
             chkSvBpm.Location = new Point(9, 87);
             chkSvBpm.Name = "chkSvBpm";
@@ -1472,7 +1472,7 @@ namespace osu_taiko_Mapping_Helper
             lblBeatSnapDivisor.ForeColor = Color.White;
             lblBeatSnapDivisor.Location = new Point(17, 602);
             lblBeatSnapDivisor.Name = "lblBeatSnapDivisor";
-            lblBeatSnapDivisor.Size = new Size(139, 20);
+            lblBeatSnapDivisor.Size = new Size(130, 20);
             lblBeatSnapDivisor.TabIndex = 35;
             lblBeatSnapDivisor.Text = "Beat Snap Divisor";
             // 
@@ -1759,7 +1759,7 @@ namespace osu_taiko_Mapping_Helper
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.FromArgb(0, 64, 64);
             ClientSize = new Size(408, 963);
             Controls.Add(btnBackup);

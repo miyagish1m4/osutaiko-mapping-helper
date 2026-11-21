@@ -91,7 +91,7 @@
             lblCurrentTiming.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblCurrentTiming.ForeColor = Color.White;
             lblCurrentTiming.ImageAlign = ContentAlignment.MiddleRight;
-            lblCurrentTiming.Location = new Point(182, 20);
+            lblCurrentTiming.Location = new Point(192, 20);
             lblCurrentTiming.Name = "lblCurrentTiming";
             lblCurrentTiming.Size = new Size(151, 25);
             lblCurrentTiming.TabIndex = 7;
@@ -103,7 +103,7 @@
             lblCurrentBpm.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblCurrentBpm.ForeColor = Color.White;
             lblCurrentBpm.ImageAlign = ContentAlignment.MiddleRight;
-            lblCurrentBpm.Location = new Point(182, 55);
+            lblCurrentBpm.Location = new Point(192, 55);
             lblCurrentBpm.Name = "lblCurrentBpm";
             lblCurrentBpm.Size = new Size(151, 25);
             lblCurrentBpm.TabIndex = 8;
@@ -115,7 +115,7 @@
             lblCurrentSv.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblCurrentSv.ForeColor = Color.White;
             lblCurrentSv.ImageAlign = ContentAlignment.MiddleRight;
-            lblCurrentSv.Location = new Point(182, 90);
+            lblCurrentSv.Location = new Point(192, 90);
             lblCurrentSv.Name = "lblCurrentSv";
             lblCurrentSv.Size = new Size(151, 25);
             lblCurrentSv.TabIndex = 9;
@@ -127,7 +127,7 @@
             lblCurrentVolume.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblCurrentVolume.ForeColor = Color.White;
             lblCurrentVolume.ImageAlign = ContentAlignment.MiddleRight;
-            lblCurrentVolume.Location = new Point(182, 160);
+            lblCurrentVolume.Location = new Point(192, 160);
             lblCurrentVolume.Name = "lblCurrentVolume";
             lblCurrentVolume.Size = new Size(151, 25);
             lblCurrentVolume.TabIndex = 10;
@@ -139,7 +139,7 @@
             lblVisualizeBpm.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblVisualizeBpm.ForeColor = Color.White;
             lblVisualizeBpm.ImageAlign = ContentAlignment.MiddleRight;
-            lblVisualizeBpm.Location = new Point(182, 125);
+            lblVisualizeBpm.Location = new Point(192, 125);
             lblVisualizeBpm.Name = "lblVisualizeBpm";
             lblVisualizeBpm.Size = new Size(151, 25);
             lblVisualizeBpm.TabIndex = 12;
@@ -160,7 +160,7 @@
             // DebugForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.FromArgb(0, 64, 64);
             ClientSize = new Size(357, 211);
             Controls.Add(lblVisualizeBpm);

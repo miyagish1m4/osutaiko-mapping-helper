@@ -31,10 +31,15 @@ namespace osu_taiko_Mapping_Helper.Views
 #pragma warning restore CS8618 // null 非許容のフィールドには、コンストラクターの終了時に null 以外の値が入っていなければなりません。'required' 修飾子を追加するか、Null 許容として宣言することを検討してください。
         {
             InitializeComponent();
+            Size designClientSize = ClientSize;
             Thread getMemoryDataThread = new(UpdateLabelText) { IsBackground = true };
             getMemoryDataThread.Start();
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
+            // 枠の種類を変えると中身の大きさが変わるため、作ったときの大きさに戻してから、
+            // 画面の大きさを Windows の拡大率とメインモニターに合わせる (WinForms の自動の拡大は使わない。AutoScaleMode は None)
+            this.ClientSize = designClientSize;
+            FormScaleUtils.FitToPrimaryScreen(this);
         }
         /// <summary>
         /// ラベルテキストの初期化設定

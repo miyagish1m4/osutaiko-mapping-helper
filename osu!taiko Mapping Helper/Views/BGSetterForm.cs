@@ -12,8 +12,12 @@ namespace osu_taiko_Mapping_Helper.Views
         private readonly string beatmapPath;
         private readonly string backgroundPath;
         private readonly string backupDirectoryName;
+        // BG を表示する大きさと、BG の位置の基準 (拡大率 100% のとき)
         private readonly Size INITIAL_SIZE = new(854, 480);
         private const int INITIAL_BG_Y = 135;
+        // BG を表示する大きさと、BG の位置の基準 (画面の大きさを拡大率とモニターに合わせた後の大きさ)
+        private Size bgSize;
+        private int bgTop;
         private Point clickPoint;
         private string[] backgrounds = new string[5];
         private Beatmap? beatmapData;
@@ -35,9 +39,18 @@ namespace osu_taiko_Mapping_Helper.Views
         internal BGSetterForm(Config config, string beatmapPath, string backgroundPath, string background, string backupDirectoryName)
         {
             InitializeComponent();
+            Size designClientSize = ClientSize;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
-            this.picDisplayBg.Size = INITIAL_SIZE;
+            // 枠の種類を変えると中身の大きさが変わるため、作ったときの大きさに戻してから、
+            // 画面の大きさを Windows の拡大率とメインモニターに合わせる (WinForms の自動の拡大は使わない。AutoScaleMode は None)
+            this.ClientSize = designClientSize;
+            float displayScale = FormScaleUtils.FitToPrimaryScreen(this);
+            // BG を表示する大きさと位置の基準も、画面と同じ割合で変える
+            // (BG の y 座標は表示する高さを基準に osu! の座標に直すため、表示する高さを変えても y 座標は変わらない)
+            bgSize = new Size((int)Math.Round(INITIAL_SIZE.Width * displayScale), (int)Math.Round(INITIAL_SIZE.Height * displayScale));
+            bgTop = (int)Math.Round(INITIAL_BG_Y * displayScale);
+            this.picDisplayBg.Size = bgSize;
             this.config = config;
             this.beatmapPath = beatmapPath;
             this.backgroundPath = backgroundPath;
@@ -60,15 +73,15 @@ namespace osu_taiko_Mapping_Helper.Views
             backgrounds = [.. backgroundParams];
             // 背景画像を表示する
             picDisplayBg.Image = BGHelper.SetBgOnForm(backgroundPath,
-                                                      new Point(INITIAL_SIZE.Width, INITIAL_SIZE.Height),
+                                                      new Point(bgSize.Width, bgSize.Height),
                                                       0.7);
             // 画像の位置をosuで表示されている位置に調整する
             picDisplayBg.Size = new Size(picDisplayBg.Image.Width, picDisplayBg.Image.Height);
-            offsetY = (int)BGHelper.ConvertPixelToOsuPixel((double)(picDisplayBg.Size.Height - INITIAL_SIZE.Height) / 2,
-                                                           (double)INITIAL_SIZE.Height);
+            offsetY = (int)BGHelper.ConvertPixelToOsuPixel((double)(picDisplayBg.Size.Height - bgSize.Height) / 2,
+                                                           (double)bgSize.Height);
             int posY = (int)BGHelper.ConvertOsuPixelToPixel((double)(int.Parse(backgrounds[4]) - offsetY),
-                                                            (double)INITIAL_SIZE.Height);
-            picDisplayBg.Location = new Point(picDisplayBg.Location.X, INITIAL_BG_Y + posY);
+                                                            (double)bgSize.Height);
+            picDisplayBg.Location = new Point(picDisplayBg.Location.X, bgTop + posY);
             // osuで設定されている初期位置を表示する
             retY = int.Parse(backgrounds[4]);
             lblCurrentPosY.Text = "y : " + retY;
@@ -276,21 +289,21 @@ namespace osu_taiko_Mapping_Helper.Views
             if (e.Button == MouseButtons.Left)
             {
                 int diffY = e.Location.Y - clickPoint.Y;
-                if (picDisplayBg.Location.Y + diffY + picDisplayBg.Size.Height < INITIAL_SIZE.Height || picDisplayBg.Location.Y + diffY > picTaikoBar.Height)
+                if (picDisplayBg.Location.Y + diffY + picDisplayBg.Size.Height < bgSize.Height || picDisplayBg.Location.Y + diffY > picTaikoBar.Height)
                 {
                     return;
                 }
                 picDisplayBg.Location = new Point(picDisplayBg.Location.X, picDisplayBg.Location.Y + diffY);
-                retY = (int)(BGHelper.ConvertPixelToOsuPixel((double)(picDisplayBg.Location.Y - INITIAL_BG_Y),
-                                                             (double)INITIAL_SIZE.Height) +
+                retY = (int)(BGHelper.ConvertPixelToOsuPixel((double)(picDisplayBg.Location.Y - bgTop),
+                                                             (double)bgSize.Height) +
                              offsetY);
                 // Mapset Verifierの警告が出ない範囲を超えた場合は、範囲の端に合わせる
                 if (retY < minY || retY > maxY)
                 {
                     retY = Math.Clamp(retY, minY, maxY);
                     int posY = (int)BGHelper.ConvertOsuPixelToPixel((double)(retY - offsetY),
-                                                                    (double)INITIAL_SIZE.Height);
-                    picDisplayBg.Location = new Point(picDisplayBg.Location.X, INITIAL_BG_Y + posY);
+                                                                    (double)bgSize.Height);
+                    picDisplayBg.Location = new Point(picDisplayBg.Location.X, bgTop + posY);
                 }
                 lblCurrentPosY.Text = $"y : {retY}";
             }
