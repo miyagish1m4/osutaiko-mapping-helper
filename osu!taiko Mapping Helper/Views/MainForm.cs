@@ -43,6 +43,10 @@ namespace osu_taiko_Mapping_Helper
         private BeatmapMetadata targetBeatmapInfo = new();
         private string targetBackupDirectoryName = string.Empty;
         private TimingPropertyForm? TimingPropertyForm = null;
+        // 画面の部品の位置・大きさに掛けた割合 (Windows の拡大率 × メインモニターに入りきる割合。FormScaleUtils.FitToPrimaryScreen)
+        private float displayScale = 1f;
+        // 作ったときの画面の中身の大きさ (拡大率 100% のときの大きさ)
+        private Size designClientSize;
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int updateInterval { get; set; } = 15;
         #endregion
@@ -53,6 +57,7 @@ namespace osu_taiko_Mapping_Helper
         public MainForm()
         {
             InitializeComponent();
+            designClientSize = ClientSize;
             Thread getMemoryDataThread = new(UpdateMemoryData) { IsBackground = true };
             getMemoryDataThread.Start();
             UpdateBeatmapInfo();
@@ -284,7 +289,7 @@ namespace osu_taiko_Mapping_Helper
                     preBeatmapInfo.previewTime = beatmapInfo.previewTime;
                     preBeatmapInfo.beatmapPath = beatmapInfo.beatmapPath;
                     preBeatmapInfo.lastUpdate = beatmapInfo.lastUpdate;
-                    picDisplayBg.Image = BGHelper.SetBgOnForm(beatmapInfo.backgroundPath ?? "", new Point(384, 216));
+                    picDisplayBg.Image = BGHelper.SetBgOnForm(beatmapInfo.backgroundPath ?? "", new Point(picDisplayBg.Width, picDisplayBg.Height));
                 }
                 catch (Exception ex)
                 {
@@ -368,7 +373,7 @@ namespace osu_taiko_Mapping_Helper
             InitializeOffsetControls();
             InitializeCalculationControls();
             UpdateSvBpmControls();
-            tabSetType.ItemSize = new Size(Constants.TAB_MAX_ITEM_SIZE / tabSetType.Controls.Count, tabSetType.ItemSize.Height);
+            tabSetType.ItemSize = new Size((int)(Constants.TAB_MAX_ITEM_SIZE * displayScale) / tabSetType.Controls.Count - (displayScale != 1f ? 1 : 0), tabSetType.ItemSize.Height);
         }
         /// <summary>
         /// 計算方法(等差・等比)のコントロールの初期化処理
@@ -992,6 +997,12 @@ namespace osu_taiko_Mapping_Helper
             pnlRelativeSvGroup.Visible = false;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
+            // 枠の種類を変えると中身の大きさが変わるため、作ったときの大きさに戻す
+            this.ClientSize = designClientSize;
+            // 画面は FullHD・拡大率 100% で入りきる大きさで作っているため、Windows の拡大率の分だけ画面全体を大きくし、
+            // メインモニターに入りきらない場合は入りきる大きさまで縮める (WinForms の自動の拡大は使わない。AutoScaleMode は None)
+            // (枠の大きさが決まってから大きさを変えるため、FormBorderStyle を設定した後に呼ぶ)
+            displayScale = FormScaleUtils.FitToPrimaryScreen(this);
         }
         private void osu_taiko_Mapping_Helper_Shown(object sender, EventArgs e)
         {
@@ -1140,7 +1151,7 @@ namespace osu_taiko_Mapping_Helper
                 tabSetType.Controls.Add(tabHitObjectsPage);
                 tabSetType.Controls.Add(tabBeatSnap);
             }
-            tabSetType.ItemSize = new Size(Constants.TAB_MAX_ITEM_SIZE / tabSetType.Controls.Count, tabSetType.ItemSize.Height);
+            tabSetType.ItemSize = new Size((int)(Constants.TAB_MAX_ITEM_SIZE * displayScale) / tabSetType.Controls.Count - (displayScale != 1f ? 1 : 0), tabSetType.ItemSize.Height);
             // 作り直す前に選択していた処理項目タブに戻す (詳細モードの変更でタブが無くなった場合は先頭のタブにする)
             tabSetType.SelectedIndex = (selectedSetTypeIndex >= 0 && selectedSetTypeIndex < tabSetType.TabCount) ? selectedSetTypeIndex : 0;
             tabSetType_SelectedIndexChanged(sender, e);

@@ -25,6 +25,8 @@ namespace osu_taiko_Mapping_Helper.Views
         private readonly MessageBoxIcon icon;
         private readonly MessageBoxDefaultButton defaultButton;
         private readonly string message;
+        // Windows の拡大率 (150% なら 1.5)。余白・ボタン・アイコンの大きさは拡大率 100% のときの値のため、これを掛けて使う
+        private readonly float dpiScale;
 
         internal CustomMessageBox(
             string message,
@@ -37,6 +39,7 @@ namespace osu_taiko_Mapping_Helper.Views
             this.buttons = buttons;
             this.icon = icon;
             this.defaultButton = defaultButton;
+            dpiScale = DeviceDpi / 96f;
 
             Text = caption ?? string.Empty;
             Font = SystemFonts.MessageBoxFont;
@@ -91,26 +94,26 @@ namespace osu_taiko_Mapping_Helper.Views
             List<ButtonSpec> buttonSpecs = GetButtonSpecs(buttons).ToList();
             bool hasIcon = icon != MessageBoxIcon.None;
 
-            int textLeft = HORIZONTAL_MARGIN + (hasIcon ? ICON_SIZE + ICON_MESSAGE_GAP : 0);
+            int textLeft = Scaled(HORIZONTAL_MARGIN) + (hasIcon ? Scaled(ICON_SIZE) + Scaled(ICON_MESSAGE_GAP) : 0);
 
             Size measuredText = MeasureMessage();
-            int messageWidth = Math.Max(measuredText.Width, MIN_MESSAGE_WIDTH);
-            int rightMargin = RIGHT_MARGIN;
+            int messageWidth = Math.Max(measuredText.Width, Scaled(MIN_MESSAGE_WIDTH));
+            int rightMargin = Scaled(RIGHT_MARGIN);
 
             int contentWidth = textLeft + messageWidth + rightMargin;
-            int buttonsWidth = buttonSpecs.Count * BUTTON_WIDTH
-                + Math.Max(0, buttonSpecs.Count - 1) * BUTTON_GAP
-                + HORIZONTAL_MARGIN
+            int buttonsWidth = buttonSpecs.Count * Scaled(BUTTON_WIDTH)
+                + Math.Max(0, buttonSpecs.Count - 1) * Scaled(BUTTON_GAP)
+                + Scaled(HORIZONTAL_MARGIN)
                 + rightMargin;
 
             int maxDialogWidth = GetMaxDialogWidth();
-            int desiredDialogWidth = Math.Max(Math.Max(contentWidth, buttonsWidth), MIN_DIALOG_WIDTH);
+            int desiredDialogWidth = Math.Max(Math.Max(contentWidth, buttonsWidth), Scaled(MIN_DIALOG_WIDTH));
             int dialogWidth = Math.Min(desiredDialogWidth, maxDialogWidth);
 
-            int contentHeight = Math.Max(hasIcon ? ICON_SIZE : 0, measuredText.Height);
-            int messageAreaHeight = contentHeight + TOP_MARGIN + BOTTOM_MARGIN;
-            int clientHeight = Clamp(messageAreaHeight + BUTTON_PANEL_HEIGHT, MIN_DIALOG_HEIGHT, MAX_DIALOG_HEIGHT);
-            int actualMessageAreaHeight = clientHeight - BUTTON_PANEL_HEIGHT;
+            int contentHeight = Math.Max(hasIcon ? Scaled(ICON_SIZE) : 0, measuredText.Height);
+            int messageAreaHeight = contentHeight + Scaled(TOP_MARGIN) + Scaled(BOTTOM_MARGIN);
+            int clientHeight = Clamp(messageAreaHeight + Scaled(BUTTON_PANEL_HEIGHT), Scaled(MIN_DIALOG_HEIGHT), Scaled(MAX_DIALOG_HEIGHT));
+            int actualMessageAreaHeight = clientHeight - Scaled(BUTTON_PANEL_HEIGHT);
 
             int iconTop = GetIconTop(actualMessageAreaHeight, measuredText.Height);
 
@@ -120,9 +123,9 @@ namespace osu_taiko_Mapping_Helper.Views
             {
                 Controls.Add(new PictureBox
                 {
-                    Image = GetIconImage(icon),
+                    Image = GetIconImage(icon, Scaled(ICON_SIZE)),
                     SizeMode = PictureBoxSizeMode.CenterImage,
-                    Bounds = new Rectangle(HORIZONTAL_MARGIN, iconTop, ICON_SIZE, ICON_SIZE)
+                    Bounds = new Rectangle(Scaled(HORIZONTAL_MARGIN), iconTop, Scaled(ICON_SIZE), Scaled(ICON_SIZE))
                 });
             }
 
@@ -141,14 +144,14 @@ namespace osu_taiko_Mapping_Helper.Views
             Panel buttonPanel = new()
             {
                 BackColor = SystemColors.Control,
-                Bounds = new Rectangle(0, clientHeight - BUTTON_PANEL_HEIGHT, dialogWidth, BUTTON_PANEL_HEIGHT)
+                Bounds = new Rectangle(0, clientHeight - Scaled(BUTTON_PANEL_HEIGHT), dialogWidth, Scaled(BUTTON_PANEL_HEIGHT))
             };
             Controls.Add(buttonPanel);
 
-            int totalButtonWidth = buttonSpecs.Count * BUTTON_WIDTH + Math.Max(0, buttonSpecs.Count - 1) * BUTTON_GAP;
+            int totalButtonWidth = buttonSpecs.Count * Scaled(BUTTON_WIDTH) + Math.Max(0, buttonSpecs.Count - 1) * Scaled(BUTTON_GAP);
             int left = dialogWidth - rightMargin - totalButtonWidth;
             int defaultIndex = GetDefaultButtonIndex(defaultButton, buttonSpecs.Count);
-            int buttonTop = (BUTTON_PANEL_HEIGHT - BUTTON_HEIGHT) / 2;
+            int buttonTop = (Scaled(BUTTON_PANEL_HEIGHT) - Scaled(BUTTON_HEIGHT)) / 2;
 
             for (int i = 0; i < buttonSpecs.Count; i++)
             {
@@ -157,7 +160,7 @@ namespace osu_taiko_Mapping_Helper.Views
                 {
                     Text = spec.Text,
                     DialogResult = spec.Result,
-                    Bounds = new Rectangle(left + i * (BUTTON_WIDTH + BUTTON_GAP), buttonTop, BUTTON_WIDTH, BUTTON_HEIGHT)
+                    Bounds = new Rectangle(left + i * (Scaled(BUTTON_WIDTH) + Scaled(BUTTON_GAP)), buttonTop, Scaled(BUTTON_WIDTH), Scaled(BUTTON_HEIGHT))
                 };
 
                 button.Click += (_, _) => SetResult(spec.Result);
@@ -196,7 +199,7 @@ namespace osu_taiko_Mapping_Helper.Views
                 };
 
                 Size lineSize = measureLabel.GetPreferredSize(Size.Empty);
-                width = Math.Max(width, lineSize.Width + MESSAGE_WIDTH_BUFFER);
+                width = Math.Max(width, lineSize.Width + Scaled(MESSAGE_WIDTH_BUFFER));
             }
 
             return new Size(width, lineHeight * Math.Max(1, lines.Length));
@@ -210,7 +213,7 @@ namespace osu_taiko_Mapping_Helper.Views
             int messageTop = Math.Max(0, (messageAreaHeight - messageHeight) / 2);
             int iconCenter = messageTop + (lineHeight * anchorLineCount / 2);
 
-            return Clamp(iconCenter - (ICON_SIZE / 2), 0, Math.Max(0, messageAreaHeight - ICON_SIZE));
+            return Clamp(iconCenter - (Scaled(ICON_SIZE) / 2), 0, Math.Max(0, messageAreaHeight - Scaled(ICON_SIZE)));
         }
 
         private void SetResult(DialogResult result)
@@ -293,26 +296,32 @@ namespace osu_taiko_Mapping_Helper.Views
             return string.IsNullOrEmpty(messageCode) ? string.Empty : messageCode[..1];
         }
 
-        private static Image GetIconImage(MessageBoxIcon icon)
+        /// <summary>
+        /// アイコンの画像を、指定の大きさで作る (拡大率に合った大きさのアイコンを使う)
+        /// </summary>
+        private static Image GetIconImage(MessageBoxIcon icon, int size)
         {
+            StockIconId stockIcon;
             if (icon == MessageBoxIcon.Error
                 || icon == MessageBoxIcon.Hand
                 || icon == MessageBoxIcon.Stop)
             {
-                return SystemIcons.Error.ToBitmap();
+                stockIcon = StockIconId.Error;
             }
-
-            if (icon == MessageBoxIcon.Warning || icon == MessageBoxIcon.Exclamation)
+            else if (icon == MessageBoxIcon.Warning || icon == MessageBoxIcon.Exclamation)
             {
-                return SystemIcons.Warning.ToBitmap();
+                stockIcon = StockIconId.Warning;
             }
-
-            if (icon == MessageBoxIcon.Question)
+            else if (icon == MessageBoxIcon.Question)
             {
-                return SystemIcons.Question.ToBitmap();
+                stockIcon = StockIconId.Help;
             }
-
-            return SystemIcons.Information.ToBitmap();
+            else
+            {
+                stockIcon = StockIconId.Info;
+            }
+            using Icon stock = SystemIcons.GetStockIcon(stockIcon, size);
+            return stock.ToBitmap();
         }
 
         private static int GetDefaultButtonIndex(MessageBoxDefaultButton defaultButton, int buttonCount)
@@ -347,6 +356,14 @@ namespace osu_taiko_Mapping_Helper.Views
             return string.IsNullOrWhiteSpace(label.Text) ? fallback : label.Text;
         }
 
+        /// <summary>
+        /// 拡大率 100% のときの大きさを、今の拡大率の大きさにする
+        /// </summary>
+        private int Scaled(int value)
+        {
+            return (int)Math.Round(value * dpiScale);
+        }
+
         private static int Clamp(int value, int min, int max)
         {
             return Math.Max(min, Math.Min(max, value));
@@ -369,10 +386,10 @@ namespace osu_taiko_Mapping_Helper.Views
                 .Split('\n');
         }
 
-        private static int GetMaxDialogWidth()
+        private int GetMaxDialogWidth()
         {
             Rectangle workingArea = Screen.PrimaryScreen?.WorkingArea ?? SystemInformation.WorkingArea;
-            return Math.Max(MIN_DIALOG_WIDTH, workingArea.Width - SCREEN_EDGE_MARGIN);
+            return Math.Max(Scaled(MIN_DIALOG_WIDTH), workingArea.Width - Scaled(SCREEN_EDGE_MARGIN));
         }
 
         private readonly struct ButtonSpec

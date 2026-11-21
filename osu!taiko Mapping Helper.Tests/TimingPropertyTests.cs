@@ -1,4 +1,5 @@
-using osu_taiko_Mapping_Helper.Models;
+﻿using osu_taiko_Mapping_Helper.Models;
+using osu_taiko_Mapping_Helper.Properties;
 using osu_taiko_Mapping_Helper.Utils.Helper;
 using osu_taiko_Mapping_Helper.Views;
 
@@ -13,8 +14,8 @@ namespace osu_taiko_Mapping_Helper.Tests
         [
             "1000,500,4,1,0,60,1,0",               // BPM120
             "2000,-50,4,1,0,70,0,0",               // SV2
-            "3000,250,4,1,0,80,1,1",               // BPM240
-            "3000,-66.6666666666667,4,1,0,90,0,1", // SV1.5
+            "3000,250,3,1,0,80,1,1",               // BPM240・3/4拍子
+            "3000,-66.6666666666667,4,1,0,90,0,1", // SV1.5 (緑線の拍子は見ない)
         ];
 
         /// <summary>
@@ -85,7 +86,8 @@ namespace osu_taiko_Mapping_Helper.Tests
             var timingOnly = BeatmapHelper.GetTimingPointsData(path);
             var full = BeatmapHelper.GetBeatmapData(path, true);
 
-            Assert.Equal(Debug.SetCurrentBpm(full, time), Debug.SetCurrentBpm(timingOnly, time));
+            Assert.Equal(UserInputDataHelper.SetCurrentMeter(full, time), UserInputDataHelper.SetCurrentMeter(timingOnly, time));
+            Assert.Equal(UserInputDataHelper.SetCurrentBpm(full, time), UserInputDataHelper.SetCurrentBpm(timingOnly, time));
             Assert.Equal(UserInputDataHelper.SetCurrentSv(full, time, true), UserInputDataHelper.SetCurrentSv(timingOnly, time, true));
             Assert.Equal(UserInputDataHelper.SetCurrentVolume(full, time), UserInputDataHelper.SetCurrentVolume(timingOnly, time));
         }
@@ -94,33 +96,62 @@ namespace osu_taiko_Mapping_Helper.Tests
         /// 表示の値が、線のとおりになる
         /// </summary>
         [Theory]
-        [InlineData(1500, "120", "1", "60")]
-        [InlineData(2500, "120", "2", "70")]
-        [InlineData(3500, "240", "1.5", "90")]
-        public void DisplayValues_MatchTimingPoints(int time, string bpm, string sv, string volume)
+        [InlineData(1500, "4 / 4", "120", "1", "60")]
+        [InlineData(2500, "4 / 4", "120", "2", "70")]
+        [InlineData(3500, "3 / 4", "240", "1.5", "90")]
+        public void DisplayValues_MatchTimingPoints(int time, string meter, string bpm, string sv, string volume)
         {
             // 2-5
             string path = WriteOsuFile("tp.osu", new OsuFileBuilder { TimingPoints = TimingPoints }.Build());
             var beatmap = BeatmapHelper.GetTimingPointsData(path);
 
-            Assert.Equal(bpm, Debug.SetCurrentBpm(beatmap, time));
+            Assert.Equal(meter, UserInputDataHelper.SetCurrentMeter(beatmap, time));
+            Assert.Equal(bpm, UserInputDataHelper.SetCurrentBpm(beatmap, time));
             Assert.Equal(sv, UserInputDataHelper.SetCurrentSv(beatmap, time, true));
             Assert.Equal(volume, UserInputDataHelper.SetCurrentVolume(beatmap, time));
         }
 
         /// <summary>
-        /// 最初の線より前は、空欄になる
+        /// 最初の赤線より前は、どの項目も最初の赤線の値になる (SV は 1)
         /// </summary>
-        [Fact]
-        public void DisplayValues_BeforeFirstLine_Empty()
+        [Theory]
+        [InlineData(-1000)]   // 曲の始まりより前 (リードイン)
+        [InlineData(0)]
+        [InlineData(500)]
+        [InlineData(999)]     // 最初の赤線の直前
+        public void DisplayValues_BeforeFirstRedLine_UseFirstRedLineValues(int time)
         {
             // 2-6
             string path = WriteOsuFile("tp.osu", new OsuFileBuilder { TimingPoints = TimingPoints }.Build());
             var beatmap = BeatmapHelper.GetTimingPointsData(path);
 
-            Assert.Equal(string.Empty, Debug.SetCurrentBpm(beatmap, 500));
-            Assert.Equal(string.Empty, UserInputDataHelper.SetCurrentSv(beatmap, 500, true));
-            Assert.Equal(string.Empty, UserInputDataHelper.SetCurrentVolume(beatmap, 500));
+            Assert.Equal("4 / 4", UserInputDataHelper.SetCurrentMeter(beatmap, time));
+            Assert.Equal("120", UserInputDataHelper.SetCurrentBpm(beatmap, time));
+            Assert.Equal("1", UserInputDataHelper.SetCurrentSv(beatmap, time, true));
+            Assert.Equal("60", UserInputDataHelper.SetCurrentVolume(beatmap, time));
+            Assert.Equal("120", UserInputDataHelper.SetCurrentVisualBpm(BeatmapHelper.GetBeatmapData(path), time));
+        }
+
+        /// <summary>
+        /// 譜面は読めても線が 1 本も無ければ、どの項目も空欄になる
+        /// </summary>
+        [Theory]
+        [InlineData(-1000)]
+        [InlineData(0)]
+        [InlineData(1000)]
+        public void DisplayValues_NoTimingPoints_Empty(int time)
+        {
+            // 2-10
+            string path = WriteOsuFile("notp.osu", new OsuFileBuilder { TimingPoints = [] }.Build());
+            var beatmap = BeatmapHelper.GetTimingPointsData(path);
+
+            Assert.NotNull(beatmap);
+            Assert.Empty(beatmap.timingPoints);
+            Assert.Equal(string.Empty, UserInputDataHelper.SetCurrentMeter(beatmap, time));
+            Assert.Equal(string.Empty, UserInputDataHelper.SetCurrentBpm(beatmap, time));
+            Assert.Equal(string.Empty, UserInputDataHelper.SetCurrentSv(beatmap, time, true));
+            Assert.Equal(string.Empty, UserInputDataHelper.SetCurrentVolume(beatmap, time));
+            Assert.Equal(string.Empty, UserInputDataHelper.SetCurrentVisualBpm(BeatmapHelper.GetBeatmapData(path), time));
         }
 
         /// <summary>
@@ -292,7 +323,7 @@ namespace osu_taiko_Mapping_Helper.Tests
         [InlineData("SliderMultiplier:1.4", 3500, "360")]        // BPM240・SV1.5
         [InlineData("SliderMultiplier:1.8", 2500, "308.57143")]  // 120 × 2 × 1.8 ÷ 1.4 を小数 5 桁に丸める
         [InlineData("SliderMultiplier:2", 1500, "171.42857")]    // 120 × 1 × 2 ÷ 1.4
-        [InlineData("SliderMultiplier:1.4", 500, "")]            // 最初の線より前
+        [InlineData("SliderMultiplier:1.4", 500, "120")]         // 最初の赤線より前は、最初の赤線の BPM・SV1
         public void VisualizeBpm_CalculatedFromBpmSvAndSliderMultiplier(string sliderMultiplier, int time, string expected)
         {
             // 2-9
@@ -325,7 +356,7 @@ namespace osu_taiko_Mapping_Helper.Tests
         [InlineData("SliderMultiplier:1.8", 2500, "308.57143")]
         [InlineData("SliderMultiplier:2", 1500, "171.42857")]
         [InlineData("SliderMultiplier:1.4", 3500, "360")]
-        [InlineData("SliderMultiplier:1.4", 500, "")]   // 最初の赤線より前
+        [InlineData("SliderMultiplier:1.4", 500, "120")]   // 最初の赤線より前は、最初の赤線の BPM・SV1
         [InlineData(null, 2500, "240")]                 // SliderMultiplier の行が無ければ 1.4 とする (Timing Property は空欄)
         public void SetCurrentVisualBpm_CalculatesFromBpmSvAndSliderMultiplier(string? sliderMultiplier, int time, string expected)
         {
@@ -336,6 +367,166 @@ namespace osu_taiko_Mapping_Helper.Tests
             string path = WriteOsuFile("visual.osu", builder.Build());
 
             Assert.Equal(expected, UserInputDataHelper.SetCurrentVisualBpm(BeatmapHelper.GetBeatmapData(path), time));
+        }
+
+        /// <summary>
+        /// 本物の Timing Property の画面で、Timing・Meter・BPM・SV・Volume・見た目 BPM の表示を読む
+        /// </summary>
+        /// <remarks>
+        /// 譜面のパスを渡す前に始まった周回の表示が残らないよう、表示を「-」にしては Timing の表示が変わるまで待つのを 2 周分くり返す
+        /// (1 周の中で、譜面を読んでから全部の表示を変えるため、Timing が変われば、ほかの表示も同じ周回の値になっている)
+        /// </remarks>
+        private static Dictionary<string, string> ReadDisplay(string path, int time)
+        {
+            string[] names = ["lblCurrentTiming", "lblCurrentMeter", "lblCurrentBpm", "lblCurrentSv", "lblCurrentVolume", "lblVisualizeBpm"];
+            var texts = new Dictionary<string, string>();
+            TestReflection.RunInSta(() =>
+            {
+                var form = new TimingPropertyForm();
+                try
+                {
+                    _ = form.Handle;
+                    var labels = names.ToDictionary(name => name, name => (Label)TestReflection.GetField(form, name)!);
+                    form.SetOsuData(path, time);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        foreach (var label in labels.Values)
+                        {
+                            label.Text = "-";
+                        }
+                        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                        while (labels["lblCurrentTiming"].Text == "-" && stopwatch.Elapsed < TimeSpan.FromSeconds(5))
+                        {
+                            Application.DoEvents();
+                            Thread.Sleep(5);
+                        }
+                    }
+                    foreach (var (name, label) in labels)
+                    {
+                        texts[name] = label.Text;
+                    }
+                }
+                finally
+                {
+                    TestReflection.SetField(form, "isClose", true);
+                    form.Dispose();
+                }
+            });
+            return texts;
+        }
+
+        /// <summary>
+        /// 画面でも、最初の赤線より前は、どの項目も最初の赤線の値になる (SV は 1)
+        /// </summary>
+        [Fact]
+        public void Form_BeforeFirstRedLine_ShowsFirstRedLineValues()
+        {
+            // 2-6
+            string path = WriteOsuFile("tp.osu", new OsuFileBuilder { TimingPoints = TimingPoints }.Build());
+
+            var display = ReadDisplay(path, 500);
+
+            Assert.Equal("00:00:500", display["lblCurrentTiming"]);
+            Assert.Equal("4 / 4", display["lblCurrentMeter"]);
+            Assert.Equal("120", display["lblCurrentBpm"]);
+            Assert.Equal("1", display["lblCurrentSv"]);
+            Assert.Equal("60", display["lblCurrentVolume"]);
+            Assert.Equal("120", display["lblVisualizeBpm"]);
+        }
+
+        /// <summary>
+        /// 画面の Meter は、Timing と BPM の間に、今の時刻の赤線の拍子を表示する
+        /// </summary>
+        [Theory]
+        [InlineData(1500, "4 / 4")]
+        [InlineData(3500, "3 / 4")]
+        public void Form_Meter_ShowsRedLineMeter(int time, string meter)
+        {
+            // 2-11
+            string path = WriteOsuFile("tp.osu", new OsuFileBuilder { TimingPoints = TimingPoints }.Build());
+
+            var display = ReadDisplay(path, time);
+
+            Assert.Equal(meter, display["lblCurrentMeter"]);
+        }
+
+        /// <summary>
+        /// 画面の表示項目は、上から Timing・Meter・BPM・SV・見た目 BPM・Volume の順に並び、各行は見出しと値が横に並ぶ
+        /// </summary>
+        /// <remarks>
+        /// 項目の足し忘れ・消し忘れ・並び順の間違い・見出しと値の重なり・画面からのはみ出しを見る
+        /// </remarks>
+        [Fact]
+        public void Form_DisplayItems_ShownInOrder()
+        {
+            // 2-11
+            // (見出し, 見出しの文字, 値)
+            (string caption, string text, string value)[] expected =
+            [
+                ("lblMaxHistoryCount", "Timing : ", "lblCurrentTiming"),
+                ("label4", "拍子 : ", "lblCurrentMeter"),
+                ("label1", "BPM : ", "lblCurrentBpm"),
+                ("label2", "SV : ", "lblCurrentSv"),
+                ("lblScrollSpeed", "見た目BPM : ", "lblVisualizeBpm"),
+                ("label3", "Volume : ", "lblCurrentVolume"),
+            ];
+            List<List<Label>> rows = [];
+            Size clientSize = Size.Empty;
+            TestReflection.RunInSta(() =>
+            {
+                var form = new TimingPropertyForm();
+                try
+                {
+                    // 見出しの文字は画面を開いたときに言語に合わせて入れるため、同じ処理を呼ぶ
+                    TestReflection.Invoke(form, "InitializeLabelText");
+                    clientSize = form.ClientSize;
+                    rows = [.. form.Controls.OfType<Label>()
+                                           .GroupBy(label => label.Top)
+                                           .OrderBy(row => row.Key)
+                                           .Select(row => row.OrderBy(label => label.Left).ToList())];
+                }
+                finally
+                {
+                    TestReflection.SetField(form, "isClose", true);
+                    form.Dispose();
+                }
+            });
+
+            Assert.Equal(expected.Select(e => $"{e.caption} {e.value}"), rows.Select(row => string.Join(" ", row.Select(label => label.Name))));
+            Assert.Equal(expected.Select(e => e.text), rows.Select(row => row[0].Text));
+            for (int i = 0; i < rows.Count; i++)
+            {
+                var (caption, value) = (rows[i][0], rows[i][1]);
+                // 見出しと値は重ならず、どちらも画面の中に収まる
+                Assert.True(caption.Right <= value.Left, $"{caption.Name} と {value.Name} が重なっている");
+                Assert.True(value.Right <= clientSize.Width && value.Bottom <= clientSize.Height, $"{value.Name} が画面からはみ出している");
+                // 行どうしも重ならない
+                if (i > 0)
+                {
+                    Assert.True(rows[i - 1][0].Bottom <= caption.Top, $"{rows[i - 1][0].Name} と {caption.Name} の行が重なっている");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 画面でも、譜面は読めても線が 1 本も無ければ、Meter・BPM・SV・Volume・見た目 BPM は何も表示しない
+        /// </summary>
+        /// <remarks>
+        /// Timing は譜面を選んでいれば表示するため、ここでは見ない
+        /// </remarks>
+        [Fact]
+        public void Form_NoTimingPoints_ShowsNothing()
+        {
+            // 2-10
+            string path = WriteOsuFile("notp.osu", new OsuFileBuilder { TimingPoints = [] }.Build());
+
+            var display = ReadDisplay(path, 1000);
+
+            Assert.Equal(string.Empty, display["lblCurrentMeter"]);
+            Assert.Equal(string.Empty, display["lblCurrentBpm"]);
+            Assert.Equal(string.Empty, display["lblCurrentSv"]);
+            Assert.Equal(string.Empty, display["lblCurrentVolume"]);
+            Assert.Equal(string.Empty, display["lblVisualizeBpm"]);
         }
     }
 }

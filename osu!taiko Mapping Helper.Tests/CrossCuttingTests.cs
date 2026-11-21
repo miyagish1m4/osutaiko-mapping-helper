@@ -48,6 +48,77 @@ namespace osu_taiko_Mapping_Helper.Tests
         }
 
         /// <summary>
+        /// コードで使っているラベルのコードが辞書にある (無いと、画面にコードがそのまま表示される)
+        /// </summary>
+        [Fact]
+        public void Labels_AllCodesUsedInSourceExist()
+        {
+            // 14-1
+            string source = Path.Combine(RepositoryDirectory, "osu!taiko Mapping Helper");
+            List<string> codes = [.. Directory.GetFiles(source, "*.cs", SearchOption.AllDirectories)
+                                              .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}") &&
+                                                          Path.GetFileName(f) != "Labels.cs")
+                                              .SelectMany(f => Regex.Matches(File.ReadAllText(f), "\"(LBL_[A-Z0-9_]+)\"").Select(m => m.Groups[1].Value))
+                                              .Distinct()];
+
+            Assert.NotEmpty(codes);
+            Assert.All(codes, code => Assert.True(Labels.LabelsJp.ContainsKey(code), $"辞書に無いラベル: {code}"));
+        }
+
+        /// <summary>
+        /// 日本語と英語のラベルに、空の文字が無い
+        /// </summary>
+        [Fact]
+        public void Labels_NoEmptyText()
+        {
+            // 14-1
+            Assert.All(Labels.LabelsJp, label => Assert.False(string.IsNullOrWhiteSpace(label.Value), $"日本語のラベルが空: {label.Key}"));
+            Assert.All(Labels.LabelsEn, label => Assert.False(string.IsNullOrWhiteSpace(label.Value), $"英語のラベルが空: {label.Key}"));
+        }
+
+        /// <summary>
+        /// ラベルは、設定の言語の文字になる。辞書に無いコードはそのまま、想定外の言語は空になる
+        /// </summary>
+        [Theory]
+        [InlineData("日本語", "LBL_TIMING_PROPERTY_METER", "拍子")]
+        [InlineData("English", "LBL_TIMING_PROPERTY_METER", "Meter")]
+        [InlineData("日本語", "LBL_TIMING_PROPERTY_SCROLL_SPEED", "見た目BPM")]
+        [InlineData("English", "LBL_TIMING_PROPERTY_SCROLL_SPEED", "Scroll Speed(BPM)")]
+        [InlineData("日本語", "LBL_NOT_EXIST", "LBL_NOT_EXIST")]
+        [InlineData("English", "LBL_NOT_EXIST", "LBL_NOT_EXIST")]
+        [InlineData("Deutsch", "LBL_TIMING_PROPERTY_METER", "")]   // 11-6 今の動きを固定する
+        public void SetLabelText_ShowsTextOfConfiguredLanguage(string language, string labelCode, string expected)
+        {
+            // 14-1
+            Common.LoadConfig(new Config { language = language });
+            using var label = new System.Windows.Forms.Label();
+
+            Common.SetLabelText(label, labelCode);
+
+            Assert.Equal(expected, label.Text);
+        }
+
+        /// <summary>
+        /// 日本語と英語の全部のラベルが、設定の言語の辞書の文字になる
+        /// </summary>
+        [Theory]
+        [InlineData("日本語")]
+        [InlineData("English")]
+        public void SetLabelText_AllLabelsFollowLanguage(string language)
+        {
+            // 14-1
+            Common.LoadConfig(new Config { language = language });
+            var labels = language == "日本語" ? Labels.LabelsJp : Labels.LabelsEn;
+            using var label = new System.Windows.Forms.Label();
+
+            Assert.All(labels, pair =>
+            {
+                Common.SetLabelText(label, pair.Key);
+                Assert.Equal(pair.Value, label.Text);
+            });
+        }
+
+        /// <summary>
         /// Helper のコードで使っているメッセージのコード
         /// </summary>
         private static List<string> UsedMessageCodes()

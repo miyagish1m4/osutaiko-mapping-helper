@@ -695,21 +695,16 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
                                             int currentTime, 
                                             bool isDebug = false)
         {
-            TimingPoint timingPointBuff = new();
             double retSv = 0;
             string retSvStr = string.Empty;
             try
             {
-                if (beatmap == null)
+                if (beatmap == null || beatmap.timingPoints.Count() == 0)
                 {
                     throw new Exception();
                 }
                 // 現在のタイミングのSVを取得する (小数点第15位まで)
-                retSv = Math.Round(beatmap.timingPoints.LastOrDefault(tp => tp.time <= currentTime)?.sv ?? -1, isDebug ? 8 : 12, MidpointRounding.AwayFromZero);
-                if (retSv == -1)
-                {
-                    throw new Exception();
-                }
+                retSv = Math.Round(beatmap.timingPoints.LastOrDefault(tp => tp.time <= currentTime)?.sv ?? 1, isDebug ? 8 : 12, MidpointRounding.AwayFromZero);
                 retSvStr = retSv.ToString();
                 if (retSvStr.Contains('.'))
                 {
@@ -733,20 +728,15 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         internal static string SetCurrentVolume(Beatmap? beatmap, 
                                                 int currentTime)
         {
-            TimingPoint timingPointBuff = new();
             int retVolume = 0;
             try
             {
-                if (beatmap == null)
+                if (beatmap == null || beatmap.timingPoints.Count() == 0)
                 {
                     throw new Exception();
                 }
                 // 現在のタイミングのVolumeを取得する
-                retVolume = beatmap.timingPoints.LastOrDefault(tp => tp.time <= currentTime)?.volume ?? -1;
-                if (retVolume == -1)
-                {
-                    throw new Exception();
-                }
+                retVolume = beatmap.timingPoints.LastOrDefault(tp => tp.time <= currentTime)?.volume ?? beatmap.timingPoints[0].volume;
                 return retVolume.ToString();
             }
             catch
@@ -763,22 +753,41 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         internal static string SetCurrentBpm(Beatmap? beatmap,
                                                 int currentTime)
         {
-            TimingPoint timingPointBuff = new();
             double retBpm = 0;
             try
             {
-                if (beatmap == null)
+                if (beatmap == null || beatmap.timingPoints.Count() == 0)
                 {
                     throw new Exception();
                 }
                 // 現在のタイミングのBPMを取得する
-                retBpm = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= currentTime) && tp.isRedLine )?.bpm ?? -1;
+                retBpm = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= currentTime) && tp.isRedLine )?.bpm ?? beatmap.timingPoints[0].bpm;
                 retBpm = Math.Round(retBpm, 6, MidpointRounding.AwayFromZero);
-                if (retBpm == -1)
+                return retBpm.ToString();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+        /// <summary>
+        /// 現地点の拍子を取得する関数
+        /// </summary>
+        /// <param name="beatmap">譜面情報</param>
+        /// <param name="currentTime">タイミング</param>
+        /// <returns>拍子</returns>
+        internal static string SetCurrentMeter(Beatmap? beatmap,
+                                               int currentTime)
+        {
+            try
+            {
+                if (beatmap == null || beatmap.timingPoints.Count() == 0)
                 {
                     throw new Exception();
                 }
-                return retBpm.ToString();
+                // 現在のタイミングの拍子を取得する
+                int retMeter = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= currentTime) && tp.isRedLine)?.meter ?? beatmap.timingPoints[0].meter;
+                return $"{retMeter} / 4";
             }
             catch
             {
@@ -799,11 +808,11 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
         {
             try
             {
-                if (beatmap == null)
+                if (beatmap == null || beatmap.timingPoints.Count() == 0)
                 {
                     throw new Exception();
                 }
-                var redLine = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= currentTime) && tp.isRedLine) ?? throw new Exception();
+                var redLine = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= currentTime) && tp.isRedLine) ?? beatmap.timingPoints[0];
                 // 赤線のSVは1 (同じ時刻に緑線がある場合は緑線のSV)
                 double sv = beatmap.timingPoints.LastOrDefault(tp => tp.time <= currentTime)?.sv ?? 1.0;
                 // SliderMultiplierの行が無い場合は、osu!の初期値(1.4)とする (SV計算での換算と同じ)
