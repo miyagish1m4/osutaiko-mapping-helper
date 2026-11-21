@@ -70,8 +70,9 @@
             { "LBL_SETTINGS_NOTES_POSITION_GUIDE", "(ノーツ座標設定 : Separateの時の設定)"},
             { "LBL_SETTINGS_UNICODE_SUPPORT", "Unicode対応" },
             { "LBL_SETTINGS_SAVE", "保存" },
-            // DebugForm
-            { "LBL_DEBUG_SCROLL_SPEED", "見た目BPM" },
+            // TimingPropertyForm
+            { "LBL_TIMING_PROPERTY_SCROLL_SPEED", "見た目BPM" },
+            { "LBL_TIMING_PROPERTY_METER", "拍子" },
             // DialogForm
             { "LBL_DIALOG_OK", "OK" },
             { "LBL_DIALOG_CANCEL", "キャンセル" },
@@ -146,8 +147,9 @@
             { "LBL_SETTINGS_NOTES_POSITION_GUIDE", "(Settings for Note Position: Separate)"},
             { "LBL_SETTINGS_UNICODE_SUPPORT", "Unicode Support" },
             { "LBL_SETTINGS_SAVE", "Save" },
-            // DebugForm
-            { "LBL_DEBUG_SCROLL_SPEED", "Scroll Speed(BPM)" },
+            // TimingPropertyForm
+            { "LBL_TIMING_PROPERTY_SCROLL_SPEED", "Scroll Speed(BPM)" },
+            { "LBL_TIMING_PROPERTY_METER", "Meter" },
             // DialogForm
             { "LBL_DIALOG_OK", "OK" },
             { "LBL_DIALOG_CANCEL", "Cancel" },

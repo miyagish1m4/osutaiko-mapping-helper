@@ -771,6 +771,30 @@ namespace osu_taiko_Mapping_Helper.Utils.Helper
             }
         }
         /// <summary>
+        /// 現地点の拍子を取得する関数
+        /// </summary>
+        /// <param name="beatmap">譜面情報</param>
+        /// <param name="currentTime">タイミング</param>
+        /// <returns>拍子</returns>
+        internal static string SetCurrentMeter(Beatmap? beatmap,
+                                               int currentTime)
+        {
+            try
+            {
+                if (beatmap == null || beatmap.timingPoints.Count() == 0)
+                {
+                    throw new Exception();
+                }
+                // 現在のタイミングの拍子を取得する
+                int retMeter = beatmap.timingPoints.LastOrDefault(tp => (tp.time <= currentTime) && tp.isRedLine)?.meter ?? beatmap.timingPoints[0].meter;
+                return $"{retMeter} / 4";
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+        /// <summary>
         /// 現地点の見た目BPMを取得する関数
         /// </summary>
         /// <param name="beatmap">譜面情報</param>

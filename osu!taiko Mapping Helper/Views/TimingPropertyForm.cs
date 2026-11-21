@@ -46,8 +46,10 @@ namespace osu_taiko_Mapping_Helper.Views
         /// </summary>
         internal void InitializeLabelText()
         {
-            Common.SetLabelText(lblScrollSpeed, "LBL_DEBUG_SCROLL_SPEED");
+            Common.SetLabelText(lblScrollSpeed, "LBL_TIMING_PROPERTY_SCROLL_SPEED");
             lblScrollSpeed.Text += " : ";
+            Common.SetLabelText(label4, "LBL_TIMING_PROPERTY_METER");
+            label4.Text += " : ";
         }
         /// <summary>
         /// ラベルテキストの更新処理
@@ -80,6 +82,7 @@ namespace osu_taiko_Mapping_Helper.Views
                     this.Invoke(() =>
                     {
                         SetCurrentTimeInfo(lblCurrentTiming, Constants.SET_TIMING);
+                        SetCurrentTimeInfo(lblCurrentMeter, Constants.SET_METER);
                         SetCurrentTimeInfo(lblCurrentBpm, Constants.SET_BPM);
                         SetCurrentTimeInfo(lblCurrentSv, Constants.SET_SV);
                         SetCurrentTimeInfo(lblCurrentVolume, Constants.SET_VOLUME);
@@ -192,7 +195,7 @@ namespace osu_taiko_Mapping_Helper.Views
         /// 現地点の情報を取得する処理
         /// </summary>
         /// <param name="control">設定対象のコントロール</param>
-        /// <param name="setCode">セットコード(0:Timing 1:SV 2:Volume)</param>
+        /// <param name="setCode">セットコード(0:Timing 1:Meter 2:BPM 3:SV 4:Volume)</param>
         private void SetCurrentTimeInfo(Control control, int setCode)
         {
             try
@@ -201,6 +204,9 @@ namespace osu_taiko_Mapping_Helper.Views
                 {
                     case Constants.SET_TIMING:
                         control.Text = beatmapPath == string.Empty ? string.Empty : Common.ConvertFormatTiming(currentTime);
+                        break;
+                    case Constants.SET_METER:
+                        control.Text = UserInputDataHelper.SetCurrentMeter(beatmapData, currentTime);
                         break;
                     case Constants.SET_BPM:
                         control.Text = UserInputDataHelper.SetCurrentBpm(beatmapData, currentTime);
@@ -222,7 +228,7 @@ namespace osu_taiko_Mapping_Helper.Views
         }
         #endregion
         #region イベント
-        private void DebugForm_Load(object sender, EventArgs e)
+        private void TimingPropertyForm_Load(object sender, EventArgs e)
         {
 #if DEBUG
             this.TopMost = true;
@@ -230,11 +236,11 @@ namespace osu_taiko_Mapping_Helper.Views
             InitializeLabelText();
             //parentForm.updateInterval = 15;
         }
-        private void DebugForm_FormClosed(object sender, FormClosedEventArgs e)
+        private void TimingPropertyForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             //parentForm.updateInterval = 15;
         }
-        private void DebugForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void TimingPropertyForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             isClose = true;
         }

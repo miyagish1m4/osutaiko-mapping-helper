@@ -34,6 +34,8 @@
             label2 = new Label();
             label3 = new Label();
             lblCurrentTiming = new Label();
+            label4 = new Label();
+            lblCurrentMeter = new Label();
             lblCurrentBpm = new Label();
             lblCurrentSv = new Label();
             lblCurrentVolume = new Label();
@@ -57,7 +59,7 @@
             // 
             label1.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             label1.ForeColor = Color.White;
-            label1.Location = new Point(2, 55);
+            label1.Location = new Point(2, 90);
             label1.Name = "label1";
             label1.Size = new Size(190, 25);
             label1.TabIndex = 4;
@@ -68,7 +70,7 @@
             // 
             label2.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             label2.ForeColor = Color.White;
-            label2.Location = new Point(2, 90);
+            label2.Location = new Point(2, 125);
             label2.Name = "label2";
             label2.Size = new Size(190, 25);
             label2.TabIndex = 5;
@@ -79,7 +81,7 @@
             // 
             label3.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             label3.ForeColor = Color.White;
-            label3.Location = new Point(2, 160);
+            label3.Location = new Point(2, 195);
             label3.Name = "label3";
             label3.Size = new Size(190, 25);
             label3.TabIndex = 6;
@@ -98,12 +100,35 @@
             lblCurrentTiming.Text = "00:00:000";
             lblCurrentTiming.TextAlign = ContentAlignment.MiddleLeft;
             // 
+            // label4
+            // 
+            label4.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            label4.ForeColor = Color.White;
+            label4.Location = new Point(2, 55);
+            label4.Name = "label4";
+            label4.Size = new Size(190, 25);
+            label4.TabIndex = 13;
+            label4.Text = "Meter : ";
+            label4.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // lblCurrentMeter
+            // 
+            lblCurrentMeter.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            lblCurrentMeter.ForeColor = Color.White;
+            lblCurrentMeter.ImageAlign = ContentAlignment.MiddleRight;
+            lblCurrentMeter.Location = new Point(192, 55);
+            lblCurrentMeter.Name = "lblCurrentMeter";
+            lblCurrentMeter.Size = new Size(151, 25);
+            lblCurrentMeter.TabIndex = 14;
+            lblCurrentMeter.Text = "4 / 4";
+            lblCurrentMeter.TextAlign = ContentAlignment.MiddleLeft;
+            // 
             // lblCurrentBpm
             // 
             lblCurrentBpm.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblCurrentBpm.ForeColor = Color.White;
             lblCurrentBpm.ImageAlign = ContentAlignment.MiddleRight;
-            lblCurrentBpm.Location = new Point(192, 55);
+            lblCurrentBpm.Location = new Point(192, 90);
             lblCurrentBpm.Name = "lblCurrentBpm";
             lblCurrentBpm.Size = new Size(151, 25);
             lblCurrentBpm.TabIndex = 8;
@@ -115,7 +140,7 @@
             lblCurrentSv.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblCurrentSv.ForeColor = Color.White;
             lblCurrentSv.ImageAlign = ContentAlignment.MiddleRight;
-            lblCurrentSv.Location = new Point(192, 90);
+            lblCurrentSv.Location = new Point(192, 125);
             lblCurrentSv.Name = "lblCurrentSv";
             lblCurrentSv.Size = new Size(151, 25);
             lblCurrentSv.TabIndex = 9;
@@ -127,7 +152,7 @@
             lblCurrentVolume.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblCurrentVolume.ForeColor = Color.White;
             lblCurrentVolume.ImageAlign = ContentAlignment.MiddleRight;
-            lblCurrentVolume.Location = new Point(192, 160);
+            lblCurrentVolume.Location = new Point(192, 195);
             lblCurrentVolume.Name = "lblCurrentVolume";
             lblCurrentVolume.Size = new Size(151, 25);
             lblCurrentVolume.TabIndex = 10;
@@ -139,7 +164,7 @@
             lblVisualizeBpm.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblVisualizeBpm.ForeColor = Color.White;
             lblVisualizeBpm.ImageAlign = ContentAlignment.MiddleRight;
-            lblVisualizeBpm.Location = new Point(192, 125);
+            lblVisualizeBpm.Location = new Point(192, 160);
             lblVisualizeBpm.Name = "lblVisualizeBpm";
             lblVisualizeBpm.Size = new Size(151, 25);
             lblVisualizeBpm.TabIndex = 12;
@@ -150,19 +175,21 @@
             // 
             lblScrollSpeed.Font = new Font("Yu Gothic UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 128);
             lblScrollSpeed.ForeColor = Color.White;
-            lblScrollSpeed.Location = new Point(2, 125);
+            lblScrollSpeed.Location = new Point(2, 160);
             lblScrollSpeed.Name = "lblScrollSpeed";
             lblScrollSpeed.Size = new Size(190, 25);
             lblScrollSpeed.TabIndex = 11;
             lblScrollSpeed.Text = "Scroll Speed(BPM) : ";
             lblScrollSpeed.TextAlign = ContentAlignment.MiddleRight;
             // 
-            // DebugForm
+            // TimingPropertyForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.FromArgb(0, 64, 64);
-            ClientSize = new Size(357, 211);
+            ClientSize = new Size(357, 246);
+            Controls.Add(lblCurrentMeter);
+            Controls.Add(label4);
             Controls.Add(lblVisualizeBpm);
             Controls.Add(lblScrollSpeed);
             Controls.Add(lblCurrentVolume);
@@ -174,11 +201,11 @@
             Controls.Add(label1);
             Controls.Add(lblMaxHistoryCount);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Name = "DebugForm";
-            Text = "DebugForm";
-            FormClosing += DebugForm_FormClosing;
-            FormClosed += DebugForm_FormClosed;
-            Load += DebugForm_Load;
+            Name = "TimingPropertyForm";
+            Text = "Timing Property";
+            FormClosing += TimingPropertyForm_FormClosing;
+            FormClosed += TimingPropertyForm_FormClosed;
+            Load += TimingPropertyForm_Load;
             ResumeLayout(false);
         }
 
@@ -189,6 +216,8 @@
         private Label label2;
         private Label label3;
         private Label lblCurrentTiming;
+        private Label label4;
+        private Label lblCurrentMeter;
         private Label lblCurrentBpm;
         private Label lblCurrentSv;
         private Label lblCurrentVolume;

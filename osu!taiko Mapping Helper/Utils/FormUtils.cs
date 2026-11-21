@@ -482,8 +482,6 @@ namespace osu_taiko_Mapping_Helper.Utils
         #endregion
         #region DialogForm
         #endregion
-        #region DebugForm
-        #endregion
         #region BGSetterForm
         #endregion
     }

@@ -111,10 +111,11 @@ namespace osu_taiko_Mapping_Helper.Properties
         #endregion
         #region セットコード
         internal const int SET_TIMING = 0;
-        internal const int SET_BPM = 1;
-        internal const int SET_SV = 2;
-        internal const int SET_VOLUME = 3;
-        internal const int SET_VISUAL_BPM = 4;
+        internal const int SET_METER = 1;
+        internal const int SET_BPM = 2;
+        internal const int SET_SV = 3;
+        internal const int SET_VOLUME = 4;
+        internal const int SET_VISUAL_BPM = 5;
         #endregion
         #region 実行コード
         internal const int EXECUTE_APPLY = 0;
