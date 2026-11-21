@@ -203,7 +203,7 @@ namespace osu_taiko_Mapping_Helper.Views
                         control.Text = beatmapPath == string.Empty ? string.Empty : Common.ConvertFormatTiming(currentTime);
                         break;
                     case Constants.SET_BPM:
-                        control.Text = Utils.Helper.Debug.SetCurrentBpm(beatmapData, currentTime);
+                        control.Text = UserInputDataHelper.SetCurrentBpm(beatmapData, currentTime);
                         break;
                     case Constants.SET_SV:
                         control.Text = UserInputDataHelper.SetCurrentSv(beatmapData, currentTime, true);
